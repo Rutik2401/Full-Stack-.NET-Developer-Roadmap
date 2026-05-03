@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Phase 5 — Angular Advanced + .NET Integration | .NET Roadmap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/global.css" />
+</head>
+<body data-phase="5">
+
+<nav class="topnav">
+  <div class="topnav__inner">
+    <div class="brand"><a href="../index.html" style="color:inherit">.NET<span class="dot">·</span>Roadmap</a></div>
+    <div class="topnav__links">
+      <a href="../index.html">Home</a>
+      <a href="phase-0-foundation.html">P0</a>
+      <a href="phase-1-csharp.html">P1</a>
+      <a href="phase-2-sql.html">P2</a>
+      <a href="phase-3-aspnet-core.html">P3</a>
+      <a href="phase-4-ef-core.html">P4</a>
+      <a href="phase-5-angular-integration.html" class="active">P5</a>
+      <a href="phase-6-system-design.html">P6</a>
+      <a href="phase-7-devops-azure.html">P7</a>
+      <a href="phase-8-projects.html">P8</a>
+      <a href="phase-9-interview.html">P9</a>
+    </div>
+  </div>
+</nav>
+
+<div class="phase-page">
+  <aside class="sidebar">
+    <h4>Week 1 · Senior Angular Gaps</h4>
+    <ul>
+      <li><a href="#standalone">1. Standalone Components</a></li>
+      <li><a href="#signals">2. Signals ⭐</a></li>
+      <li><a href="#change-detection">3. Change Detection / OnPush</a></li>
+      <li><a href="#rxjs">4. RxJS Mastery ⭐</a></li>
+      <li><a href="#forms">5. Reactive Forms Deep Dive</a></li>
+    </ul>
+    <h4>Week 2 · .NET Integration</h4>
+    <ul>
+      <li><a href="#http">6. HttpClient + Typed Services</a></li>
+      <li><a href="#interceptors">7. Interceptors</a></li>
+      <li><a href="#cors">8. CORS Setup (both sides)</a></li>
+      <li><a href="#jwt">9. JWT End-to-End ⭐</a></li>
+      <li><a href="#signalr">10. SignalR Real-Time</a></li>
+    </ul>
+    <h4>Week 3 · Production</h4>
+    <ul>
+      <li><a href="#state">11. NgRx + Signal Store</a></li>
+      <li><a href="#testing">12. Testing</a></li>
+      <li><a href="#ui">13. Material/Tailwind/Performance</a></li>
+      <li><a href="#deploy">14. Deploy to Azure SWA</a></li>
+    </ul>
+    <h4>Sections</h4>
+    <ul>
+      <li><a href="#qa">Interview Q&A</a></li>
+      <li><a href="#mistakes">Common Mistakes</a></li>
+    </ul>
+  </aside>
+
+  <main class="content">
+    <div class="breadcrumb"><a href="../index.html">Home</a> / Phase 5</div>
+
+    <header class="phase-header">
+      <h1>Phase 5 — Angular Advanced + .NET Integration</h1>
+      <p class="lede">You already build Angular daily. This phase plugs the senior-level gaps and teaches you how to integrate Angular with the .NET API you're now building yourself.</p>
+      <div class="phase-meta">
+        <span class="pill">⏱ 3 Weeks</span>
+        <span class="pill">14 Topics</span>
+        <span class="pill">💪 Compressed (you're already strong)</span>
+      </div>
+    </header>
+
+    <div class="callout callout--prereq">
+      <h3>📋 Prerequisites</h3>
+      <ul>
+        <li>Angular fundamentals (you have ✓)</li>
+        <li>TypeScript (you have ✓)</li>
+        <li>ASP.NET Core Web API (Phase 3) — to integrate with</li>
+        <li>JWT auth on backend (Phase 3) — to build the frontend flow</li>
+      </ul>
+      <p class="muted"><strong>Skip these:</strong> components, basic services, modules, basic routing, *ngIf/ngFor, two-way binding — you do them in your sleep.</p>
+    </div>
+
+    <h2 class="section-title">📅 Week 1 — Senior-Level Angular Gaps</h2>
+
+    <section class="topic" id="standalone">
+      <div class="topic__check"><input type="checkbox" data-topic="0" /></div>
+      <h3><span class="num">1</span> Standalone Components & Bootstrap</h3>
+      <p class="concept">Angular 15+ introduced standalone APIs — components, directives, pipes that don't need a NgModule. Modern Angular apps are built standalone-first.</p>
+
+      <pre><code><span class="com">// modern bootstrap</span>
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideRouter(routes),
+    provideHttpClient(withInterceptors([authInterceptor])),
+    provideAnimationsAsync()
+  ]
+});
+
+@Component({
+  standalone: <span class="kw">true</span>,
+  selector: <span class="str">'app-product'</span>,
+  imports: [CommonModule, RouterLink, MatButtonModule],
+  templateUrl: <span class="str">'./product.component.html'</span>
+})
+<span class="kw">export class</span> ProductComponent {}</code></pre>
+
+      <div class="interview">
+        <h4>🎯 Interview Points</h4>
+        <ul>
+          <li>Standalone removes need for declaring in NgModule</li>
+          <li><code>imports</code> array on component now includes other components/directives</li>
+          <li>Lazy loading routes use <code>loadComponent</code> instead of <code>loadChildren</code></li>
+          <li>Smaller bundles + simpler tree-shaking</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="topic" id="signals">
+      <div class="topic__check"><input type="checkbox" data-topic="1" /></div>
+      <h3><span class="num">2</span> Signals (Angular 16+) ⭐</h3>
+      <p class="concept">Signals are Angular's new fine-grained reactive primitive. They replace much of RxJS for component state and enable a future without zone.js.</p>
+
+      <pre><code><span class="kw">import</span> { signal, computed, effect } <span class="kw">from</span> <span class="str">'@angular/core'</span>;
+
+<span class="kw">export class</span> CartComponent {
+  items = signal&lt;CartItem[]&gt;([]);
+  total = computed(() =&gt; <span class="kw">this</span>.items().reduce((s, i) =&gt; s + i.price * i.qty, 0));
+  count = computed(() =&gt; <span class="kw">this</span>.items().length);
+
+  <span class="kw">constructor</span>() {
+    effect(() =&gt; console.log(<span class="str">'Cart updated:'</span>, <span class="kw">this</span>.total()));
+  }
+
+  add(item: CartItem) {
+    <span class="kw">this</span>.items.update(arr =&gt; [...arr, item]);
+  }
+
+  setItems(arr: CartItem[]) { <span class="kw">this</span>.items.set(arr); }
+}</code></pre>
+
+      <pre><code><span class="com">&lt;!-- template --&gt;</span>
+&lt;p&gt;Items: <span class="str">{{ count() }}</span>&lt;/p&gt;
+&lt;p&gt;Total: ₹<span class="str">{{ total() }}</span>&lt;/p&gt;</code></pre>
+
+      <h4>🎯 Signal vs Observable</h4>
+      <table>
+        <thead><tr><th></th><th>Signal</th><th>Observable</th></tr></thead>
+        <tbody>
+          <tr><td>Eager</td><td>Yes — value always available</td><td>No — must subscribe</td></tr>
+          <tr><td>Sync</td><td>Yes</td><td>Async</td></tr>
+          <tr><td>For</td><td>Component state, derived values</td><td>HTTP, events, time</td></tr>
+          <tr><td>Subscribe</td><td>Auto via template</td><td>Manual / async pipe</td></tr>
+        </tbody>
+      </table>
+
+      <p>Signals are the <strong>future of Angular reactivity</strong>. Use signals for state; keep RxJS for streams (HTTP, WebSockets, events).</p>
+    </section>
+
+    <section class="topic" id="change-detection">
+      <div class="topic__check"><input type="checkbox" data-topic="2" /></div>
+      <h3><span class="num">3</span> Change Detection & OnPush Strategy</h3>
+      <p class="concept">By default Angular runs change detection on every async event in the app. OnPush limits a component to re-render only when its inputs change (by reference). Critical for performance.</p>
+
+      <pre><code>@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  ...
+})
+<span class="kw">export class</span> ProductCard {
+  @Input() product!: Product;   <span class="com">// re-renders only when reference changes</span>
+
+  <span class="kw">constructor</span>(<span class="kw">private</span> cdr: ChangeDetectorRef) {}
+
+  forceUpdate() {
+    <span class="kw">this</span>.cdr.markForCheck();   <span class="com">// schedule check</span>
+  }
+}</code></pre>
+
+      <h4>🎯 OnPush Triggers Re-render When</h4>
+      <ul>
+        <li>An <code>@Input()</code> reference changes (immutability matters!)</li>
+        <li>An event handler in this component fires</li>
+        <li>An async pipe emits a new value</li>
+        <li>Manual <code>cdr.markForCheck()</code> or <code>cdr.detectChanges()</code></li>
+        <li>Signals read in template change</li>
+      </ul>
+
+      <div class="gotcha">⚠️ <strong>Gotcha:</strong> Mutating an array in place (<code>arr.push(x)</code>) won't trigger OnPush. Use immutable updates: <code>arr = [...arr, x]</code>.</div>
+    </section>
+
+    <section class="topic" id="rxjs">
+      <div class="topic__check"><input type="checkbox" data-topic="3" /></div>
+      <h3><span class="num">4</span> RxJS Mastery — switchMap & friends ⭐</h3>
+      <p class="concept">Even working Angular devs are weak on higher-order operators. These show up in interviews and bug reports.</p>
+
+      <h4>🎯 Higher-Order Mapping Operators (most asked)</h4>
+      <table>
+        <thead><tr><th>Operator</th><th>Behavior</th><th>Use For</th></tr></thead>
+        <tbody>
+          <tr><td><code>switchMap</code></td><td>Cancel previous inner if new arrives</td><td>Search-as-you-type, latest only</td></tr>
+          <tr><td><code>mergeMap</code> (flatMap)</td><td>Run all in parallel, no order</td><td>Independent parallel calls</td></tr>
+          <tr><td><code>concatMap</code></td><td>Queue, run one at a time, in order</td><td>Sequential writes, save order</td></tr>
+          <tr><td><code>exhaustMap</code></td><td>Ignore new while one is running</td><td>Login button (prevent double click)</td></tr>
+        </tbody>
+      </table>
+
+      <pre><code><span class="com">// search box — cancels stale requests</span>
+search = <span class="kw">new</span> FormControl(<span class="str">''</span>);
+results$ = <span class="kw">this</span>.search.valueChanges.pipe(
+  debounceTime(300),
+  distinctUntilChanged(),
+  switchMap(term =&gt; <span class="kw">this</span>.api.search(term))
+);
+
+<span class="com">// parallel calls</span>
+combined$ = combineLatest([
+  <span class="kw">this</span>.api.getUser(id),
+  <span class="kw">this</span>.api.getOrders(id),
+  <span class="kw">this</span>.api.getProfile(id)
+]).pipe(map(([u, o, p]) =&gt; ({ user: u, orders: o, profile: p })));
+
+<span class="com">// race / first to finish</span>
+first$ = forkJoin([api1, api2]);  <span class="com">// wait for ALL, get last value of each</span></code></pre>
+
+      <h4>🎯 Subjects — pick the right one</h4>
+      <ul>
+        <li><strong>Subject</strong> — no initial value, late subscribers miss past emissions</li>
+        <li><strong>BehaviorSubject(initial)</strong> — replays current value to new subscribers (most used for state)</li>
+        <li><strong>ReplaySubject(n)</strong> — replays last N values</li>
+        <li><strong>AsyncSubject</strong> — emits final value on complete only</li>
+      </ul>
+
+      <h4>🎯 Subscription Cleanup (memory leaks)</h4>
+      <pre><code><span class="com">// 1. takeUntilDestroyed (Angular 16+) — cleanest</span>
+<span class="kw">import</span> { takeUntilDestroyed } <span class="kw">from</span> <span class="str">'@angular/core/rxjs-interop'</span>;
+
+<span class="kw">constructor</span>() {
+  <span class="kw">this</span>.api.stream$.pipe(takeUntilDestroyed()).subscribe();
+}
+
+<span class="com">// 2. async pipe (let Angular handle subscription)</span>
+&lt;div&gt;<span class="str">{{ users$ | async | json }}</span>&lt;/div&gt;
+
+<span class="com">// 3. classic takeUntil pattern</span>
+<span class="kw">private</span> destroy$ = <span class="kw">new</span> Subject&lt;<span class="kw">void</span>&gt;();
+ngOnInit() { <span class="kw">this</span>.api.stream$.pipe(takeUntil(<span class="kw">this</span>.destroy$)).subscribe(); }
+ngOnDestroy() { <span class="kw">this</span>.destroy$.next(); <span class="kw">this</span>.destroy$.complete(); }</code></pre>
+    </section>
+
+    <section class="topic" id="forms">
+      <div class="topic__check"><input type="checkbox" data-topic="4" /></div>
+      <h3><span class="num">5</span> Reactive Forms — Dynamic, Custom Validators, ControlValueAccessor</h3>
+      <p class="concept">Reactive Forms scale better than Template-Driven — better for complex validation, dynamic forms, async checks. Master FormBuilder + custom validators + CVA.</p>
+
+      <pre><code><span class="kw">private</span> fb = inject(FormBuilder);
+form = <span class="kw">this</span>.fb.group({
+  email: [<span class="str">''</span>, [Validators.required, Validators.email]],
+  password: [<span class="str">''</span>, [Validators.required, Validators.minLength(8)]],
+  addresses: <span class="kw">this</span>.fb.array([])
+});
+
+<span class="kw">get</span> addresses() { <span class="kw">return</span> <span class="kw">this</span>.form.get(<span class="str">'addresses'</span>) <span class="kw">as</span> FormArray; }
+addAddress() {
+  <span class="kw">this</span>.addresses.push(<span class="kw">this</span>.fb.group({
+    line1: [<span class="str">''</span>, Validators.required],
+    pincode: [<span class="str">''</span>, [Validators.pattern(<span class="str">/^\d{6}$/</span>)]]
+  }));
+}
+
+<span class="com">// custom sync validator</span>
+<span class="kw">function</span> noWhitespace(c: AbstractControl) {
+  <span class="kw">return</span> (c.value || <span class="str">''</span>).trim().length === 0 ? { whitespace: <span class="kw">true</span> } : <span class="kw">null</span>;
+}
+
+<span class="com">// async validator (e.g., email uniqueness)</span>
+<span class="kw">export class</span> EmailUniqueValidator {
+  <span class="kw">constructor</span>(<span class="kw">private</span> api: ApiService) {}
+  validate = (c: AbstractControl) =&gt;
+    <span class="kw">this</span>.api.checkEmail(c.value).pipe(map(taken =&gt; taken ? { taken: <span class="kw">true</span> } : <span class="kw">null</span>));
+}</code></pre>
+    </section>
+
+    <h2 class="section-title">📅 Week 2 — .NET Integration</h2>
+
+    <section class="topic" id="http">
+      <div class="topic__check"><input type="checkbox" data-topic="5" /></div>
+      <h3><span class="num">6</span> HttpClient + Typed Services</h3>
+      <p class="concept">Wrap HttpClient in typed services that mirror your .NET API. Match DTOs from Phase 3 for type safety end-to-end.</p>
+
+      <pre><code><span class="com">// match .NET DTO</span>
+<span class="kw">export interface</span> Product {
+  id: <span class="kw">number</span>;
+  name: <span class="kw">string</span>;
+  price: <span class="kw">number</span>;
+  createdAt: <span class="kw">string</span>;
+}
+
+@Injectable({ providedIn: <span class="str">'root'</span> })
+<span class="kw">export class</span> ProductService {
+  <span class="kw">private</span> http = inject(HttpClient);
+  <span class="kw">private</span> base = `<span class="str">${environment.apiUrl}</span>/api/products`;
+
+  list(query?: { page?: <span class="kw">number</span>; size?: <span class="kw">number</span> }): Observable&lt;PagedResult&lt;Product&gt;&gt; {
+    <span class="kw">return</span> <span class="kw">this</span>.http.get&lt;PagedResult&lt;Product&gt;&gt;(<span class="kw">this</span>.base, { params: query <span class="kw">as any</span> });
+  }
+  get(id: <span class="kw">number</span>) { <span class="kw">return</span> <span class="kw">this</span>.http.get&lt;Product&gt;(`<span class="str">${this.base}/${id}</span>`); }
+  create(dto: CreateProductDto) { <span class="kw">return</span> <span class="kw">this</span>.http.post&lt;Product&gt;(<span class="kw">this</span>.base, dto); }
+  update(id: <span class="kw">number</span>, dto: UpdateProductDto) { <span class="kw">return</span> <span class="kw">this</span>.http.put&lt;<span class="kw">void</span>&gt;(`<span class="str">${this.base}/${id}</span>`, dto); }
+  delete(id: <span class="kw">number</span>) { <span class="kw">return</span> <span class="kw">this</span>.http.delete&lt;<span class="kw">void</span>&gt;(`<span class="str">${this.base}/${id}</span>`); }
+}</code></pre>
+
+      <h4>Environment Files (mirror appsettings.json)</h4>
+      <pre><code><span class="com">// environments/environment.ts</span>
+<span class="kw">export const</span> environment = { production: <span class="kw">false</span>, apiUrl: <span class="str">'https://localhost:5001'</span> };
+
+<span class="com">// environments/environment.prod.ts</span>
+<span class="kw">export const</span> environment = { production: <span class="kw">true</span>, apiUrl: <span class="str">'https://api.shop.com'</span> };</code></pre>
+    </section>
+
+    <section class="topic" id="interceptors">
+      <div class="topic__check"><input type="checkbox" data-topic="6" /></div>
+      <h3><span class="num">7</span> Interceptors — Auth, Error, Loader, Retry</h3>
+      <p class="concept">Interceptors are the Angular equivalent of .NET middleware — sit in the HTTP pipeline, transform every request/response.</p>
+
+      <pre><code><span class="com">// modern functional interceptor (Angular 15+)</span>
+<span class="kw">export const</span> authInterceptor: HttpInterceptorFn = (req, next) =&gt; {
+  <span class="kw">const</span> token = inject(AuthService).token();
+  <span class="kw">const</span> cloned = token
+    ? req.clone({ headers: req.headers.set(<span class="str">'Authorization'</span>, `<span class="str">Bearer ${token}</span>`) })
+    : req;
+  <span class="kw">return</span> next(cloned);
+};
+
+<span class="com">// error interceptor — surface .NET ProblemDetails</span>
+<span class="kw">export const</span> errorInterceptor: HttpInterceptorFn = (req, next) =&gt; {
+  <span class="kw">const</span> toast = inject(ToastService);
+  <span class="kw">return</span> next(req).pipe(
+    catchError((err: HttpErrorResponse) =&gt; {
+      <span class="kw">if</span> (err.status === 401) inject(Router).navigate([<span class="str">'/login'</span>]);
+      <span class="kw">else if</span> (err.status === 403) toast.error(<span class="str">'Forbidden'</span>);
+      <span class="kw">else if</span> (err.error?.title) toast.error(err.error.title);
+      <span class="kw">else</span> toast.error(<span class="str">'Network error'</span>);
+      <span class="kw">return</span> throwError(() =&gt; err);
+    })
+  );
+};
+
+<span class="com">// register</span>
+provideHttpClient(withInterceptors([authInterceptor, errorInterceptor]))</code></pre>
+    </section>
+
+    <section class="topic" id="cors">
+      <div class="topic__check"><input type="checkbox" data-topic="7" /></div>
+      <h3><span class="num">8</span> CORS — Both Sides</h3>
+      <p class="concept">CORS is a server thing, but it bites devs every time they connect Angular (:4200) to .NET (:5000) for the first time.</p>
+
+      <h4>.NET Side (Phase 3 recap)</h4>
+      <pre><code>builder.Services.AddCors(o =&gt; o.AddPolicy(<span class="str">"AllowAngular"</span>, p =&gt; p
+    .WithOrigins(<span class="str">"http://localhost:4200"</span>)
+    .AllowAnyHeader()
+    .AllowAnyMethod()
+    .AllowCredentials()));
+
+app.UseCors(<span class="str">"AllowAngular"</span>);</code></pre>
+
+      <h4>Angular Side</h4>
+      <ul>
+        <li>Set <code>withCredentials: true</code> on requests if using cookies</li>
+        <li>For dev only: configure proxy in <code>proxy.conf.json</code> so Angular dev server forwards to .NET (avoids CORS entirely in dev)</li>
+      </ul>
+
+      <pre><code><span class="com">// proxy.conf.json</span>
+{
+  <span class="str">"/api"</span>: {
+    <span class="str">"target"</span>: <span class="str">"https://localhost:5001"</span>,
+    <span class="str">"secure"</span>: <span class="kw">false</span>,
+    <span class="str">"changeOrigin"</span>: <span class="kw">true</span>
+  }
+}
+
+<span class="com"># run with proxy</span>
+ng serve --proxy-config proxy.conf.json</code></pre>
+    </section>
+
+    <section class="topic" id="jwt">
+      <div class="topic__check"><input type="checkbox" data-topic="8" /></div>
+      <h3><span class="num">9</span> JWT Authentication End-to-End ⭐</h3>
+      <p class="concept">Build the complete flow: login → store token → attach to every request → refresh on 401 → guards on routes → role-based UI.</p>
+
+      <pre><code>@Injectable({ providedIn: <span class="str">'root'</span> })
+<span class="kw">export class</span> AuthService {
+  <span class="kw">private</span> http = inject(HttpClient);
+  <span class="kw">private</span> router = inject(Router);
+
+  token = signal&lt;<span class="kw">string</span> | <span class="kw">null</span>&gt;(localStorage.getItem(<span class="str">'token'</span>));
+  user = computed(() =&gt; <span class="kw">this</span>.parseJwt(<span class="kw">this</span>.token()));
+  isAuthed = computed(() =&gt; !!<span class="kw">this</span>.user());
+  isAdmin = computed(() =&gt; <span class="kw">this</span>.user()?.role === <span class="str">'Admin'</span>);
+
+  login(email: <span class="kw">string</span>, password: <span class="kw">string</span>) {
+    <span class="kw">return</span> <span class="kw">this</span>.http.post&lt;{ token: <span class="kw">string</span>; refreshToken: <span class="kw">string</span> }&gt;(
+      `<span class="str">${env.apiUrl}/api/auth/login</span>`, { email, password }
+    ).pipe(tap(r =&gt; <span class="kw">this</span>.setToken(r.token, r.refreshToken)));
+  }
+
+  refresh() {
+    <span class="kw">const</span> rt = localStorage.getItem(<span class="str">'rt'</span>);
+    <span class="kw">return</span> <span class="kw">this</span>.http.post&lt;{ token: <span class="kw">string</span> }&gt;(`<span class="str">${env.apiUrl}/api/auth/refresh</span>`, { rt })
+      .pipe(tap(r =&gt; <span class="kw">this</span>.setToken(r.token)));
+  }
+
+  logout() {
+    localStorage.removeItem(<span class="str">'token'</span>); localStorage.removeItem(<span class="str">'rt'</span>);
+    <span class="kw">this</span>.token.set(<span class="kw">null</span>);
+    <span class="kw">this</span>.router.navigate([<span class="str">'/login'</span>]);
+  }
+
+  <span class="kw">private</span> setToken(t: <span class="kw">string</span>, rt?: <span class="kw">string</span>) {
+    localStorage.setItem(<span class="str">'token'</span>, t);
+    <span class="kw">if</span> (rt) localStorage.setItem(<span class="str">'rt'</span>, rt);
+    <span class="kw">this</span>.token.set(t);
+  }
+
+  <span class="kw">private</span> parseJwt(token: <span class="kw">string</span> | <span class="kw">null</span>) {
+    <span class="kw">if</span> (!token) <span class="kw">return null</span>;
+    <span class="kw">try</span> { <span class="kw">return</span> JSON.parse(atob(token.split(<span class="str">'.'</span>)[1])); }
+    <span class="kw">catch</span> { <span class="kw">return null</span>; }
+  }
+}
+
+<span class="com">// route guard</span>
+<span class="kw">export const</span> authGuard: CanActivateFn = () =&gt; {
+  <span class="kw">const</span> auth = inject(AuthService);
+  <span class="kw">if</span> (auth.isAuthed()) <span class="kw">return true</span>;
+  inject(Router).navigate([<span class="str">'/login'</span>]);
+  <span class="kw">return false</span>;
+};
+
+<span class="kw">export const</span> adminGuard: CanActivateFn = () =&gt; inject(AuthService).isAdmin();</code></pre>
+
+      <h4>🎯 Refresh Token Pattern (silent renewal)</h4>
+      <ul>
+        <li>Backend issues short-lived JWT (15 min) + long-lived refresh token (DB-stored, can revoke)</li>
+        <li>Auth interceptor catches 401 → calls /refresh → retries original request</li>
+        <li>Use <code>switchMap</code> to chain refresh + retry; queue concurrent 401s with a shared refresh observable</li>
+      </ul>
+
+      <div class="gotcha">⚠️ <strong>Gotcha:</strong> localStorage tokens are vulnerable to XSS. HttpOnly cookies are safer but need CSRF protection. Pick one and document the trade-off — interviewers ask this.</div>
+    </section>
+
+    <section class="topic" id="signalr">
+      <div class="topic__check"><input type="checkbox" data-topic="9" /></div>
+      <h3><span class="num">10</span> SignalR — Real-Time</h3>
+      <p class="concept">SignalR = .NET's WebSocket abstraction. The <code>@microsoft/signalr</code> JS client connects from Angular for chat, notifications, live dashboards.</p>
+
+      <pre><code>npm i @microsoft/signalr
+
+<span class="com">// service</span>
+<span class="kw">import</span> * <span class="kw">as</span> signalR <span class="kw">from</span> <span class="str">'@microsoft/signalr'</span>;
+
+@Injectable({ providedIn: <span class="str">'root'</span> })
+<span class="kw">export class</span> NotificationHub {
+  <span class="kw">private</span> hub: signalR.HubConnection;
+  notifications = signal&lt;Notification[]&gt;([]);
+
+  <span class="kw">constructor</span>(<span class="kw">private</span> auth: AuthService) {
+    <span class="kw">this</span>.hub = <span class="kw">new</span> signalR.HubConnectionBuilder()
+      .withUrl(`<span class="str">${env.apiUrl}/hubs/notify</span>`, { accessTokenFactory: () =&gt; auth.token()! })
+      .withAutomaticReconnect()
+      .build();
+
+    <span class="kw">this</span>.hub.on(<span class="str">'NewNotification'</span>, (n: Notification) =&gt;
+      <span class="kw">this</span>.notifications.update(arr =&gt; [n, ...arr]));
+  }
+
+  start() { <span class="kw">return</span> <span class="kw">this</span>.hub.start(); }
+  stop()  { <span class="kw">return</span> <span class="kw">this</span>.hub.stop();  }
+}</code></pre>
+
+      <p class="muted">Backend setup (preview): <code>app.MapHub&lt;NotificationHub&gt;("/hubs/notify");</code> + <code>builder.Services.AddSignalR();</code></p>
+    </section>
+
+    <h2 class="section-title">📅 Week 3 — Production-Grade Skills</h2>
+
+    <section class="topic" id="state">
+      <div class="topic__check"><input type="checkbox" data-topic="10" /></div>
+      <h3><span class="num">11</span> NgRx + Signal Store</h3>
+      <p class="concept">For complex multi-component state. Choose based on team and Angular version.</p>
+
+      <ul>
+        <li><strong>NgRx Store</strong> — Redux pattern (Actions, Reducers, Effects, Selectors). Powerful but boilerplate-heavy.</li>
+        <li><strong>NgRx Signal Store</strong> — modern, leverages Angular signals. Less boilerplate, growing fast.</li>
+        <li><strong>Plain services + Signals/BehaviorSubject</strong> — for small to medium apps</li>
+      </ul>
+
+      <pre><code><span class="com">// NgRx Signal Store (Angular 17+)</span>
+<span class="kw">export const</span> CartStore = signalStore(
+  withState({ items: [] <span class="kw">as</span> CartItem[], loading: <span class="kw">false</span> }),
+  withComputed(({ items }) =&gt; ({
+    total: computed(() =&gt; items().reduce((s, i) =&gt; s + i.price, 0)),
+    count: computed(() =&gt; items().length)
+  })),
+  withMethods((store, api = inject(CartApi)) =&gt; ({
+    <span class="kw">async</span> load() {
+      patchState(store, { loading: <span class="kw">true</span> });
+      <span class="kw">const</span> items = <span class="kw">await</span> firstValueFrom(api.getCart());
+      patchState(store, { items, loading: <span class="kw">false</span> });
+    }
+  }))
+);</code></pre>
+    </section>
+
+    <section class="topic" id="testing">
+      <div class="topic__check"><input type="checkbox" data-topic="11" /></div>
+      <h3><span class="num">12</span> Testing — Jasmine, TestBed, Cypress</h3>
+      <p class="concept">Tests boost your resume hugely. Most Angular devs skip them — be the dev who doesn't.</p>
+
+      <pre><code><span class="com">// service test with HttpTestingController</span>
+describe(<span class="str">'ProductService'</span>, () =&gt; {
+  <span class="kw">let</span> svc: ProductService, http: HttpTestingController;
+  beforeEach(() =&gt; {
+    TestBed.configureTestingModule({
+      providers: [ProductService, provideHttpClient(), provideHttpClientTesting()]
+    });
+    svc = TestBed.inject(ProductService);
+    http = TestBed.inject(HttpTestingController);
+  });
+
+  it(<span class="str">'should load'</span>, () =&gt; {
+    svc.list().subscribe(r =&gt; expect(r.items.length).toBe(2));
+    <span class="kw">const</span> req = http.expectOne(req =&gt; req.url.includes(<span class="str">'/products'</span>));
+    expect(req.request.method).toBe(<span class="str">'GET'</span>);
+    req.flush({ items: [{ id: 1 }, { id: 2 }], total: 2 });
+  });
+});</code></pre>
+
+      <h4>E2E with Cypress / Playwright</h4>
+      <ul>
+        <li>Cypress — easier learning curve</li>
+        <li>Playwright — multi-browser, faster CI</li>
+        <li>Test critical user flows: signup, login, checkout, role gates</li>
+      </ul>
+    </section>
+
+    <section class="topic" id="ui">
+      <div class="topic__check"><input type="checkbox" data-topic="12" /></div>
+      <h3><span class="num">13</span> Material / Tailwind / Performance</h3>
+      <p class="concept">Pick one UI system and master it. Tailwind has overtaken Material for modern dev jobs.</p>
+
+      <h4>UI Choices</h4>
+      <ul>
+        <li><strong>Angular Material</strong> — Google's design system, comprehensive components</li>
+        <li><strong>PrimeNG</strong> — richer enterprise components</li>
+        <li><strong>TailwindCSS</strong> — utility-first, modern, in-demand</li>
+        <li><strong>Bootstrap</strong> — legacy but still common</li>
+      </ul>
+
+      <h4>🎯 Performance Checklist</h4>
+      <ol>
+        <li>OnPush change detection on all "leaf" components</li>
+        <li><code>trackBy</code> on every <code>*ngFor</code> with mutable list</li>
+        <li>Lazy load routes (<code>loadComponent</code>)</li>
+        <li>Standalone + tree-shaking → smaller bundles</li>
+        <li>Virtual scrolling for long lists (CDK)</li>
+        <li>Image lazy loading (<code>loading="lazy"</code>) + Angular Image directive (NgOptimizedImage)</li>
+        <li>Defer / preload strategies</li>
+        <li>Run Lighthouse before shipping</li>
+      </ol>
+    </section>
+
+    <section class="topic" id="deploy">
+      <div class="topic__check"><input type="checkbox" data-topic="13" /></div>
+      <h3><span class="num">14</span> Deploy to Azure Static Web Apps</h3>
+      <p class="concept">Azure SWA is the perfect host for Angular apps that talk to a separate .NET API on Azure App Service. Free tier available, GitHub-integrated CI/CD.</p>
+
+      <pre><code>ng build --configuration=production
+
+<span class="com"># commit + push — Azure SWA picks up via GitHub Action it auto-creates</span>
+
+<span class="com"># OR via SWA CLI</span>
+npm i -g @azure/static-web-apps-cli
+swa deploy ./dist/shop --env production --deployment-token &lt;TOKEN&gt;</code></pre>
+
+      <h4>Production Build Tips</h4>
+      <ul>
+        <li>Use environment.prod.ts for prod URLs</li>
+        <li>Enable <code>"buildOptimizer": true</code></li>
+        <li>Verify bundle size with <code>--stats-json</code> + webpack-bundle-analyzer</li>
+        <li>Cache headers: long-cache hashed assets, no-cache for index.html</li>
+      </ul>
+
+      <p>You'll do this for real in <a href="phase-7-devops-azure.html">Phase 7</a> and apply to all <a href="phase-8-projects.html">Phase 8 projects</a>.</p>
+    </section>
+
+    <section id="qa">
+      <h2 class="section-title">🎤 Interview Q&A — Phase 5</h2>
+      <div class="qa-block">
+        <details><summary>Q. What are Angular Signals and how they differ from RxJS?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>Signals = new reactive primitive in Angular 16+</li>
+              <li>Function that hold a value</li>
+              <li>Read with <code>count()</code>, write with <code>count.set(5)</code> or <code>count.update(c =&gt; c + 1)</code></li>
+            </ul>
+            <p><strong>How it works:</strong></p>
+            <ul>
+              <li>Angular track where each signal is read</li>
+              <li>When value change — only those components re-evaluate</li>
+              <li>More efficient than old zone.js change detection</li>
+            </ul>
+            <p><strong>Signals vs Observables:</strong></p>
+            <table>
+              <thead><tr><th>Signal</th><th>Observable</th></tr></thead>
+              <tbody>
+                <tr><td>Synchronous</td><td>Asynchronous</td></tr>
+                <tr><td>Always has value</td><td>No initial value</td></tr>
+                <tr><td>Eager (auto running)</td><td>Lazy (need subscribe)</td></tr>
+                <tr><td>For state</td><td>For event streams</td></tr>
+              </tbody>
+            </table>
+            <p><strong>When to use:</strong></p>
+            <ul>
+              <li>Signals — component state, derived values</li>
+              <li>RxJS — HTTP, WebSocket, timers, mouse events</li>
+            </ul>
+            <p><strong>Related:</strong></p>
+            <ul>
+              <li><code>computed()</code> — derived signals</li>
+              <li><code>effect()</code> — run side-effects when signal change</li>
+            </ul>
+            <p><strong>Note:</strong> Signals are foundation of "zoneless" Angular — future direction.</p>
+          </div>
+        </details>
+
+        <details><summary>Q. Explain switchMap vs mergeMap vs concatMap vs exhaustMap?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>4 "higher-order mapping" RxJS operators</li>
+              <li>Flatten Observable of Observables</li>
+              <li>Differ in how they handle overlap</li>
+            </ul>
+            <p><strong>Compare Table:</strong></p>
+            <table>
+              <thead><tr><th>Operator</th><th>Behavior</th><th>Use For</th></tr></thead>
+              <tbody>
+                <tr><td>switchMap</td><td>Cancel previous, use new</td><td>Type-ahead search</td></tr>
+                <tr><td>mergeMap</td><td>Run all in parallel</td><td>Independent calls (analytics)</td></tr>
+                <tr><td>concatMap</td><td>Queue, run one by one in order</td><td>Save edits in order</td></tr>
+                <tr><td>exhaustMap</td><td>Ignore new while running</td><td>Login button (no double click)</td></tr>
+              </tbody>
+            </table>
+            <p><strong>Quick interview trick:</strong></p>
+            <ul>
+              <li>Q: "Search box that fires HTTP — which operator?"</li>
+              <li>A: switchMap (cancel old searches)</li>
+            </ul>
+          </div>
+        </details>
+
+        <details><summary>Q. What is OnPush change detection and when to use?</summary>
+          <div>
+            <p><strong>Default vs OnPush:</strong></p>
+            <ul>
+              <li>Default — Angular check every component on every async event (slow in big apps)</li>
+              <li>OnPush — only re-check when something concrete change</li>
+            </ul>
+            <p><strong>OnPush Triggers (5 things):</strong></p>
+            <ol>
+              <li><code>@Input()</code> reference change (new object, not mutation)</li>
+              <li>Event handler in this component fire</li>
+              <li><code>async</code> pipe in template emit</li>
+              <li>Signal read in template update</li>
+              <li>Manual <code>cdr.markForCheck()</code></li>
+            </ol>
+            <p><strong>Performance Win:</strong></p>
+            <ul>
+              <li>Instead of checking 500 components on every click</li>
+              <li>Only check the few that actually changed</li>
+            </ul>
+            <p><strong>BIG Catch — Immutability:</strong></p>
+            <ul>
+              <li><code>arr.push(x)</code> — OnPush NOT notice (same reference)</li>
+              <li><code>arr = [...arr, x]</code> — OnPush detect (new reference)</li>
+              <li>Or use Signals</li>
+            </ul>
+            <p><strong>Note:</strong> Use OnPush as default on all "leaf" components, especially in lists with <code>*ngFor</code>.</p>
+          </div>
+        </details>
+
+        <details><summary>Q. How to implement JWT auth in Angular?</summary>
+          <div>
+            <p><strong>5 Step Flow:</strong></p>
+            <ol>
+              <li><strong>AuthService</strong> — hold token as Signal, persist to localStorage on login</li>
+              <li><strong>HTTP Interceptor</strong> — add <code>Authorization: Bearer &lt;token&gt;</code> to every request</li>
+              <li><strong>Error Interceptor</strong> — catch 401, call refresh endpoint, retry original</li>
+              <li><strong>CanActivate Guards</strong> — protect routes, check <code>isAuthed()</code></li>
+              <li><strong>Logout</strong> — clear localStorage, navigate to /login</li>
+            </ol>
+            <p><strong>AuthService Properties:</strong></p>
+            <ul>
+              <li>Computed: <code>isAuthed()</code>, <code>isAdmin()</code></li>
+              <li>Login method post credentials, get <code>{ token, refreshToken }</code></li>
+              <li>Store both tokens</li>
+            </ul>
+            <p><strong>Security Notes:</strong></p>
+            <ul>
+              <li>localStorage = vulnerable to XSS — sanitize user input</li>
+              <li>HttpOnly cookies = no XSS risk but CSRF risk</li>
+              <li>Decode JWT on client ONLY for UI hints (show user name)</li>
+              <li>Real security check happen on server</li>
+            </ul>
+            <p><strong>Java parallel:</strong></p>
+            <ul>
+              <li>Same JWT pattern as Java backend</li>
+              <li>Token in header, validated on server</li>
+            </ul>
+          </div>
+        </details>
+
+        <details><summary>Q. How do interceptors compare to .NET middleware?</summary>
+          <div>
+            <p><strong>Same Concept:</strong></p>
+            <ul>
+              <li>Both are pipelines of handlers</li>
+              <li>Process every HTTP request and response</li>
+              <li>Cross-cut concerns — auth, logging, error, retry</li>
+              <li>Without touching every call site</li>
+            </ul>
+            <p><strong>Angular Interceptor:</strong></p>
+            <ul>
+              <li>Function or class</li>
+              <li>Register with <code>provideHttpClient(withInterceptors([...]))</code></li>
+              <li>Receive request, clone and modify</li>
+              <li>Call <code>next(req)</code> to pass down chain</li>
+              <li>Handle errors with <code>catchError</code></li>
+            </ul>
+            <p><strong>.NET Middleware:</strong></p>
+            <ul>
+              <li>Register in <code>Program.cs</code> with <code>app.Use...()</code></li>
+              <li>Receive HttpContext</li>
+              <li>Do work, call <code>next()</code></li>
+            </ul>
+            <p><strong>Both:</strong></p>
+            <ul>
+              <li>Ordered pipeline</li>
+              <li>Can short-circuit (skip rest by not calling next)</li>
+              <li>Can modify response on way back</li>
+            </ul>
+            <p><strong>Mental model:</strong></p>
+            <ul>
+              <li>Interceptor = "client-side middleware" (wrap OUT requests)</li>
+              <li>.NET Middleware = wrap IN requests</li>
+              <li>Together = full pipeline from Angular → server → back</li>
+            </ul>
+          </div>
+        </details>
+
+        <details><summary>Q. What is RxJS memory leak and how to prevent?</summary>
+          <div>
+            <p><strong>Why it happens:</strong></p>
+            <ul>
+              <li>Call <code>.subscribe()</code> and never unsubscribe</li>
+              <li>Observable hold reference to callback</li>
+              <li>Callback hold <code>this</code> (your component)</li>
+              <li>Component never garbage collected after destroy</li>
+            </ul>
+            <p><strong>3 Modern Ways to Prevent:</strong></p>
+            <p><strong>1. takeUntilDestroyed (Angular 16+) — Cleanest:</strong></p>
+            <pre><code>this.api.stream$.pipe(takeUntilDestroyed()).subscribe();</code></pre>
+            <ul>
+              <li>Pipe inside constructor</li>
+              <li>Auto-complete when component destroyed</li>
+            </ul>
+            <p><strong>2. async pipe in template — Best for Display:</strong></p>
+            <pre><code>{{ users$ | async }}</code></pre>
+            <ul>
+              <li>Angular subscribe when template render</li>
+              <li>Auto unsubscribe when removed</li>
+            </ul>
+            <p><strong>3. takeUntil Pattern (Classic):</strong></p>
+            <pre><code>private destroy$ = new Subject&lt;void&gt;();
+this.api.stream$.pipe(takeUntil(this.destroy$)).subscribe();
+ngOnDestroy() { this.destroy$.next(); this.destroy$.complete(); }</code></pre>
+            <p><strong>Avoid:</strong> Storing subscription objects manually — easy to forget.</p>
+          </div>
+        </details>
+
+        <details><summary>Q. Standalone components vs NgModules?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>Standalone — modern way (Angular 14+, default in Angular 17)</li>
+              <li>NgModules — old system</li>
+            </ul>
+            <p><strong>Old NgModule System:</strong></p>
+            <ul>
+              <li>Declare every component, directive, pipe in module first</li>
+              <li>Lead to fat NgModules and boilerplate</li>
+            </ul>
+            <p><strong>Standalone System:</strong></p>
+            <ul>
+              <li>Component declare own dependencies in <code>imports</code> array</li>
+              <li>No module file needed</li>
+              <li>Example: ProductCard import <code>CommonModule</code> and <code>RouterLink</code> directly</li>
+            </ul>
+            <p><strong>Benefits:</strong></p>
+            <ul>
+              <li>Smaller bundles (better tree-shaking)</li>
+              <li>Faster app startup</li>
+              <li>Simpler mental model</li>
+              <li>Easier lazy loading via <code>loadComponent</code></li>
+            </ul>
+            <p><strong>New Bootstrap:</strong></p>
+            <pre><code>bootstrapApplication(AppComponent, { providers: [...] })</code></pre>
+            <p><strong>Note:</strong> Can use NgModules in legacy code — they coexist. For new code, default to standalone.</p>
+          </div>
+        </details>
+
+        <details><summary>Q. How to handle CORS during development?</summary>
+          <div>
+            <p><strong>Why it happens:</strong></p>
+            <ul>
+              <li>Angular on <code>localhost:4200</code></li>
+              <li>.NET API on <code>localhost:5001</code></li>
+              <li>Different ports = different origin = CORS error</li>
+            </ul>
+            <p><strong>Proper Fix — Server Side:</strong></p>
+            <ul>
+              <li>In .NET API: <code>builder.Services.AddCors</code></li>
+              <li>Allow Angular origin (<code>http://localhost:4200</code>)</li>
+              <li>Add <code>app.UseCors("PolicyName")</code> before <code>UseAuthentication</code></li>
+              <li>Specify origins, methods, headers explicitly</li>
+              <li>Don't use AllowAnyOrigin in production with credentials</li>
+            </ul>
+            <p><strong>Dev-Only Shortcut — Angular Proxy:</strong></p>
+            <ul>
+              <li>Create <code>proxy.conf.json</code></li>
+              <li>Point <code>/api</code> to <code>https://localhost:5001</code></li>
+              <li>Run <code>ng serve --proxy-config proxy.conf.json</code></li>
+              <li>Angular dev server forward calls to .NET</li>
+              <li>Browser see same origin — no CORS</li>
+            </ul>
+            <p><strong>Note:</strong> Proxy work in dev only. Still need server CORS for production.</p>
+          </div>
+        </details>
+
+        <details><summary>Q. Reactive Forms vs Template-Driven?</summary>
+          <div>
+            <p><strong>Definition:</strong> Angular has 2 ways to build forms.</p>
+            <p><strong>Template-Driven Forms:</strong></p>
+            <ul>
+              <li>Use directives in HTML template — <code>ngModel</code>, <code>required</code></li>
+              <li>Angular build FormGroup behind scene</li>
+              <li>Easy for simple forms (contact us)</li>
+            </ul>
+            <p><strong>Reactive Forms (Better):</strong></p>
+            <ul>
+              <li>Defined in component class using <code>FormBuilder</code></li>
+              <li>Explicitly create FormGroup, FormControl, FormArray</li>
+              <li>Template bind with <code>[formGroup]</code> and <code>formControlName</code></li>
+            </ul>
+            <p><strong>Why Reactive Better:</strong></p>
+            <ul>
+              <li>Stronger typing</li>
+              <li>Easier dynamic forms (add/remove fields)</li>
+              <li>Built-in async validators (check email unique with server)</li>
+              <li>Simpler unit testing (no template render needed)</li>
+              <li>Access to RxJS observables for value/status changes</li>
+            </ul>
+            <p><strong>Rule:</strong> Don't mix both styles in same form — pick one and stick.</p>
+            <p><strong>Note:</strong> Most production codebases use Reactive Forms exclusively.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <section id="mistakes" class="callout callout--warn">
+      <h3>⚠️ Common Mistakes</h3>
+      <ul>
+        <li>Forgetting to unsubscribe → memory leaks (use async pipe or takeUntilDestroyed)</li>
+        <li>Mutating arrays in OnPush components — change detection misses it</li>
+        <li>Calling subscribe inside subscribe instead of switchMap</li>
+        <li>Storing JWT in localStorage without considering XSS (or in cookies without CSRF)</li>
+        <li>Not using trackBy in *ngFor → DOM thrash on every render</li>
+        <li>Mixing Reactive and Template-driven forms in same project</li>
+        <li>Ignoring strict mode in tsconfig (you should always be strict)</li>
+        <li>Using mergeMap when you wanted switchMap (race conditions in search)</li>
+      </ul>
+    </section>
+
+    <nav class="phase-nav">
+      <a href="phase-4-ef-core.html"><span class="label">← Prev</span><strong>Phase 4: EF Core</strong></a>
+      <a href="phase-6-system-design.html" class="next"><span class="label">Next →</span><strong>Phase 6: System Design</strong></a>
+    </nav>
+  </main>
+</div>
+
+<footer class="footer">Phase 5 of 9 · Now you're truly Full Stack — Angular + .NET end to end</footer>
+
+<script>
+  const phase = document.body.dataset.phase;
+  document.querySelectorAll('input[type="checkbox"][data-topic]').forEach(cb => {
+    const key = `phase-${phase}-topic-${cb.dataset.topic}`;
+    cb.checked = localStorage.getItem(key) === 'true';
+    cb.closest('.topic').classList.toggle('is-done', cb.checked);
+    cb.addEventListener('change', () => {
+      localStorage.setItem(key, cb.checked);
+      cb.closest('.topic').classList.toggle('is-done', cb.checked);
+    });
+  });
+  const links = document.querySelectorAll('.sidebar a[href^="#"]');
+  const sections = [...links].map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  window.addEventListener('scroll', () => {
+    let current = sections[0]?.id;
+    sections.forEach(s => { if (window.scrollY + 100 >= s.offsetTop) current = s.id; });
+    links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current));
+  });
+</script>
+</body>
+</html>

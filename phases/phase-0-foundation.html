@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Phase 0 — Foundation & TS→C# Bridge | .NET Roadmap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/global.css" />
+</head>
+<body data-phase="0">
+
+<nav class="topnav">
+  <div class="topnav__inner">
+    <div class="brand"><a href="../index.html" style="color:inherit">.NET<span class="dot">·</span>Roadmap</a></div>
+    <div class="topnav__links">
+      <a href="../index.html">Home</a>
+      <a href="phase-0-foundation.html" class="active">P0</a>
+      <a href="phase-1-csharp.html">P1</a>
+      <a href="phase-2-sql.html">P2</a>
+      <a href="phase-3-aspnet-core.html">P3</a>
+      <a href="phase-4-ef-core.html">P4</a>
+      <a href="phase-5-angular-integration.html">P5</a>
+      <a href="phase-6-system-design.html">P6</a>
+      <a href="phase-7-devops-azure.html">P7</a>
+      <a href="phase-8-projects.html">P8</a>
+      <a href="phase-9-interview.html">P9</a>
+    </div>
+  </div>
+</nav>
+
+<div class="phase-page">
+
+  <aside class="sidebar">
+    <h4>Topics</h4>
+    <ul>
+      <li><a href="#tools">1. Tools & Setup</a></li>
+      <li><a href="#dotnet-eco">2. .NET Ecosystem</a></li>
+      <li><a href="#ts-to-cs">3. TS → C# Bridge</a></li>
+      <li><a href="#cli">4. dotnet CLI</a></li>
+      <li><a href="#nuget">5. NuGet</a></li>
+      <li><a href="#vs-debug">6. VS Debugging Skills</a></li>
+    </ul>
+    <h4>Sections</h4>
+    <ul>
+      <li><a href="#qa">Interview Q&A</a></li>
+      <li><a href="#mistakes">Common Mistakes</a></li>
+    </ul>
+  </aside>
+
+  <main class="content">
+
+    <div class="breadcrumb"><a href="../index.html">Home</a> / Phase 0</div>
+
+    <header class="phase-header">
+      <h1>Phase 0 — Foundation & TS → C# Bridge</h1>
+      <p class="lede">You're already a developer. This phase isn't about learning to code — it's about installing the .NET stack and translating your TypeScript instincts into C# syntax.</p>
+      <div class="phase-meta">
+        <span class="pill">⏱ 1 Week</span>
+        <span class="pill">🎯 Setup + Bridge</span>
+        <span class="pill">💪 Lighter for you</span>
+      </div>
+    </header>
+
+    <div class="callout callout--prereq">
+      <h3>📋 Prerequisites</h3>
+      <ul>
+        <li>Working laptop, 8GB+ RAM, ~20 GB free disk</li>
+        <li>Existing JS/TS knowledge (you have this ✓)</li>
+        <li>Comfortable with Git/GitHub (you have this ✓)</li>
+      </ul>
+    </div>
+
+    <!-- TOPIC 1 -->
+    <section class="topic" id="tools">
+      <div class="topic__check"><input type="checkbox" data-topic="0" /></div>
+      <h3><span class="num">1</span> Tools & Environment Setup</h3>
+      <p class="concept">The .NET ecosystem has a primary IDE (Visual Studio) and supporting tools. Get this right once and you won't fight your tools later.</p>
+
+      <div class="interview">
+        <h4>🎯 What to Install</h4>
+        <ul>
+          <li><strong>Visual Studio 2022 Community</strong> — the main .NET IDE (free). Pick workloads: <em>ASP.NET and web development</em>, <em>.NET desktop development</em>, <em>Data storage and processing</em>.</li>
+          <li><strong>.NET 8 SDK</strong> — long-term support runtime. Verify: <code>dotnet --version</code></li>
+          <li><strong>VS Code</strong> + extensions: <em>C# Dev Kit</em>, <em>C#</em>, <em>NuGet Gallery</em>, <em>REST Client</em></li>
+          <li><strong>SQL Server Express</strong> + <strong>SSMS</strong> (or <strong>Azure Data Studio</strong>)</li>
+          <li><strong>Postman</strong> — API testing</li>
+          <li><strong>Docker Desktop</strong> — install now, used in Phase 7</li>
+          <li><strong>Git</strong> — already configured</li>
+        </ul>
+      </div>
+
+      <pre><code><span class="com"># verify everything is installed</span>
+<span class="fn">dotnet</span> --version              <span class="com"># should print 8.x.x</span>
+<span class="fn">dotnet</span> --list-sdks
+<span class="fn">git</span> --version
+<span class="fn">docker</span> --version</code></pre>
+
+      <div class="gotcha">⚠️ <strong>Gotcha:</strong> Don't install old .NET Framework 4.8 confused with .NET 8. .NET Framework = legacy Windows-only. .NET (5/6/7/8) = modern cross-platform. You want the modern one.</div>
+    </section>
+
+    <!-- TOPIC 2 -->
+    <section class="topic" id="dotnet-eco">
+      <div class="topic__check"><input type="checkbox" data-topic="1" /></div>
+      <h3><span class="num">2</span> The .NET Ecosystem</h3>
+
+      <p class="concept"><strong>Definition:</strong> .NET is a big platform with many parts. You should know each part for interview.</p>
+
+      <h4>Important Parts</h4>
+      <ul>
+        <li><strong>.NET Framework (1.0 → 4.8)</strong> — old, Windows only, in maintenance mode</li>
+        <li><strong>.NET Core (1, 2, 3.x)</strong> — new cross-platform version. Renamed to just ".NET" from v5</li>
+        <li><strong>.NET 5/6/7/8</strong> — modern unified version. .NET 8 is current LTS</li>
+        <li><strong>C#</strong> — language we write code in</li>
+        <li><strong>.NET</strong> — runtime + libraries</li>
+        <li><strong>ASP.NET Core</strong> — web framework that run on .NET</li>
+        <li><strong>CLR (Common Language Runtime)</strong> — engine that run IL code</li>
+        <li><strong>BCL (Base Class Library)</strong> — built-in types like String, List, File</li>
+      </ul>
+
+      <h4>Common Terms</h4>
+      <table>
+        <thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td>SDK</td><td>Tools to build apps (compiler, CLI) — developer install this</td></tr>
+          <tr><td>Runtime</td><td>What is needed to run apps — server install this</td></tr>
+          <tr><td>NuGet</td><td>Package manager — like npm for .NET</td></tr>
+          <tr><td>MSBuild</td><td>Build engine — like webpack for .NET</td></tr>
+          <tr><td>LTS</td><td>Long-Term Support release — pick for production (.NET 6, 8)</td></tr>
+        </tbody>
+      </table>
+
+      <h4>Java parallel</h4>
+      <ul>
+        <li>.NET SDK = JDK</li>
+        <li>.NET Runtime = JRE</li>
+        <li>CLR = JVM</li>
+        <li>NuGet = Maven</li>
+        <li>BCL = java.lang + java.util packages</li>
+      </ul>
+
+      <p><strong>Note:</strong> Always pick latest LTS version (.NET 8) for new projects.</p>
+    </section>
+
+    <!-- TOPIC 3 -->
+    <section class="topic" id="ts-to-cs">
+      <div class="topic__check"><input type="checkbox" data-topic="2" /></div>
+      <h3><span class="num">3</span> TypeScript → C# Syntax Bridge</h3>
+      <p class="concept">You already know strong typing, classes, generics, async/await, and decorators in TS. C# uses the same ideas with slightly different syntax. Learn the diff, not the concept.</p>
+
+      <table>
+        <thead><tr><th>Concept</th><th>TypeScript</th><th>C#</th></tr></thead>
+        <tbody>
+          <tr><td>Variable</td><td><code>let x: number = 5</code></td><td><code>int x = 5;</code> or <code>var x = 5;</code></td></tr>
+          <tr><td>String</td><td><code>let s: string = "hi"</code></td><td><code>string s = "hi";</code></td></tr>
+          <tr><td>Array</td><td><code>number[]</code> / <code>Array&lt;number&gt;</code></td><td><code>int[]</code> or <code>List&lt;int&gt;</code></td></tr>
+          <tr><td>Map</td><td><code>Map&lt;string, number&gt;</code></td><td><code>Dictionary&lt;string, int&gt;</code></td></tr>
+          <tr><td>Class</td><td><code>class User { name: string; }</code></td><td><code>class User { public string Name { get; set; } }</code></td></tr>
+          <tr><td>Interface</td><td><code>interface IUser { id: number }</code></td><td><code>interface IUser { int Id { get; set; } }</code></td></tr>
+          <tr><td>Constructor</td><td><code>constructor(name: string) {}</code></td><td><code>public User(string name) {}</code></td></tr>
+          <tr><td>Async</td><td><code>async fn(): Promise&lt;User&gt;</code></td><td><code>async Task&lt;User&gt; Fn()</code></td></tr>
+          <tr><td>Null safety</td><td><code>string \| null</code>, <code>?.</code></td><td><code>string?</code>, <code>?.</code>, <code>??</code></td></tr>
+          <tr><td>Generic</td><td><code>function f&lt;T&gt;(x: T): T</code></td><td><code>T F&lt;T&gt;(T x)</code></td></tr>
+          <tr><td>Decorator</td><td><code>@Injectable()</code></td><td><code>[Authorize]</code> (called <em>attribute</em>)</td></tr>
+          <tr><td>Spread</td><td><code>[...arr]</code></td><td><code>arr.ToList()</code> or <code>[..arr]</code> (C# 12)</td></tr>
+          <tr><td>Destructure</td><td><code>const {name} = user</code></td><td><code>var (name, _) = user;</code> (records)</td></tr>
+          <tr><td>String interp</td><td><code>`Hello ${name}`</code></td><td><code>$"Hello {name}"</code></td></tr>
+          <tr><td>Optional param</td><td><code>function f(x?: number)</code></td><td><code>void F(int x = 0)</code></td></tr>
+        </tbody>
+      </table>
+
+      <h4>🎯 Mental Model Differences</h4>
+      <ul>
+        <li><strong>Properties vs fields:</strong> C# uses <em>properties</em> (<code>{ get; set; }</code>) instead of TS's plain class fields. Same role, different syntax.</li>
+        <li><strong>Naming:</strong> C# uses <strong>PascalCase</strong> for methods/properties (<code>GetUser</code>), camelCase only for local variables and parameters.</li>
+        <li><strong>Statements end with semicolons</strong>, just like TS.</li>
+        <li><strong>No truthy/falsy:</strong> <code>if (x)</code> only works on <code>bool</code> in C#. You must write <code>if (x != null)</code> or <code>if (str.Length &gt; 0)</code>.</li>
+      </ul>
+
+      <pre><code><span class="com">// Same logic — TS first, then C#</span>
+
+<span class="com">// TS:</span>
+<span class="kw">interface</span> <span class="type">IUser</span> { <span class="var">id</span>: <span class="type">number</span>; <span class="var">name</span>: <span class="type">string</span>; }
+<span class="kw">class</span> <span class="type">UserService</span> {
+  <span class="kw">async</span> <span class="fn">getUser</span>(<span class="var">id</span>: <span class="type">number</span>): <span class="type">Promise</span>&lt;<span class="type">IUser</span>&gt; {
+    <span class="kw">return</span> { <span class="var">id</span>, <span class="var">name</span>: <span class="str">"Rutik"</span> };
+  }
+}
+
+<span class="com">// C#:</span>
+<span class="kw">public interface</span> <span class="type">IUser</span> { <span class="kw">int</span> <span class="var">Id</span> { <span class="kw">get</span>; <span class="kw">set</span>; } <span class="kw">string</span> <span class="var">Name</span> { <span class="kw">get</span>; <span class="kw">set</span>; } }
+<span class="kw">public class</span> <span class="type">UserService</span> {
+  <span class="kw">public async</span> <span class="type">Task</span>&lt;<span class="type">IUser</span>&gt; <span class="fn">GetUser</span>(<span class="kw">int</span> <span class="var">id</span>) {
+    <span class="kw">return new</span> <span class="type">User</span> { <span class="var">Id</span> = <span class="var">id</span>, <span class="var">Name</span> = <span class="str">"Rutik"</span> };
+  }
+}</code></pre>
+
+      <div class="angular-bridge">🔗 <strong>Angular Parallel:</strong> 80% of the syntax is muscle-memory swap. The <em>concepts</em> are identical — types, classes, interfaces, generics, async. The only true new thing is <em>properties</em> with <code>get/set</code>.</div>
+    </section>
+
+    <!-- TOPIC 4 -->
+    <section class="topic" id="cli">
+      <div class="topic__check"><input type="checkbox" data-topic="3" /></div>
+      <h3><span class="num">4</span> dotnet CLI — your daily driver</h3>
+      <p class="concept">The <code>dotnet</code> CLI creates, builds, runs, and tests projects. You'll use it constantly. Learn the 10 commands that cover 95% of work.</p>
+
+      <pre><code><span class="com"># project lifecycle</span>
+dotnet new list                       <span class="com"># show all templates</span>
+dotnet new console -n MyApp           <span class="com"># console app</span>
+dotnet new webapi -n MyApi            <span class="com"># Web API</span>
+dotnet new classlib -n MyLib          <span class="com"># class library</span>
+dotnet new sln -n MySolution          <span class="com"># solution file</span>
+dotnet sln add MyApi/MyApi.csproj     <span class="com"># add proj to solution</span>
+
+<span class="com"># build / run / watch</span>
+dotnet restore                        <span class="com"># restore NuGet packages</span>
+dotnet build                          <span class="com"># compile</span>
+dotnet run                            <span class="com"># compile + run</span>
+dotnet watch run                      <span class="com"># hot reload (like ng serve)</span>
+
+<span class="com"># testing</span>
+dotnet new xunit -n MyApp.Tests
+dotnet test
+
+<span class="com"># packages (NuGet)</span>
+dotnet add package Serilog
+dotnet remove package Serilog
+dotnet list package --outdated
+
+<span class="com"># publish for production</span>
+dotnet publish -c Release -o ./publish</code></pre>
+
+      <div class="angular-bridge">🔗 <strong>Angular Parallel:</strong><br>
+        <code>dotnet new webapi</code> ≈ <code>ng new my-app</code><br>
+        <code>dotnet watch run</code> ≈ <code>ng serve</code><br>
+        <code>dotnet add package</code> ≈ <code>npm install</code><br>
+        <code>dotnet build</code> ≈ <code>ng build</code><br>
+        <code>dotnet test</code> ≈ <code>ng test</code>
+      </div>
+    </section>
+
+    <!-- TOPIC 5 -->
+    <section class="topic" id="nuget">
+      <div class="topic__check"><input type="checkbox" data-topic="4" /></div>
+      <h3><span class="num">5</span> NuGet — Package Manager</h3>
+      <p class="concept">NuGet is to .NET what npm is to Node. Packages live at <a href="https://nuget.org">nuget.org</a> and dependencies are tracked in your <code>.csproj</code> file (the .NET equivalent of <code>package.json</code>).</p>
+
+      <div class="interview">
+        <h4>🎯 Things You'll Use Daily</h4>
+        <ul>
+          <li><code>.csproj</code> file lists <code>&lt;PackageReference Include="Serilog" Version="3.0.0" /&gt;</code></li>
+          <li>No <code>node_modules</code>! Packages cached globally at <code>~/.nuget/packages/</code></li>
+          <li>Install via CLI (<code>dotnet add package X</code>) or VS Package Manager UI</li>
+          <li>Lock file: <code>packages.lock.json</code> (opt-in, recommended for CI)</li>
+        </ul>
+      </div>
+
+      <h4>📦 Packages You'll See Constantly</h4>
+      <ul>
+        <li><strong>Microsoft.EntityFrameworkCore</strong> — ORM (Phase 4)</li>
+        <li><strong>Microsoft.AspNetCore.Authentication.JwtBearer</strong> — JWT (Phase 3)</li>
+        <li><strong>Serilog.AspNetCore</strong> — structured logging</li>
+        <li><strong>AutoMapper</strong> — DTO mapping</li>
+        <li><strong>FluentValidation</strong> — input validation</li>
+        <li><strong>MediatR</strong> — CQRS handler dispatcher</li>
+        <li><strong>xUnit / Moq / FluentAssertions</strong> — testing trinity</li>
+        <li><strong>Polly</strong> — retry/circuit-breaker resilience</li>
+        <li><strong>Dapper</strong> — micro-ORM for raw SQL speed</li>
+      </ul>
+
+      <div class="gotcha">⚠️ <strong>Gotcha:</strong> Packages have version compatibility tied to .NET versions (e.g. EF Core 8 needs .NET 8). Always check the package's "Frameworks" section on nuget.org.</div>
+    </section>
+
+    <!-- TOPIC 6 -->
+    <section class="topic" id="vs-debug">
+      <div class="topic__check"><input type="checkbox" data-topic="5" /></div>
+      <h3><span class="num">6</span> Visual Studio Debugging — Skill that Pays Forever</h3>
+      <p class="concept">VS has the best debugger in the industry. Master these from day one — interviewers respect a dev who debugs systematically instead of <code>Console.WriteLine</code> everywhere.</p>
+
+      <div class="interview">
+        <h4>🎯 Must-Know Debugger Features</h4>
+        <ul>
+          <li><strong>Breakpoints</strong> — F9 to set, F5 to run-to-next, F10 step over, F11 step into, Shift+F11 step out</li>
+          <li><strong>Conditional breakpoints</strong> — break only when <code>x &gt; 100</code> (right-click breakpoint → Conditions)</li>
+          <li><strong>Tracepoints</strong> — log without stopping (replaces <code>Console.WriteLine</code>)</li>
+          <li><strong>Watch / QuickWatch (Shift+F9)</strong> — inspect any expression while paused</li>
+          <li><strong>Immediate window</strong> — execute C# code mid-debug</li>
+          <li><strong>Call Stack</strong> — see how you got here</li>
+          <li><strong>Locals / Autos</strong> — inspect current scope variables</li>
+          <li><strong>Edit and Continue</strong> — modify code while paused, keep running</li>
+          <li><strong>Exception Settings</strong> — break on thrown exceptions (Debug → Windows → Exception Settings)</li>
+        </ul>
+      </div>
+
+      <h4>⌨️ Productivity Shortcuts</h4>
+      <table>
+        <thead><tr><th>Shortcut</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td>Ctrl+. </td><td>Quick fix / refactor menu (the most-used shortcut)</td></tr>
+          <tr><td>Ctrl+T</td><td>Go to anything (file, type, member)</td></tr>
+          <tr><td>F12</td><td>Go to definition</td></tr>
+          <tr><td>Shift+F12</td><td>Find all references</td></tr>
+          <tr><td>Ctrl+R, Ctrl+R</td><td>Rename symbol</td></tr>
+          <tr><td>Ctrl+K, Ctrl+D</td><td>Format document</td></tr>
+          <tr><td>Ctrl+/</td><td>Toggle comment</td></tr>
+          <tr><td>Ctrl+Space</td><td>IntelliSense</td></tr>
+        </tbody>
+      </table>
+
+      <div class="angular-bridge">🔗 <strong>Angular Parallel:</strong> Like Chrome DevTools breakpoints + VS Code F5 debug, but with object inspection so deep you can edit values mid-execution.</div>
+    </section>
+
+    <!-- INTERVIEW Q&A -->
+    <section id="qa">
+      <h2 class="section-title">🎤 Interview Q&A — Phase 0</h2>
+      <div class="qa-block">
+        <details>
+          <summary>Q. What is difference between .NET Framework and .NET (Core)?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>.NET Framework = old version, only run on Windows</li>
+              <li>.NET (Core) = new version, run on Windows, Linux, Mac</li>
+            </ul>
+            <p><strong>Key Points:</strong></p>
+            <ul>
+              <li>.NET Framework last version is 4.8 — Microsoft not adding new features</li>
+              <li>.NET Core was renamed to just ".NET" from version 5</li>
+              <li>Current LTS version is .NET 8 — support for 3 years</li>
+              <li>.NET Framework is legacy, only for old enterprise apps</li>
+              <li>For all new projects use .NET 8 (or latest LTS)</li>
+              <li>.NET (Core) is open source and faster</li>
+            </ul>
+            <p><strong>Java parallel:</strong></p>
+            <ul>
+              <li>Same like JDK 1.8 vs JDK 17 — old vs modern version</li>
+              <li>.NET 8 is like JDK LTS — 3 year support</li>
+            </ul>
+            <p><strong>Note:</strong> In interview just say — "Framework is old Windows-only, .NET 8 is modern cross-platform. I always use .NET 8."</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>Q. What is the CLR?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>CLR = Common Language Runtime</li>
+              <li>It is the engine that run C# code at run time</li>
+            </ul>
+            <p><strong>Key Points:</strong></p>
+            <ul>
+              <li>C# code first compile to IL (Intermediate Language) — not machine code</li>
+              <li>CLR has JIT (Just-In-Time) compiler that convert IL to machine code at run time</li>
+              <li>CLR handle Garbage Collection (clean unused memory)</li>
+              <li>CLR handle Exception (throw/catch flow)</li>
+              <li>CLR handle Security (check what code can do)</li>
+              <li>Other languages like F#, VB.NET also run on CLR</li>
+            </ul>
+            <p><strong>Java parallel:</strong></p>
+            <ul>
+              <li>CLR is same like JVM in Java</li>
+              <li>IL is same like Java Bytecode</li>
+              <li>JIT in C# = JIT in Java — same idea</li>
+            </ul>
+            <p><strong>Note:</strong> CLR enable features like Reflection, Generics, async/await.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>Q. What is NuGet and how it relate to npm?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>NuGet is package manager for .NET</li>
+              <li>Same like npm for Node.js</li>
+            </ul>
+            <p><strong>Key Points:</strong></p>
+            <ul>
+              <li>Packages hosted at nuget.org</li>
+              <li>Install command: <code>dotnet add package PackageName</code></li>
+              <li>Package listed in <code>.csproj</code> file (same like <code>package.json</code>)</li>
+              <li>Packages stored in one global folder — not per project</li>
+              <li>No <code>node_modules</code> like big folder problem</li>
+              <li>Lock file: <code>packages.lock.json</code> for CI/CD</li>
+            </ul>
+            <p><strong>Java parallel:</strong></p>
+            <ul>
+              <li>Same like Maven (pom.xml) or Gradle (build.gradle)</li>
+              <li>NuGet ≈ Maven Central</li>
+            </ul>
+            <p><strong>Common packages:</strong></p>
+            <ul>
+              <li>Serilog — logging</li>
+              <li>AutoMapper — object mapping</li>
+              <li>EF Core — database ORM</li>
+              <li>FluentValidation — input validation</li>
+            </ul>
+          </div>
+        </details>
+
+        <details>
+          <summary>Q. SDK vs Runtime — when to install which?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>SDK = Software Development Kit (for building apps)</li>
+              <li>Runtime = only for running already built apps</li>
+            </ul>
+            <p><strong>Key Points:</strong></p>
+            <ul>
+              <li>SDK contain — compiler + dotnet CLI + build tools + runtime</li>
+              <li>Runtime contain only — what is needed to run app</li>
+              <li>Developer install SDK on machine</li>
+              <li>Production server install only Runtime</li>
+              <li>Runtime is small in size — save space on server</li>
+            </ul>
+            <p><strong>Java parallel:</strong></p>
+            <ul>
+              <li>Same like JDK vs JRE</li>
+              <li>SDK = JDK (for development)</li>
+              <li>Runtime = JRE (for run only)</li>
+            </ul>
+            <p><strong>Real example:</strong></p>
+            <ul>
+              <li>In Docker — first stage use SDK image to compile</li>
+              <li>Second stage use small Runtime image to run</li>
+              <li>Final image is small and more secure</li>
+            </ul>
+          </div>
+        </details>
+
+        <details>
+          <summary>Q. Why C# is strongly typed?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>Strongly typed = compiler check type of every variable</li>
+              <li>If <code>int x = 5</code>, you cannot assign <code>"hello"</code> to x</li>
+            </ul>
+            <p><strong>Key Points:</strong></p>
+            <ul>
+              <li>Type check happen at compile time — error shown before run</li>
+              <li>Most silly bugs caught in build, not in production</li>
+              <li>Refactoring is safe — rename method, compiler show all places</li>
+              <li>IntelliSense show correct method suggestion</li>
+              <li>Big code base easy to maintain</li>
+              <li>C# check type at both compile time AND run time</li>
+            </ul>
+            <p><strong>Java parallel:</strong></p>
+            <ul>
+              <li>Same like Java — both are strongly typed</li>
+              <li>Same compile time type check</li>
+              <li>Same IntelliSense / IDE support benefit</li>
+            </ul>
+            <p><strong>Note:</strong> TypeScript also strongly typed but type disappear at run time. C# keep types at run time also — extra safety.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- COMMON MISTAKES -->
+    <section id="mistakes" class="callout callout--warn">
+      <h3>⚠️ Common Mistakes in Phase 0</h3>
+      <ul>
+        <li>Installing .NET Framework 4.8 instead of .NET 8 SDK.</li>
+        <li>Skipping Visual Studio in favor of VS Code only — VS is the platform standard for .NET; learn it even if VS Code stays your daily driver.</li>
+        <li>Treating C# as "Java but worse." It's the most modern enterprise language alongside Kotlin — appreciate features like records, pattern matching, and source generators.</li>
+        <li>Trying to learn C# basics from a "for absolute beginners" course. You're already a dev — read <em>"C# in Depth"</em> or Microsoft Docs directly.</li>
+      </ul>
+    </section>
+
+    <!-- NAVIGATION -->
+    <nav class="phase-nav">
+      <a href="../index.html"><span class="label">← Back</span><strong>Home</strong></a>
+      <a href="phase-1-csharp.html" class="next"><span class="label">Next →</span><strong>Phase 1: C# Basic → Advanced</strong></a>
+    </nav>
+
+  </main>
+</div>
+
+<footer class="footer">Phase 0 of 9 · Setup the runway, then take off in Phase 1</footer>
+
+<script>
+  // Save / load checkbox state
+  const phase = document.body.dataset.phase;
+  document.querySelectorAll('input[type="checkbox"][data-topic]').forEach(cb => {
+    const key = `phase-${phase}-topic-${cb.dataset.topic}`;
+    cb.checked = localStorage.getItem(key) === 'true';
+    cb.closest('.topic').classList.toggle('is-done', cb.checked);
+    cb.addEventListener('change', () => {
+      localStorage.setItem(key, cb.checked);
+      cb.closest('.topic').classList.toggle('is-done', cb.checked);
+    });
+  });
+
+  // Sidebar active link on scroll
+  const links = document.querySelectorAll('.sidebar a[href^="#"]');
+  const sections = [...links].map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  window.addEventListener('scroll', () => {
+    let current = sections[0]?.id;
+    sections.forEach(s => { if (window.scrollY + 100 >= s.offsetTop) current = s.id; });
+    links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current));
+  });
+</script>
+
+</body>
+</html>

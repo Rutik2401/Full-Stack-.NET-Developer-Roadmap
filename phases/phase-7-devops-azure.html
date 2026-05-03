@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Phase 7 — Docker, Azure & CI/CD | .NET Roadmap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/global.css" />
+</head>
+<body data-phase="7">
+
+<nav class="topnav">
+  <div class="topnav__inner">
+    <div class="brand"><a href="../index.html" style="color:inherit">.NET<span class="dot">·</span>Roadmap</a></div>
+    <div class="topnav__links">
+      <a href="../index.html">Home</a>
+      <a href="phase-0-foundation.html">P0</a>
+      <a href="phase-1-csharp.html">P1</a>
+      <a href="phase-2-sql.html">P2</a>
+      <a href="phase-3-aspnet-core.html">P3</a>
+      <a href="phase-4-ef-core.html">P4</a>
+      <a href="phase-5-angular-integration.html">P5</a>
+      <a href="phase-6-system-design.html">P6</a>
+      <a href="phase-7-devops-azure.html" class="active">P7</a>
+      <a href="phase-8-projects.html">P8</a>
+      <a href="phase-9-interview.html">P9</a>
+    </div>
+  </div>
+</nav>
+
+<div class="phase-page">
+  <aside class="sidebar">
+    <h4>Week 1 · Linux/Net/Git</h4>
+    <ul>
+      <li><a href="#linux">1. Linux Essentials</a></li>
+      <li><a href="#networking">2. Networking Basics</a></li>
+      <li><a href="#git-adv">3. Git Advanced</a></li>
+    </ul>
+    <h4>Week 2 · Docker</h4>
+    <ul>
+      <li><a href="#containers">4. Containers vs VMs</a></li>
+      <li><a href="#dockerfile">5. Dockerfile</a></li>
+      <li><a href="#compose">6. Docker Compose</a></li>
+      <li><a href="#dotnet-docker">7. Dockerizing .NET + SQL</a></li>
+    </ul>
+    <h4>Week 3 · Azure</h4>
+    <ul>
+      <li><a href="#azure-basics">8. Azure Basics</a></li>
+      <li><a href="#app-service">9. App Service</a></li>
+      <li><a href="#azure-sql">10. Azure SQL</a></li>
+      <li><a href="#storage">11. Blob Storage</a></li>
+      <li><a href="#key-vault">12. Key Vault & Managed Identity</a></li>
+      <li><a href="#functions">13. Functions & Service Bus</a></li>
+      <li><a href="#monitoring">14. App Insights</a></li>
+    </ul>
+    <h4>Week 4 · CI/CD</h4>
+    <ul>
+      <li><a href="#github-actions">15. GitHub Actions</a></li>
+      <li><a href="#azure-devops">16. Azure DevOps + K8s</a></li>
+    </ul>
+    <h4>Sections</h4>
+    <ul>
+      <li><a href="#qa">Interview Q&A</a></li>
+      <li><a href="#mistakes">Common Mistakes</a></li>
+    </ul>
+  </aside>
+
+  <main class="content">
+    <div class="breadcrumb"><a href="../index.html">Home</a> / Phase 7</div>
+
+    <header class="phase-header">
+      <h1>Phase 7 — Docker, Azure Cloud & CI/CD</h1>
+      <p class="lede">The single biggest salary multiplier. Devs who can ship to Azure command 30-40% premium. Docker + Azure + Pipelines turns "I built it" into "it's running for users."</p>
+      <div class="phase-meta">
+        <span class="pill">⏱ 4 Weeks</span>
+        <span class="pill">16 Topics</span>
+        <span class="pill">⭐ Premium pay skill</span>
+      </div>
+    </header>
+
+    <div class="callout callout--prereq">
+      <h3>📋 Prerequisites</h3>
+      <ul>
+        <li>A working .NET API (Phase 3) ready to containerize</li>
+        <li>Git fluency (you have)</li>
+        <li>Linux command-line basics (covered Week 1 if new)</li>
+        <li>Free Azure account ($200 credit for first month)</li>
+      </ul>
+    </div>
+
+    <h2 class="section-title">📅 Week 1 — Linux, Networking, Git</h2>
+
+    <section class="topic" id="linux">
+      <div class="topic__check"><input type="checkbox" data-topic="0" /></div>
+      <h3><span class="num">1</span> Linux Essentials (you'll SSH into servers)</h3>
+
+      <pre><code><span class="com"># navigation</span>
+pwd                      <span class="com"># where am I</span>
+ls -la                   <span class="com"># list with hidden + long</span>
+cd /var/log
+cat file.log
+less file.log            <span class="com"># scrollable</span>
+tail -f app.log          <span class="com"># follow live</span>
+head -n 50 file
+
+<span class="com"># files</span>
+mkdir -p path/to/dir
+cp -r src/ dest/
+mv old new
+rm -rf folder
+chmod 755 script.sh
+chown user:group file
+
+<span class="com"># search</span>
+grep -ri <span class="str">"error"</span> .
+find . -name <span class="str">"*.log"</span> -mtime -1
+which dotnet
+
+<span class="com"># processes</span>
+ps aux | grep dotnet
+kill -9 1234
+top                      <span class="com"># live process viewer</span>
+htop
+
+<span class="com"># network</span>
+curl https://api.example.com
+curl -X POST -H <span class="str">"Content-Type: application/json"</span> -d <span class="str">'{"a":1}'</span> https://...
+ping example.com
+netstat -tulpn           <span class="com"># open ports</span>
+ss -tulpn                <span class="com"># modern alternative</span>
+
+<span class="com"># pipes &amp; redirects</span>
+cat log | grep ERROR | wc -l
+dotnet build &gt; build.log 2&gt;&amp;1
+
+<span class="com"># package managers</span>
+sudo apt update &amp;&amp; sudo apt install nginx        <span class="com"># Debian/Ubuntu</span>
+sudo dnf install something                       <span class="com"># Fedora/RHEL</span>
+
+<span class="com"># systemd</span>
+sudo systemctl status nginx
+sudo systemctl restart myapp
+
+<span class="com"># SSH</span>
+ssh user@server.com
+ssh-keygen -t ed25519
+scp file.txt user@server:/tmp/</code></pre>
+    </section>
+
+    <section class="topic" id="networking">
+      <div class="topic__check"><input type="checkbox" data-topic="1" /></div>
+      <h3><span class="num">2</span> Networking Basics</h3>
+      <ul>
+        <li><strong>IP / Subnet</strong> — IPv4 (192.168.1.10/24), IPv6, public vs private</li>
+        <li><strong>DNS</strong> — domain → IP. A record, CNAME, MX, TXT, SRV</li>
+        <li><strong>Ports</strong> — 80 HTTP, 443 HTTPS, 22 SSH, 5432 Postgres, 1433 SQL Server, 6379 Redis</li>
+        <li><strong>Firewall</strong> — allow/deny rules; cloud SGs / NSGs</li>
+        <li><strong>NAT</strong> — many private IPs → one public</li>
+        <li><strong>VPN / VNet</strong> — private network in cloud</li>
+        <li><strong>TLS / SSL</strong> — cert from Let's Encrypt or Azure-managed</li>
+        <li><strong>HTTP status codes</strong> + headers (Cache-Control, ETag, CORS)</li>
+        <li><strong>WebSockets</strong> — full-duplex over HTTP upgrade (SignalR uses this)</li>
+        <li><strong>CDN</strong> — Azure CDN / Cloudflare for static asset edge caching</li>
+      </ul>
+    </section>
+
+    <section class="topic" id="git-adv">
+      <div class="topic__check"><input type="checkbox" data-topic="2" /></div>
+      <h3><span class="num">3</span> Git Advanced</h3>
+
+      <pre><code><span class="com"># branch flow</span>
+git checkout -b feat/cart
+git add . &amp;&amp; git commit -m <span class="str">"feat: cart total calc"</span>
+git push -u origin feat/cart
+
+<span class="com"># bring main into your branch (rebase)</span>
+git fetch origin
+git rebase origin/main
+
+<span class="com"># interactive rebase — squash before PR</span>
+git rebase -i HEAD~5
+
+<span class="com"># cherry-pick</span>
+git cherry-pick &lt;sha&gt;
+
+<span class="com"># stash</span>
+git stash push -m <span class="str">"WIP cart"</span>
+git stash pop
+
+<span class="com"># reflog — recover lost commits</span>
+git reflog
+git reset --hard HEAD@{2}
+
+<span class="com"># conflict resolution</span>
+git status                 <span class="com"># see conflict files</span>
+<span class="com"># edit, keep markers around HEAD vs branch</span>
+git add resolved.cs
+git rebase --continue
+
+<span class="com"># tags &amp; release</span>
+git tag -a v1.0.0 -m <span class="str">"release"</span>
+git push origin v1.0.0</code></pre>
+
+      <h4>🎯 GitHub Workflow Rules</h4>
+      <ul>
+        <li>Branch per feature/fix; main is always deployable</li>
+        <li>Conventional commits (<code>feat:</code>, <code>fix:</code>, <code>chore:</code>)</li>
+        <li>PRs with description, screenshots, test plan</li>
+        <li>Code review required before merge</li>
+        <li>Squash-merge for clean history; rebase for shared branches</li>
+        <li>Never <code>--force</code> push to main</li>
+      </ul>
+    </section>
+
+    <h2 class="section-title">📅 Week 2 — Docker</h2>
+
+    <section class="topic" id="containers">
+      <div class="topic__check"><input type="checkbox" data-topic="3" /></div>
+      <h3><span class="num">4</span> Containers vs Virtual Machines</h3>
+      <table>
+        <thead><tr><th></th><th>VM</th><th>Container</th></tr></thead>
+        <tbody>
+          <tr><td>Includes</td><td>Full OS</td><td>App + libs (shares host kernel)</td></tr>
+          <tr><td>Size</td><td>GBs</td><td>MBs</td></tr>
+          <tr><td>Boot</td><td>Minutes</td><td>Seconds</td></tr>
+          <tr><td>Isolation</td><td>Strong (hypervisor)</td><td>Process-level (namespaces, cgroups)</td></tr>
+          <tr><td>Density</td><td>10s per host</td><td>100s per host</td></tr>
+        </tbody>
+      </table>
+
+      <h4>Docker Building Blocks</h4>
+      <ul>
+        <li><strong>Image</strong> — read-only template (your code + runtime)</li>
+        <li><strong>Container</strong> — running instance of an image</li>
+        <li><strong>Registry</strong> — image storage (Docker Hub, Azure ACR)</li>
+        <li><strong>Dockerfile</strong> — recipe to build image</li>
+        <li><strong>Volume</strong> — persistent storage that survives container restart</li>
+        <li><strong>Network</strong> — virtual network connecting containers</li>
+      </ul>
+    </section>
+
+    <section class="topic" id="dockerfile">
+      <div class="topic__check"><input type="checkbox" data-topic="4" /></div>
+      <h3><span class="num">5</span> Dockerfile (multi-stage build for .NET)</h3>
+
+      <pre><code><span class="com"># --- BUILD STAGE ---</span>
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+<span class="com"># copy csproj first to leverage layer cache for restore</span>
+COPY *.sln .
+COPY Shop.Api/*.csproj Shop.Api/
+COPY Shop.Application/*.csproj Shop.Application/
+COPY Shop.Domain/*.csproj Shop.Domain/
+COPY Shop.Infrastructure/*.csproj Shop.Infrastructure/
+RUN dotnet restore
+
+<span class="com"># copy source &amp; publish</span>
+COPY . .
+RUN dotnet publish Shop.Api/Shop.Api.csproj -c Release -o /app/publish --no-restore
+
+<span class="com"># --- RUNTIME STAGE (small, no SDK) ---</span>
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+WORKDIR /app
+COPY --from=build /app/publish .
+EXPOSE 8080
+ENV ASPNETCORE_URLS=http://+:8080
+ENTRYPOINT [<span class="str">"dotnet"</span>, <span class="str">"Shop.Api.dll"</span>]</code></pre>
+
+      <pre><code><span class="com"># build &amp; run</span>
+docker build -t shop-api:latest .
+docker run -d -p 8080:8080 --name api shop-api:latest
+
+<span class="com"># inspect</span>
+docker ps                       <span class="com"># running</span>
+docker logs -f api
+docker exec -it api bash        <span class="com"># shell inside</span>
+docker stop api &amp;&amp; docker rm api
+
+<span class="com"># push to registry</span>
+docker tag shop-api:latest myacr.azurecr.io/shop-api:1.0
+docker push myacr.azurecr.io/shop-api:1.0</code></pre>
+
+      <h4>🎯 Best Practices</h4>
+      <ul>
+        <li><strong>Multi-stage builds</strong> — small final image (no SDK in prod)</li>
+        <li><strong>Layer caching</strong> — copy <code>.csproj</code> + restore BEFORE copying source</li>
+        <li>Use <code>.dockerignore</code> (like .gitignore)</li>
+        <li>Don't run as root in production (<code>USER app</code>)</li>
+        <li>Pin image versions (<code>aspnet:8.0</code> not <code>aspnet:latest</code>)</li>
+        <li>Health checks: <code>HEALTHCHECK</code> instruction</li>
+      </ul>
+    </section>
+
+    <section class="topic" id="compose">
+      <div class="topic__check"><input type="checkbox" data-topic="5" /></div>
+      <h3><span class="num">6</span> Docker Compose — Multi-Container Apps</h3>
+      <p class="concept">Define multi-container app declaratively. <code>docker-compose up</code> brings everything up; <code>down</code> tears it all down.</p>
+
+      <pre><code><span class="com"># docker-compose.yml — API + SQL Server + Redis</span>
+version: <span class="str">'3.9'</span>
+services:
+  api:
+    build: ./Shop.Api
+    ports: [<span class="str">"8080:8080"</span>]
+    environment:
+      ConnectionStrings__Default: <span class="str">"Server=db;Database=Shop;User=sa;Password=Pass@word1;TrustServerCertificate=true"</span>
+      Redis__Connection: <span class="str">"redis:6379"</span>
+    depends_on: [db, redis]
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: Pass@word1
+    ports: [<span class="str">"1433:1433"</span>]
+    volumes: [sqldata:/var/opt/mssql]
+
+  redis:
+    image: redis:7-alpine
+    ports: [<span class="str">"6379:6379"</span>]
+
+volumes:
+  sqldata:</code></pre>
+
+      <pre><code>docker compose up -d
+docker compose logs -f api
+docker compose down -v       <span class="com"># -v removes volumes</span></code></pre>
+    </section>
+
+    <section class="topic" id="dotnet-docker">
+      <div class="topic__check"><input type="checkbox" data-topic="6" /></div>
+      <h3><span class="num">7</span> Dockerizing .NET API + Angular SPA</h3>
+      <p>You'll containerize your Phase 8 projects. The pattern:</p>
+      <ul>
+        <li>API container (multi-stage as above)</li>
+        <li>Angular built into NGINX container</li>
+        <li>SQL Server in container (dev only — use Azure SQL in prod)</li>
+        <li>Redis container</li>
+        <li>All wired with Docker Compose</li>
+        <li>Optional: Seq / Kibana for log aggregation</li>
+      </ul>
+
+      <pre><code><span class="com"># Angular Dockerfile</span>
+FROM node:20-alpine AS build
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build -- --configuration=production
+
+FROM nginx:alpine
+COPY --from=build /app/dist/shop /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80</code></pre>
+    </section>
+
+    <h2 class="section-title">📅 Week 3 — Azure (the money skill)</h2>
+
+    <section class="topic" id="azure-basics">
+      <div class="topic__check"><input type="checkbox" data-topic="7" /></div>
+      <h3><span class="num">8</span> Azure Basics & CLI</h3>
+
+      <h4>Hierarchy</h4>
+      <ul>
+        <li><strong>Tenant</strong> (Azure AD)</li>
+        <li><strong>Subscription</strong> (billing boundary)</li>
+        <li><strong>Resource Group</strong> (logical container)</li>
+        <li><strong>Resource</strong> (App Service, SQL, etc.)</li>
+        <li><strong>Region</strong> (datacenter location)</li>
+      </ul>
+
+      <pre><code><span class="com"># Azure CLI</span>
+az login
+az account list
+az account set --subscription &lt;id&gt;
+
+<span class="com"># resource group</span>
+az group create -n rg-shop -l centralindia
+
+<span class="com"># list resources</span>
+az resource list --resource-group rg-shop --output table</code></pre>
+
+      <h4>Free Account Credits</h4>
+      <ul>
+        <li>$200 credit for 30 days</li>
+        <li>12 months of free services (App Service F1, SQL DB, Cosmos)</li>
+        <li>Always-free tier (Functions 1M/month, Cognitive Services basic, etc.)</li>
+      </ul>
+    </section>
+
+    <section class="topic" id="app-service">
+      <div class="topic__check"><input type="checkbox" data-topic="8" /></div>
+      <h3><span class="num">9</span> Azure App Service — host your .NET API</h3>
+      <p class="concept">PaaS for web apps. Push code or container, Azure runs it. Auto-scale, slots, custom domains, free SSL.</p>
+
+      <pre><code><span class="com"># create plan + web app</span>
+az appservice plan create -g rg-shop -n plan-shop --sku B1 --is-linux
+az webapp create -g rg-shop -p plan-shop -n shop-api-rutik --runtime <span class="str">"DOTNETCORE:8.0"</span>
+
+<span class="com"># deploy zip</span>
+dotnet publish -c Release -o ./publish
+cd publish &amp;&amp; zip -r ../app.zip . &amp;&amp; cd ..
+az webapp deploy -g rg-shop -n shop-api-rutik --src-path app.zip --type zip
+
+<span class="com"># OR deploy from container</span>
+az webapp config container set -g rg-shop -n shop-api-rutik \
+  --container-image-name myacr.azurecr.io/shop-api:1.0
+
+<span class="com"># app settings (env vars)</span>
+az webapp config appsettings set -g rg-shop -n shop-api-rutik \
+  --settings ConnectionStrings__Default=<span class="str">"Server=..."</span> Jwt__Key=<span class="str">"..."</span></code></pre>
+
+      <h4>Killer Features</h4>
+      <ul>
+        <li><strong>Deployment slots</strong> — staging slot for blue/green deploys, swap with zero downtime</li>
+        <li><strong>Auto-scale</strong> rules (CPU, queue length, schedule)</li>
+        <li><strong>Custom domains + free Managed Certificates</strong></li>
+        <li><strong>Always On</strong> setting (don't unload after idle)</li>
+        <li><strong>Application Insights</strong> integration in one click</li>
+      </ul>
+    </section>
+
+    <section class="topic" id="azure-sql">
+      <div class="topic__check"><input type="checkbox" data-topic="9" /></div>
+      <h3><span class="num">10</span> Azure SQL Database</h3>
+      <p class="concept">Managed SQL Server in Azure — backups, HA, scaling all handled. Connect via standard connection string.</p>
+
+      <pre><code>az sql server create -g rg-shop -n sql-shop-rutik -l centralindia \
+  -u sqladmin -p <span class="str">"Pass@word1234"</span>
+
+<span class="com"># firewall rule (allow your IP)</span>
+az sql server firewall-rule create -g rg-shop -s sql-shop-rutik \
+  -n MyIp --start-ip-address 0.0.0.0 --end-ip-address 0.0.0.0   <span class="com"># 0.0.0.0 = allow Azure svc</span>
+
+az sql db create -g rg-shop -s sql-shop-rutik -n shop-db --service-objective S0</code></pre>
+
+      <h4>Tiers (high-level)</h4>
+      <ul>
+        <li><strong>DTU model</strong> — Basic, Standard (S0–S12), Premium</li>
+        <li><strong>vCore model</strong> — General Purpose, Business Critical, Hyperscale</li>
+        <li><strong>Serverless</strong> — auto-pause, pay per use</li>
+      </ul>
+
+      <p class="muted">Connection string is just SQL Server format — your EF Core code works unchanged. Use <strong>Managed Identity</strong> + Azure AD auth instead of passwords in prod.</p>
+    </section>
+
+    <section class="topic" id="storage">
+      <div class="topic__check"><input type="checkbox" data-topic="10" /></div>
+      <h3><span class="num">11</span> Azure Blob Storage (file uploads)</h3>
+
+      <pre><code>az storage account create -g rg-shop -n stshoprutik --sku Standard_LRS
+az storage container create --account-name stshoprutik -n images --public-access blob</code></pre>
+
+      <pre><code><span class="com">// .NET upload</span>
+<span class="kw">var</span> client = <span class="kw">new</span> BlobContainerClient(connectionString, <span class="str">"images"</span>);
+<span class="kw">await</span> client.CreateIfNotExistsAsync(PublicAccessType.Blob);
+
+<span class="kw">var</span> blob = client.GetBlobClient(fileName);
+<span class="kw">using var</span> stream = file.OpenReadStream();
+<span class="kw">await</span> blob.UploadAsync(stream, overwrite: <span class="kw">true</span>);
+
+<span class="kw">return</span> blob.Uri.ToString();   <span class="com">// public URL or generate SAS for private</span></code></pre>
+
+      <h4>Storage Types</h4>
+      <ul>
+        <li><strong>Blob</strong> — files (images, videos, backups)</li>
+        <li><strong>Table</strong> — NoSQL key-value (cheap)</li>
+        <li><strong>Queue</strong> — simple FIFO messages</li>
+        <li><strong>File</strong> — SMB shares</li>
+      </ul>
+    </section>
+
+    <section class="topic" id="key-vault">
+      <div class="topic__check"><input type="checkbox" data-topic="11" /></div>
+      <h3><span class="num">12</span> Key Vault & Managed Identity ⭐</h3>
+      <p class="concept">Store secrets (DB passwords, JWT keys, API keys) in Key Vault. Use <strong>Managed Identity</strong> so your App Service authenticates to Key Vault without storing credentials anywhere.</p>
+
+      <pre><code>az keyvault create -g rg-shop -n kv-shop-rutik
+az keyvault secret set --vault-name kv-shop-rutik -n SqlConnString --value <span class="str">"..."</span>
+
+<span class="com"># enable managed identity on App Service</span>
+az webapp identity assign -g rg-shop -n shop-api-rutik
+
+<span class="com"># grant access</span>
+az keyvault set-policy -n kv-shop-rutik --object-id &lt;app-identity&gt; --secret-permissions get list</code></pre>
+
+      <pre><code><span class="com">// .NET reads Key Vault as configuration</span>
+builder.Configuration.AddAzureKeyVault(
+    <span class="kw">new</span> Uri(<span class="str">"https://kv-shop-rutik.vault.azure.net/"</span>),
+    <span class="kw">new</span> DefaultAzureCredential());
+
+<span class="com">// then use as normal</span>
+<span class="kw">var</span> conn = builder.Configuration[<span class="str">"SqlConnString"</span>];</code></pre>
+
+      <p class="muted">This is the <strong>gold standard</strong> for secret management — no credentials in code, config, or env vars.</p>
+    </section>
+
+    <section class="topic" id="functions">
+      <div class="topic__check"><input type="checkbox" data-topic="12" /></div>
+      <h3><span class="num">13</span> Azure Functions & Service Bus</h3>
+      <p class="concept">Serverless compute — pay per execution, scale to zero. Triggers: HTTP, Timer, Queue, Blob, Service Bus, etc.</p>
+
+      <pre><code>[Function(<span class="str">"ProcessOrder"</span>)]
+<span class="kw">public async</span> Task Run(
+    [ServiceBusTrigger(<span class="str">"orders"</span>, Connection = <span class="str">"SbConn"</span>)] Order order,
+    FunctionContext ctx) {
+    _logger.LogInformation(<span class="str">"Got {Id}"</span>, order.Id);
+    <span class="kw">await</span> ProcessAsync(order);
+}</code></pre>
+
+      <h4>Service Bus Patterns</h4>
+      <ul>
+        <li><strong>Queue</strong> — point-to-point messages</li>
+        <li><strong>Topic + Subscriptions</strong> — pub/sub with filtering</li>
+        <li><strong>Sessions</strong> — ordered processing per group</li>
+        <li><strong>Dead Letter Queue</strong> — failed messages for inspection</li>
+      </ul>
+    </section>
+
+    <section class="topic" id="monitoring">
+      <div class="topic__check"><input type="checkbox" data-topic="13" /></div>
+      <h3><span class="num">14</span> Application Insights — Observability</h3>
+      <p class="concept">Auto-collects requests, dependencies, exceptions, traces, custom metrics. Powerful query language (Kusto/KQL).</p>
+
+      <pre><code>builder.Services.AddApplicationInsightsTelemetry();
+
+<span class="com">// custom event</span>
+_telemetry.TrackEvent(<span class="str">"OrderPlaced"</span>, <span class="kw">new</span>() { [<span class="str">"OrderId"</span>] = order.Id.ToString() });</code></pre>
+
+      <pre><code><span class="com">// KQL query — top errors last 24h</span>
+exceptions
+| where timestamp &gt; ago(24h)
+| summarize count() by problemId
+| order by count_ desc
+| take 10</code></pre>
+
+      <h4>What to Monitor</h4>
+      <ul>
+        <li><strong>RED metrics</strong>: Rate, Errors, Duration (per endpoint)</li>
+        <li><strong>USE metrics</strong>: Utilization, Saturation, Errors (per resource)</li>
+        <li>Dependency call latency (DB, external APIs)</li>
+        <li>Exceptions with stack traces</li>
+        <li>Custom business events (signups, conversions)</li>
+        <li>Set <strong>alerts</strong> on critical thresholds (5xx rate, p99 latency, queue depth)</li>
+      </ul>
+    </section>
+
+    <h2 class="section-title">📅 Week 4 — CI/CD</h2>
+
+    <section class="topic" id="github-actions">
+      <div class="topic__check"><input type="checkbox" data-topic="14" /></div>
+      <h3><span class="num">15</span> GitHub Actions — Automate Everything</h3>
+
+      <pre><code><span class="com"># .github/workflows/ci-cd.yml</span>
+name: CI/CD
+on:
+  push: { branches: [main] }
+  pull_request: { branches: [main] }
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with: { dotnet-version: <span class="str">'8.0'</span> }
+      - run: dotnet restore
+      - run: dotnet build --no-restore -c Release
+      - run: dotnet test --no-build -c Release --logger trx
+      - uses: actions/upload-artifact@v4
+        with: { name: testresults, path: <span class="str">'**/TestResults/*.trx'</span> }
+
+  deploy:
+    needs: build-test
+    if: github.ref == <span class="str">'refs/heads/main'</span>
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with: { dotnet-version: <span class="str">'8.0'</span> }
+      - run: dotnet publish Shop.Api -c Release -o ./publish
+      - uses: azure/login@v2
+        with: { creds: <span class="str">${{ secrets.AZURE_CREDENTIALS }}</span> }
+      - uses: azure/webapps-deploy@v3
+        with:
+          app-name: shop-api-rutik
+          package: ./publish</code></pre>
+
+      <h4>🎯 Pipeline Stages You'll See in Real Jobs</h4>
+      <ol>
+        <li><strong>Lint / format check</strong></li>
+        <li><strong>Restore dependencies</strong></li>
+        <li><strong>Build</strong></li>
+        <li><strong>Unit tests</strong> + coverage</li>
+        <li><strong>Static analysis / SAST</strong> (CodeQL, SonarQube)</li>
+        <li><strong>Build container image</strong></li>
+        <li><strong>Push to registry (ACR)</strong></li>
+        <li><strong>Deploy to staging slot</strong></li>
+        <li><strong>Integration tests</strong> against staging</li>
+        <li><strong>Slot swap → production</strong></li>
+        <li><strong>Smoke tests</strong> on prod</li>
+        <li><strong>Notify Slack/Teams</strong></li>
+      </ol>
+    </section>
+
+    <section class="topic" id="azure-devops">
+      <div class="topic__check"><input type="checkbox" data-topic="15" /></div>
+      <h3><span class="num">16</span> Azure DevOps + Kubernetes (awareness)</h3>
+      <p class="concept">Azure DevOps = Microsoft's full DevOps suite (Boards, Repos, Pipelines, Artifacts, Test Plans). Many enterprises use it instead of GitHub Actions.</p>
+
+      <pre><code><span class="com"># azure-pipelines.yml</span>
+trigger: [main]
+pool: { vmImage: <span class="str">'ubuntu-latest'</span> }
+variables:
+  buildConfiguration: <span class="str">'Release'</span>
+steps:
+  - task: UseDotNet@2
+    inputs: { version: <span class="str">'8.x'</span> }
+  - script: dotnet restore
+  - script: dotnet build -c <span class="str">$(buildConfiguration)</span>
+  - script: dotnet test -c <span class="str">$(buildConfiguration)</span>
+  - task: AzureWebApp@1
+    inputs:
+      azureSubscription: <span class="str">'AzureSC'</span>
+      appName: <span class="str">'shop-api-rutik'</span>
+      package: <span class="str">'$(System.DefaultWorkingDirectory)/publish'</span></code></pre>
+
+      <h4>Kubernetes / AKS (interview awareness only)</h4>
+      <ul>
+        <li><strong>Pod</strong> — smallest unit (1+ containers)</li>
+        <li><strong>Deployment</strong> — declares desired pods + rollout strategy</li>
+        <li><strong>Service</strong> — stable network endpoint for pods</li>
+        <li><strong>Ingress</strong> — HTTP routing into cluster</li>
+        <li><strong>ConfigMap / Secret</strong> — config and secret injection</li>
+        <li><strong>Helm</strong> — package manager for K8s manifests</li>
+        <li>You don't need to operate K8s for 15 LPA — just be conversational</li>
+      </ul>
+
+      <p class="muted">Strong recommendation: pursue <strong>AZ-204 — Azure Developer Associate</strong> certification. It's directly aligned with what employers test, and adds ~15-20% salary signal.</p>
+    </section>
+
+    <section id="qa">
+      <h2 class="section-title">🎤 Interview Q&A — Phase 7</h2>
+      <div class="qa-block">
+        <details><summary>Q. Container vs VM?</summary>
+          <div>
+            <p><strong>Definition:</strong> Both isolate and run software but work differently.</p>
+            <p><strong>Compare Table:</strong></p>
+            <table>
+              <thead><tr><th>Aspect</th><th>VM</th><th>Container</th></tr></thead>
+              <tbody>
+                <tr><td>Includes</td><td>Full guest OS</td><td>Just process on host OS</td></tr>
+                <tr><td>Kernel</td><td>Own kernel</td><td>Share host kernel</td></tr>
+                <tr><td>Size</td><td>GBs</td><td>MBs</td></tr>
+                <tr><td>Boot</td><td>Minutes</td><td>Seconds</td></tr>
+                <tr><td>Density per host</td><td>Few dozens</td><td>Hundreds</td></tr>
+                <tr><td>Isolation</td><td>Strong</td><td>Slightly weaker</td></tr>
+              </tbody>
+            </table>
+            <p><strong>VM (Virtual Machine):</strong></p>
+            <ul>
+              <li>Run on hypervisor (Hyper-V, VMware)</li>
+              <li>Has own kernel, drivers, system services</li>
+            </ul>
+            <p><strong>Container:</strong></p>
+            <ul>
+              <li>Just a process on host OS</li>
+              <li>Isolated using Linux namespaces and cgroups</li>
+              <li>No second OS inside</li>
+            </ul>
+            <p><strong>Container Benefits:</strong></p>
+            <ul>
+              <li>Same environment from laptop to production</li>
+              <li>Easy horizontal scaling</li>
+              <li>Consistent deployments</li>
+            </ul>
+            <p><strong>Note:</strong> VMs still used for full OS isolation or different OS than host.</p>
+          </div>
+        </details>
+
+        <details><summary>Q. What is multi-stage Docker build?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>Multi-stage = use multiple <code>FROM</code> in one Dockerfile</li>
+              <li>Produce smaller and more secure final image</li>
+              <li>Essential for compiled languages like C#</li>
+            </ul>
+            <p><strong>How it works:</strong></p>
+            <ol>
+              <li>First stage use .NET SDK image (compiler, MSBuild, tools)</li>
+              <li>Restore packages and publish app</li>
+              <li>Second stage use smaller ASP.NET runtime image</li>
+              <li>Copy ONLY compiled output from first stage</li>
+              <li>Build tools, source code never in final image</li>
+            </ol>
+            <p><strong>Size Difference:</strong></p>
+            <ul>
+              <li>SDK image — around 800 MB</li>
+              <li>Runtime image — around 200 MB</li>
+              <li>Final container = 4x smaller</li>
+            </ul>
+            <p><strong>Benefits:</strong></p>
+            <ul>
+              <li>Faster pulls in CI/CD</li>
+              <li>Faster deploys</li>
+              <li>Lower bandwidth costs</li>
+              <li>Lower attack surface</li>
+            </ul>
+            <p><strong>Layer Caching Tip:</strong></p>
+            <ul>
+              <li>Copy <code>.csproj</code> first, run <code>dotnet restore</code></li>
+              <li>Then copy source</li>
+              <li>Docker cache restore layer — skip on rebuild when only source change</li>
+            </ul>
+            <p><strong>Note:</strong> Standard pattern for production .NET Dockerfiles.</p>
+          </div>
+        </details>
+
+        <details><summary>Q. Singleton, Scoped, Transient at Azure App Service level?</summary>
+          <div>
+            <p><strong>Basic Rule:</strong></p>
+            <ul>
+              <li>Same .NET DI lifetime rules apply</li>
+              <li>BUT important catch when scale out on Azure App Service</li>
+            </ul>
+            <p><strong>Catch:</strong></p>
+            <ul>
+              <li>App Service can run app on multiple instances behind load balancer</li>
+              <li>Singleton = one instance PER PROCESS (not whole app)</li>
+              <li>5 App Service instances = 5 separate Singleton objects</li>
+              <li>In-memory Singleton cache only visible on one instance</li>
+            </ul>
+            <p><strong>For Cross-Instance Sharing:</strong></p>
+            <ul>
+              <li><strong>Redis</strong> — cache and SignalR backplane</li>
+              <li><strong>Azure Service Bus</strong> — messaging</li>
+              <li><strong>Database</strong> — persistent state</li>
+            </ul>
+            <p><strong>Scoped:</strong></p>
+            <ul>
+              <li>Still once per HTTP request</li>
+              <li>Works fine — request lands on one instance</li>
+            </ul>
+            <p><strong>Transient:</strong></p>
+            <ul>
+              <li>Same — new every injection</li>
+            </ul>
+            <p><strong>Mental Shift:</strong> Think Singleton = "one per process", not "one for whole app".</p>
+          </div>
+        </details>
+
+        <details><summary>Q. How to secure secrets in Azure?</summary>
+          <div>
+            <p><strong>Gold Standard:</strong> Azure Key Vault + Managed Identity.</p>
+            <p><strong>4 Setup Steps:</strong></p>
+            <ol>
+              <li>Create Key Vault, store all secrets (DB conn, JWT keys, API keys)</li>
+              <li>Enable System-Assigned Managed Identity on App Service</li>
+              <li>Grant Managed Identity Get + List permission on Key Vault</li>
+              <li>In .NET: <code>builder.Configuration.AddAzureKeyVault(vaultUri, new DefaultAzureCredential())</code></li>
+            </ol>
+            <p><strong>How it works:</strong></p>
+            <ul>
+              <li>Managed Identity gives App Service Azure AD identity automatically</li>
+              <li>No credentials to handle</li>
+              <li>DefaultAzureCredential auto use Managed Identity on Azure</li>
+            </ul>
+            <p><strong>Result:</strong></p>
+            <ul>
+              <li>Zero credentials in source code</li>
+              <li>Zero credentials in app settings</li>
+              <li>Zero credentials in env variables</li>
+              <li>Secret lifecycle (rotation, audit) managed by Key Vault</li>
+            </ul>
+            <p><strong>Local Development:</strong></p>
+            <ul>
+              <li>DefaultAzureCredential fall back to Visual Studio / Azure CLI login</li>
+              <li>Same code work everywhere</li>
+            </ul>
+          </div>
+        </details>
+
+        <details><summary>Q. What is CI/CD in plain English?</summary>
+          <div>
+            <p><strong>CI — Continuous Integration:</strong></p>
+            <ul>
+              <li>Every code push trigger build and run all tests</li>
+              <li>Catch problems early (minutes not weeks)</li>
+              <li>Developers push small changes often</li>
+              <li>Bugs surface while code fresh in head</li>
+            </ul>
+            <p><strong>CD — Continuous Deployment:</strong></p>
+            <ul>
+              <li>When CI pass on main branch — auto deploy</li>
+              <li>Deploy to staging environment</li>
+              <li>Run more tests there</li>
+              <li>Push to production with no human</li>
+            </ul>
+            <p><strong>Continuous Delivery vs Deployment:</strong></p>
+            <ul>
+              <li>Delivery = manual approval before prod</li>
+              <li>Deployment = full auto, no approval</li>
+            </ul>
+            <p><strong>Typical CI/CD Pipeline Steps:</strong></p>
+            <ol>
+              <li>Lint / format check</li>
+              <li>Restore packages</li>
+              <li>Build</li>
+              <li>Run unit tests</li>
+              <li>Static security analysis</li>
+              <li>Build Docker image</li>
+              <li>Push to registry</li>
+              <li>Deploy to staging</li>
+              <li>Smoke tests</li>
+              <li>Swap to production</li>
+              <li>Final smoke tests</li>
+              <li>Notify team (Slack)</li>
+            </ol>
+            <p><strong>Tools:</strong> GitHub Actions, Azure DevOps Pipelines, GitLab CI, Jenkins.</p>
+            <p><strong>Result:</strong> Ship multiple times a day with confidence.</p>
+          </div>
+        </details>
+
+        <details><summary>Q. How to achieve zero-downtime deployment in App Service?</summary>
+          <div>
+            <p><strong>Answer:</strong> Use deployment slots.</p>
+            <p><strong>What is a Slot:</strong></p>
+            <ul>
+              <li>Separate web app sharing App Service Plan</li>
+              <li>Has own URL and configuration</li>
+            </ul>
+            <p><strong>Flow Steps:</strong></p>
+            <ol>
+              <li>Create "staging" slot alongside production</li>
+              <li>Deploy new build to staging slot</li>
+              <li>Slot warm up — load app, JIT-compile, fill caches, open DB connections</li>
+              <li>Run smoke tests against staging URL</li>
+              <li>Perform <strong>swap</strong> — Azure switch routing atomically</li>
+              <li>Production traffic go to new slot (already warm)</li>
+              <li>Old production become new staging</li>
+            </ol>
+            <p><strong>Benefits:</strong></p>
+            <ul>
+              <li>No downtime — no failed requests, no spinner of death</li>
+              <li>Fast and seamless (new instances already warm)</li>
+              <li>Instant rollback — swap back if issue</li>
+              <li>Within seconds back on old version</li>
+            </ul>
+            <p><strong>Note:</strong> Configure slot-specific settings (like connection strings) for things that should not swap.</p>
+          </div>
+        </details>
+
+        <details><summary>Q. What is Application Insights?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>Azure's APM (Application Performance Monitoring) service</li>
+              <li>Auto-instrument .NET app</li>
+            </ul>
+            <p><strong>What it Collects:</strong></p>
+            <ul>
+              <li><strong>Requests</strong> — every HTTP request with duration, status, URL, user</li>
+              <li><strong>Dependencies</strong> — every outgoing call (DB, Redis, API) with timing</li>
+              <li><strong>Exceptions</strong> — every unhandled exception with stack trace and context</li>
+              <li><strong>Traces</strong> — your <code>ILogger</code> messages</li>
+              <li><strong>Custom events</strong> — events you fire from code</li>
+            </ul>
+            <p><strong>Query Language:</strong></p>
+            <ul>
+              <li><strong>KQL (Kusto Query Language)</strong> — powerful SQL-like for log data</li>
+            </ul>
+            <p><strong>Features:</strong></p>
+            <ul>
+              <li>Build dashboards</li>
+              <li>Set alerts ("5xx error rate over 1% for 5 minutes")</li>
+              <li>Live metrics streaming</li>
+              <li>Track end-to-end transactions across services</li>
+            </ul>
+            <p><strong>Setup (one line):</strong></p>
+            <pre><code>builder.Services.AddApplicationInsightsTelemetry()</code></pre>
+            <p><strong>Without APM:</strong></p>
+            <ul>
+              <li>Flying blind in production</li>
+              <li>Only hear problems from angry users</li>
+            </ul>
+            <p><strong>With App Insights:</strong></p>
+            <ul>
+              <li>See latency p99 on every endpoint</li>
+              <li>Slowest DB queries</li>
+              <li>Most common errors</li>
+              <li>Impact of each deploy</li>
+            </ul>
+          </div>
+        </details>
+
+        <details><summary>Q. Azure Functions vs App Service?</summary>
+          <div>
+            <p><strong>Both run code on Azure but very different billing/lifecycle.</strong></p>
+            <p><strong>Compare Table:</strong></p>
+            <table>
+              <thead><tr><th>Aspect</th><th>App Service</th><th>Functions</th></tr></thead>
+              <tbody>
+                <tr><td>Type</td><td>Long-running web app</td><td>Serverless function</td></tr>
+                <tr><td>Billing</td><td>Hourly rate (always)</td><td>Per execution</td></tr>
+                <tr><td>Always on</td><td>Yes (24/7)</td><td>Scale to zero</td></tr>
+                <tr><td>Trigger</td><td>HTTP requests</td><td>HTTP, queue, blob, timer</td></tr>
+                <tr><td>Use for</td><td>Web APIs, websites</td><td>Short tasks, cron, webhooks</td></tr>
+              </tbody>
+            </table>
+            <p><strong>App Service:</strong></p>
+            <ul>
+              <li>Provision a Plan (B1, S1, P1v2 — VM tier)</li>
+              <li>Pay even with no traffic</li>
+              <li>Always on, ready to serve</li>
+            </ul>
+            <p><strong>Azure Functions:</strong></p>
+            <ul>
+              <li>Code = function trigger by event</li>
+              <li>Consumption plan — pay per execution + request count</li>
+              <li>Auto scale 0 to thousands</li>
+              <li>No server to manage</li>
+              <li>Trade-off: cold start latency on first call after idle</li>
+              <li>Limit on max execution time</li>
+            </ul>
+            <p><strong>Real Pattern:</strong> Use BOTH — App Service for main API, Functions for background processors and event handlers.</p>
+          </div>
+        </details>
+
+        <details><summary>Q. What is Managed Identity?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>Azure AD identity auto created for Azure resource</li>
+              <li>Removes need to store credentials in code/config</li>
+            </ul>
+            <p><strong>2 Flavors:</strong></p>
+            <ul>
+              <li><strong>System-Assigned</strong> — tied to one resource, delete when resource deleted. Easiest — toggle on in portal</li>
+              <li><strong>User-Assigned</strong> — standalone, attach to multiple resources</li>
+            </ul>
+            <p><strong>How to Use:</strong></p>
+            <ol>
+              <li>Enable Managed Identity on App Service</li>
+              <li>Go to other resources (Key Vault, Storage, SQL DB)</li>
+              <li>Grant identity permissions through their access controls</li>
+              <li>In code: use <code>DefaultAzureCredential</code> from Azure.Identity NuGet</li>
+            </ol>
+            <p><strong>Result:</strong></p>
+            <ul>
+              <li>No connection strings with passwords</li>
+              <li>No API keys checked into git</li>
+              <li>No credentials anywhere</li>
+              <li>Auditing built in — Azure log every action</li>
+            </ul>
+            <p><strong>Note:</strong> Modern best practice for any Azure-hosted .NET app.</p>
+          </div>
+        </details>
+
+        <details><summary>Q. Docker Compose vs Kubernetes?</summary>
+          <div>
+            <p><strong>Both orchestrate containers but very different scales.</strong></p>
+            <p><strong>Docker Compose:</strong></p>
+            <ul>
+              <li>For local development and single-host</li>
+              <li>Write <code>docker-compose.yml</code> file</li>
+              <li>Describe services (API, DB, Redis) with image, ports, env, dependencies</li>
+              <li><code>docker compose up</code> — bring stack up</li>
+              <li><code>docker compose down</code> — tear down</li>
+              <li>Perfect for local dev environment</li>
+            </ul>
+            <p><strong>Kubernetes (K8s):</strong></p>
+            <ul>
+              <li>Production-grade orchestration</li>
+              <li>Across cluster of many machines</li>
+              <li>Schedule pods (groups of containers) onto nodes</li>
+              <li>Auto restart when containers crash</li>
+              <li>Rolling updates with zero downtime</li>
+              <li>Auto scale based on CPU/memory/custom metrics</li>
+              <li>Service discovery, load balancing</li>
+              <li>Secret management, persistent volumes</li>
+            </ul>
+            <p><strong>Concepts to Know:</strong></p>
+            <ul>
+              <li>Pods, Deployments, Services, Ingress, ConfigMaps</li>
+              <li>Steep learning curve</li>
+            </ul>
+            <p><strong>Azure Options:</strong></p>
+            <ul>
+              <li>AKS — managed Kubernetes</li>
+              <li>Azure Container Apps — simpler serverless container option</li>
+            </ul>
+            <p><strong>Note:</strong> For 12-15 LPA .NET roles you don't need to operate K8s, but understand concepts.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <section id="mistakes" class="callout callout--warn">
+      <h3>⚠️ Common Mistakes</h3>
+      <ul>
+        <li>Pinning <code>:latest</code> tag → unpredictable rebuilds</li>
+        <li>Single-stage Dockerfile → shipping the SDK to prod (huge, insecure)</li>
+        <li>Storing secrets in <code>appsettings.json</code> in source control</li>
+        <li>Running container as root</li>
+        <li>Not pinning .NET runtime version → image rebuilds break</li>
+        <li>Calling <code>db.Database.Migrate()</code> from multiple App Service instances at startup → race</li>
+        <li>Forgetting Always On in App Service → first request after idle is super slow</li>
+        <li>Not setting up health checks → load balancer routes traffic to dead instances</li>
+        <li>No App Insights / log aggregation → blind in production</li>
+      </ul>
+    </section>
+
+    <nav class="phase-nav">
+      <a href="phase-6-system-design.html"><span class="label">← Prev</span><strong>Phase 6: System Design</strong></a>
+      <a href="phase-8-projects.html" class="next"><span class="label">Next →</span><strong>Phase 8: Real Portfolio Projects</strong></a>
+    </nav>
+  </main>
+</div>
+
+<footer class="footer">Phase 7 of 9 · Azure + Docker = the salary multiplier</footer>
+
+<script>
+  const phase = document.body.dataset.phase;
+  document.querySelectorAll('input[type="checkbox"][data-topic]').forEach(cb => {
+    const key = `phase-${phase}-topic-${cb.dataset.topic}`;
+    cb.checked = localStorage.getItem(key) === 'true';
+    cb.closest('.topic').classList.toggle('is-done', cb.checked);
+    cb.addEventListener('change', () => {
+      localStorage.setItem(key, cb.checked);
+      cb.closest('.topic').classList.toggle('is-done', cb.checked);
+    });
+  });
+  const links = document.querySelectorAll('.sidebar a[href^="#"]');
+  const sections = [...links].map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  window.addEventListener('scroll', () => {
+    let current = sections[0]?.id;
+    sections.forEach(s => { if (window.scrollY + 100 >= s.offsetTop) current = s.id; });
+    links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current));
+  });
+</script>
+</body>
+</html>

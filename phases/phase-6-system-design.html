@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Phase 6 — System Design | .NET Roadmap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/global.css" />
+</head>
+<body data-phase="6">
+
+<nav class="topnav">
+  <div class="topnav__inner">
+    <div class="brand"><a href="../index.html" style="color:inherit">.NET<span class="dot">·</span>Roadmap</a></div>
+    <div class="topnav__links">
+      <a href="../index.html">Home</a>
+      <a href="phase-0-foundation.html">P0</a>
+      <a href="phase-1-csharp.html">P1</a>
+      <a href="phase-2-sql.html">P2</a>
+      <a href="phase-3-aspnet-core.html">P3</a>
+      <a href="phase-4-ef-core.html">P4</a>
+      <a href="phase-5-angular-integration.html">P5</a>
+      <a href="phase-6-system-design.html" class="active">P6</a>
+      <a href="phase-7-devops-azure.html">P7</a>
+      <a href="phase-8-projects.html">P8</a>
+      <a href="phase-9-interview.html">P9</a>
+    </div>
+  </div>
+</nav>
+
+<div class="phase-page">
+  <aside class="sidebar">
+    <h4>Week 1 · Fundamentals</h4>
+    <ul>
+      <li><a href="#client-server">1. Client-Server & HTTP</a></li>
+      <li><a href="#rest">2. REST API Design</a></li>
+      <li><a href="#stateless">3. Stateless vs Stateful</a></li>
+      <li><a href="#monolith">4. Monolith vs Microservices</a></li>
+      <li><a href="#clean-arch">5. Clean Architecture ⭐</a></li>
+    </ul>
+    <h4>Week 2 · Scalability</h4>
+    <ul>
+      <li><a href="#scaling">6. Vertical vs Horizontal</a></li>
+      <li><a href="#load-balancing">7. Load Balancing</a></li>
+      <li><a href="#caching">8. Caching & Redis ⭐</a></li>
+      <li><a href="#db-scaling">9. DB Sharding & Replication</a></li>
+      <li><a href="#sql-vs-nosql">10. SQL vs NoSQL</a></li>
+    </ul>
+    <h4>Week 3 · Microservices & Patterns</h4>
+    <ul>
+      <li><a href="#micro">11. Microservices Architecture</a></li>
+      <li><a href="#mq">12. Message Queues</a></li>
+      <li><a href="#cqrs">13. CQRS & Event Sourcing</a></li>
+      <li><a href="#patterns">14. GoF Design Patterns</a></li>
+    </ul>
+    <h4>Sections</h4>
+    <ul>
+      <li><a href="#qa">Interview Q&A</a></li>
+      <li><a href="#mistakes">Common Mistakes</a></li>
+    </ul>
+  </aside>
+
+  <main class="content">
+    <div class="breadcrumb"><a href="../index.html">Home</a> / Phase 6</div>
+
+    <header class="phase-header">
+      <h1>Phase 6 — System Design</h1>
+      <p class="lede">The single biggest skill that separates 8 LPA from 15 LPA. You don't need to design YouTube — you need to discuss tradeoffs intelligently and apply patterns to real problems.</p>
+      <div class="phase-meta">
+        <span class="pill">⏱ 3 Weeks</span>
+        <span class="pill">14 Topics</span>
+        <span class="pill">⭐ Highest signal for senior roles</span>
+      </div>
+    </header>
+
+    <div class="callout callout--prereq">
+      <h3>📋 Prerequisites</h3>
+      <ul>
+        <li>Working backend skill (Phase 3)</li>
+        <li>DB experience (Phase 2 + 4)</li>
+        <li>Understanding of HTTP, REST, JSON</li>
+        <li>One real production-style API in your portfolio</li>
+      </ul>
+    </div>
+
+    <h2 class="section-title">📅 Week 1 — Fundamentals</h2>
+
+    <section class="topic" id="client-server">
+      <div class="topic__check"><input type="checkbox" data-topic="0" /></div>
+      <h3><span class="num">1</span> Client-Server & HTTP/HTTPS</h3>
+      <p class="concept">Every web app is client-server. Client (Angular) requests, server (.NET) responds. HTTPS = HTTP over TLS — encrypted in transit, also authenticates the server.</p>
+
+      <h4>🎯 Senior-Level Knowledge</h4>
+      <ul>
+        <li><strong>HTTP/1.1 vs HTTP/2 vs HTTP/3</strong>: H2 multiplexes many requests over one TCP connection; H3 uses QUIC over UDP (faster startup, better mobile)</li>
+        <li><strong>TCP vs UDP</strong>: TCP reliable + ordered (web, email); UDP fast + lossy (gaming, streaming, DNS)</li>
+        <li><strong>DNS</strong>: domain → IP. TTL controls cache. Use SRV/CNAME for service discovery.</li>
+        <li><strong>TLS handshake</strong>: cert validation, key exchange, symmetric encryption setup</li>
+        <li><strong>Headers that matter</strong>: <code>Cache-Control</code>, <code>ETag</code>, <code>Authorization</code>, <code>Content-Type</code>, <code>CORS</code> headers</li>
+      </ul>
+    </section>
+
+    <section class="topic" id="rest">
+      <div class="topic__check"><input type="checkbox" data-topic="1" /></div>
+      <h3><span class="num">2</span> REST API Design Principles</h3>
+      <p class="concept">REST is a style, not a protocol. A "RESTful" API uses HTTP correctly — resources, verbs, status codes — and is stateless.</p>
+
+      <h4>🎯 The 6 Constraints (Roy Fielding)</h4>
+      <ol>
+        <li><strong>Client-Server</strong> — separation of concerns</li>
+        <li><strong>Stateless</strong> — server stores no client context</li>
+        <li><strong>Cacheable</strong> — responses must declare cacheability</li>
+        <li><strong>Layered system</strong> — client doesn't see beyond the immediate server</li>
+        <li><strong>Uniform interface</strong> — resources, URIs, verbs, hypermedia</li>
+        <li><strong>Code on demand</strong> (optional) — server can send executable code</li>
+      </ol>
+
+      <h4>🎯 Design Checklist</h4>
+      <ul>
+        <li>URLs are <strong>nouns</strong>, not verbs (<code>/users/5/orders</code> not <code>/getOrdersByUser</code>)</li>
+        <li>Plural resource names (<code>/products</code>)</li>
+        <li>Hierarchical for relationships (<code>/users/5/orders/10</code>)</li>
+        <li>Use query params for filter/sort/page (<code>?status=paid&page=2</code>)</li>
+        <li>Versioning: <code>/api/v1/products</code> from day one</li>
+        <li>Return proper status codes — 200/201/204/400/401/403/404/409/500</li>
+        <li>Use ProblemDetails (RFC 7807) for errors</li>
+        <li>Pagination metadata in response envelope</li>
+        <li>Consistent naming (camelCase JSON)</li>
+        <li>HATEOAS (hypermedia links) — optional, rare in practice</li>
+      </ul>
+
+      <h4>REST vs GraphQL vs gRPC</h4>
+      <table>
+        <thead><tr><th></th><th>REST</th><th>GraphQL</th><th>gRPC</th></tr></thead>
+        <tbody>
+          <tr><td>Format</td><td>JSON</td><td>JSON</td><td>Protobuf (binary)</td></tr>
+          <tr><td>Strength</td><td>Simple, cacheable</td><td>Client picks fields</td><td>Speed, type-safety, streaming</td></tr>
+          <tr><td>Use</td><td>Public APIs</td><td>Aggregator / mobile</td><td>Internal microservices</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="topic" id="stateless">
+      <div class="topic__check"><input type="checkbox" data-topic="2" /></div>
+      <h3><span class="num">3</span> Stateless vs Stateful — Why It Matters</h3>
+      <p class="concept">Stateless servers can be scaled horizontally trivially (add more instances behind a load balancer). Stateful servers need sticky sessions or shared session stores.</p>
+
+      <h4>🎯 Make Your APIs Stateless</h4>
+      <ul>
+        <li>Use JWT (token holds claims) instead of server-side sessions</li>
+        <li>Store session/cart in Redis (shared) if you must</li>
+        <li>Never store data in memory that next request needs (any node should serve any request)</li>
+        <li>Idempotent operations (POST/PUT/DELETE retried produce same effect)</li>
+      </ul>
+    </section>
+
+    <section class="topic" id="monolith">
+      <div class="topic__check"><input type="checkbox" data-topic="3" /></div>
+      <h3><span class="num">4</span> Monolith vs Microservices</h3>
+      <p class="concept">Monolith = single deployable unit. Microservices = many small services. Most successful systems start monolith, split later when pain demands it.</p>
+
+      <table>
+        <thead><tr><th></th><th>Monolith</th><th>Microservices</th></tr></thead>
+        <tbody>
+          <tr><td>Deploy</td><td>One unit</td><td>Many independent</td></tr>
+          <tr><td>Complexity</td><td>Code complexity grows</td><td>Operational complexity grows</td></tr>
+          <tr><td>Scaling</td><td>Scale whole app</td><td>Scale specific services</td></tr>
+          <tr><td>Tech stack</td><td>Single</td><td>Per-service</td></tr>
+          <tr><td>Team size</td><td>Small to medium</td><td>Many independent teams</td></tr>
+          <tr><td>Failure mode</td><td>All or nothing</td><td>Partial degradation</td></tr>
+          <tr><td>Best for</td><td>Most products day 1</td><td>Big org, scale problems</td></tr>
+        </tbody>
+      </table>
+
+      <p class="muted"><strong>Modular Monolith</strong> is often the best of both: single deployment, but well-bounded internal modules ready to extract later.</p>
+    </section>
+
+    <section class="topic" id="clean-arch">
+      <div class="topic__check"><input type="checkbox" data-topic="4" /></div>
+      <h3><span class="num">5</span> Clean Architecture ⭐ (must-know for 15 LPA)</h3>
+      <p class="concept">Layered architecture where dependencies point INWARD. Inner layers (Domain) know nothing about outer (Infrastructure). Enables testability, framework swap, and clear boundaries.</p>
+
+      <pre><code>┌─────────────────────────────────────────────┐
+│   Web API / UI    (controllers, DTOs)        │  ← outermost
+├─────────────────────────────────────────────┤
+│   Infrastructure  (EF, file IO, email)       │
+├─────────────────────────────────────────────┤
+│   Application     (use cases, MediatR, DI)   │
+├─────────────────────────────────────────────┤
+│   Domain          (entities, business rules) │  ← innermost, no deps
+└─────────────────────────────────────────────┘
+
+Dependencies always point INWARD →</code></pre>
+
+      <h4>🎯 Project Structure (typical)</h4>
+      <ul>
+        <li><strong>Shop.Domain</strong> — Entities, ValueObjects, DomainEvents (zero NuGet refs)</li>
+        <li><strong>Shop.Application</strong> — Interfaces, Use Cases (CQRS handlers), DTOs</li>
+        <li><strong>Shop.Infrastructure</strong> — EF DbContext, repositories, email/storage adapters</li>
+        <li><strong>Shop.Api</strong> — Controllers, middleware, Program.cs (composition root)</li>
+      </ul>
+
+      <h4>🎯 Why Senior Devs Love It</h4>
+      <ul>
+        <li>Domain logic is independent of frameworks (test without DB or HTTP)</li>
+        <li>Swap EF for Dapper without touching business code</li>
+        <li>Forces dependency inversion (D in SOLID)</li>
+        <li>Aligns with DDD principles</li>
+      </ul>
+
+      <div class="callout">
+        <h3>Related Patterns</h3>
+        <p><strong>Onion Architecture</strong> — same idea, different naming. <strong>Hexagonal (Ports & Adapters)</strong> — same intent. <strong>DDD</strong> — methodology that pairs naturally.</p>
+      </div>
+    </section>
+
+    <h2 class="section-title">📅 Week 2 — Scalability & Performance</h2>
+
+    <section class="topic" id="scaling">
+      <div class="topic__check"><input type="checkbox" data-topic="5" /></div>
+      <h3><span class="num">6</span> Vertical vs Horizontal Scaling</h3>
+      <table>
+        <thead><tr><th></th><th>Vertical (scale up)</th><th>Horizontal (scale out)</th></tr></thead>
+        <tbody>
+          <tr><td>What</td><td>Bigger machine</td><td>More machines</td></tr>
+          <tr><td>Limit</td><td>Hardware ceiling</td><td>Practically infinite</td></tr>
+          <tr><td>Cost</td><td>Exponential</td><td>Linear</td></tr>
+          <tr><td>Complexity</td><td>Trivial (no app changes)</td><td>Need stateless app, LB</td></tr>
+          <tr><td>Failure</td><td>Single point of failure</td><td>Tolerant by default</td></tr>
+        </tbody>
+      </table>
+      <p>Modern cloud apps default to horizontal — auto-scale based on CPU / queue length. Azure App Service, AKS, all support this natively.</p>
+    </section>
+
+    <section class="topic" id="load-balancing">
+      <div class="topic__check"><input type="checkbox" data-topic="6" /></div>
+      <h3><span class="num">7</span> Load Balancing</h3>
+      <p class="concept">Distributes traffic across multiple servers. Sits between client and your servers.</p>
+
+      <h4>Algorithms</h4>
+      <ul>
+        <li><strong>Round-Robin</strong> — rotate through servers</li>
+        <li><strong>Least Connections</strong> — to least-busy</li>
+        <li><strong>Least Response Time</strong> — fastest responding</li>
+        <li><strong>IP Hash</strong> — same client → same server (sticky)</li>
+        <li><strong>Weighted</strong> — heavier servers get more</li>
+      </ul>
+
+      <h4>L4 vs L7</h4>
+      <ul>
+        <li><strong>L4</strong> — TCP-level (e.g., AWS NLB, Azure Load Balancer); fast, no header inspection</li>
+        <li><strong>L7</strong> — HTTP-level (e.g., NGINX, Azure Application Gateway, Cloudflare); can route by URL/host/header, do TLS termination, WAF</li>
+      </ul>
+
+      <h4>Health Checks</h4>
+      <p>Load balancer periodically pings <code>/healthz</code> on each server; removes failing nodes. .NET 8: <code>app.MapHealthChecks("/healthz")</code>.</p>
+    </section>
+
+    <section class="topic" id="caching">
+      <div class="topic__check"><input type="checkbox" data-topic="7" /></div>
+      <h3><span class="num">8</span> Caching & Redis ⭐</h3>
+      <p class="concept">Caching is the cheapest performance win. Multiple layers — browser, CDN, gateway, app, database.</p>
+
+      <h4>Cache Layers</h4>
+      <ul>
+        <li><strong>Browser</strong> — Cache-Control, ETag</li>
+        <li><strong>CDN</strong> — static assets / cacheable APIs</li>
+        <li><strong>API gateway</strong> — output caching</li>
+        <li><strong>App / process</strong> — IMemoryCache (in-process, single node)</li>
+        <li><strong>Distributed (Redis)</strong> — shared cache across nodes</li>
+        <li><strong>DB query cache</strong> — built into RDBMS</li>
+      </ul>
+
+      <h4>Common Strategies</h4>
+      <ul>
+        <li><strong>Cache-aside (lazy)</strong> — check cache, miss → DB → populate cache. Most common.</li>
+        <li><strong>Write-through</strong> — every write goes to cache + DB</li>
+        <li><strong>Write-behind</strong> — write to cache, async to DB (risk: data loss)</li>
+        <li><strong>Read-through</strong> — cache itself fetches from DB on miss</li>
+      </ul>
+
+      <h4>🎯 Cache Invalidation (the hard problem)</h4>
+      <ul>
+        <li>TTL — set expiry, simplest</li>
+        <li>Manual eviction on writes</li>
+        <li>Pub/sub invalidation across nodes</li>
+        <li>Versioned keys (<code>product:5:v3</code>) — increment on update</li>
+      </ul>
+
+      <pre><code><span class="com">// Redis with .NET</span>
+builder.Services.AddStackExchangeRedisCache(o =&gt; o.Configuration = <span class="str">"localhost:6379"</span>);
+
+<span class="kw">public class</span> ProductService(IDistributedCache cache, AppDbContext db) {
+    <span class="kw">public async</span> Task&lt;Product?&gt; GetAsync(<span class="kw">int</span> id) {
+        <span class="kw">var</span> key = $<span class="str">"product:{id}"</span>;
+        <span class="kw">var</span> cached = <span class="kw">await</span> cache.GetStringAsync(key);
+        <span class="kw">if</span> (cached != <span class="kw">null</span>) <span class="kw">return</span> JsonSerializer.Deserialize&lt;Product&gt;(cached);
+
+        <span class="kw">var</span> p = <span class="kw">await</span> db.Products.FindAsync(id);
+        <span class="kw">if</span> (p != <span class="kw">null</span>) {
+            <span class="kw">await</span> cache.SetStringAsync(key, JsonSerializer.Serialize(p),
+                <span class="kw">new</span> DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5) });
+        }
+        <span class="kw">return</span> p;
+    }
+}</code></pre>
+    </section>
+
+    <section class="topic" id="db-scaling">
+      <div class="topic__check"><input type="checkbox" data-topic="8" /></div>
+      <h3><span class="num">9</span> DB Sharding & Replication</h3>
+
+      <h4>Replication (read scaling)</h4>
+      <ul>
+        <li>One <strong>primary</strong> handles writes, multiple <strong>read replicas</strong> handle reads</li>
+        <li>Replication can be sync (consistent, slower) or async (eventually consistent)</li>
+        <li>App routes reads to replicas, writes to primary</li>
+        <li>Provides HA — promote replica if primary fails</li>
+      </ul>
+
+      <h4>Sharding (write scaling)</h4>
+      <ul>
+        <li>Partition data across multiple databases by a <strong>shard key</strong> (e.g., user_id % 4)</li>
+        <li>Each shard holds a subset; queries that span shards are expensive</li>
+        <li>Common when single DB can't hold the data or handle writes</li>
+        <li>Adds complexity — only when truly needed (Postgres can scale to TBs vertically first)</li>
+      </ul>
+
+      <h4>Other DB Concepts</h4>
+      <ul>
+        <li><strong>Connection pooling</strong> — reuse connections (built into ADO.NET)</li>
+        <li><strong>Read/write splitting</strong> — separate connection strings, route appropriately</li>
+        <li><strong>Materialized views</strong> — pre-computed, refresh periodically</li>
+        <li><strong>Partitioning</strong> — split a single big table into chunks (by date, range, hash)</li>
+      </ul>
+    </section>
+
+    <section class="topic" id="sql-vs-nosql">
+      <div class="topic__check"><input type="checkbox" data-topic="9" /></div>
+      <h3><span class="num">10</span> SQL vs NoSQL — When to Use What</h3>
+
+      <table>
+        <thead><tr><th>Type</th><th>Examples</th><th>When</th></tr></thead>
+        <tbody>
+          <tr><td>Relational (SQL)</td><td>SQL Server, Postgres, MySQL</td><td>Transactions, joins, structured data — your default</td></tr>
+          <tr><td>Document</td><td>MongoDB, CosmosDB, DynamoDB</td><td>Flexible schema, JSON-shaped data, denormalized</td></tr>
+          <tr><td>Key-Value</td><td>Redis, Memcached</td><td>Cache, session, simple lookups</td></tr>
+          <tr><td>Wide-column</td><td>Cassandra, HBase</td><td>Massive write throughput, time-series</td></tr>
+          <tr><td>Graph</td><td>Neo4j, CosmosDB Gremlin</td><td>Relationships-heavy queries (social, fraud detection)</td></tr>
+          <tr><td>Search</td><td>Elasticsearch, Azure AI Search</td><td>Full-text search, faceted filtering</td></tr>
+          <tr><td>Time-series</td><td>InfluxDB, TimescaleDB</td><td>Metrics, IoT</td></tr>
+        </tbody>
+      </table>
+
+      <h4>🎯 CAP Theorem (interview classic)</h4>
+      <p>Distributed system can guarantee only 2 of: <strong>C</strong>onsistency, <strong>A</strong>vailability, <strong>P</strong>artition tolerance. Network partitions are inevitable, so you actually choose between CP and AP. Most NoSQL = AP, traditional RDBMS = CP.</p>
+
+      <h4>🎯 ACID vs BASE</h4>
+      <ul>
+        <li><strong>ACID</strong> (SQL): Atomic, Consistent, Isolated, Durable</li>
+        <li><strong>BASE</strong> (NoSQL): Basically Available, Soft state, Eventually consistent</li>
+      </ul>
+    </section>
+
+    <h2 class="section-title">📅 Week 3 — Microservices, Patterns</h2>
+
+    <section class="topic" id="micro">
+      <div class="topic__check"><input type="checkbox" data-topic="10" /></div>
+      <h3><span class="num">11</span> Microservices Architecture</h3>
+      <p class="concept">Many small services, each with its own database, communicating via HTTP/gRPC/messages. Powerful — and operationally complex.</p>
+
+      <h4>Patterns You Must Know</h4>
+      <ul>
+        <li><strong>API Gateway</strong> — single entry point, routes/auth/rate-limit (e.g., Ocelot, YARP, Azure API Management)</li>
+        <li><strong>BFF (Backend for Frontend)</strong> — gateway tailored per client (web, mobile)</li>
+        <li><strong>Service Discovery</strong> — services find each other (Consul, Eureka, K8s built-in)</li>
+        <li><strong>Service Mesh</strong> — sidecar proxies handle traffic/auth/observability (Istio, Linkerd)</li>
+        <li><strong>Database-per-service</strong> — each service owns its data; never share DB tables</li>
+        <li><strong>Saga</strong> — distributed transaction via choreography or orchestration</li>
+        <li><strong>Circuit Breaker</strong> — stop calling a failing service (Polly library)</li>
+        <li><strong>Bulkhead</strong> — isolate failures, don't let one service exhaust threads</li>
+        <li><strong>Retry with backoff</strong> — Polly handles this</li>
+        <li><strong>Outbox pattern</strong> — guarantee message + DB consistency</li>
+      </ul>
+
+      <pre><code><span class="com">// Polly resilience policies in .NET</span>
+builder.Services.AddHttpClient&lt;OrderClient&gt;()
+    .AddPolicyHandler(HttpPolicyExtensions.HandleTransientHttpError()
+        .WaitAndRetryAsync(3, attempt =&gt; TimeSpan.FromSeconds(Math.Pow(2, attempt))))
+    .AddPolicyHandler(HttpPolicyExtensions.HandleTransientHttpError()
+        .CircuitBreakerAsync(5, TimeSpan.FromMinutes(1)));</code></pre>
+
+      <h4>When to NOT Go Microservices</h4>
+      <ul>
+        <li>Small team (&lt; 20 devs) — coordination cost outweighs benefit</li>
+        <li>Early product (still finding market fit) — iteration speed matters more</li>
+        <li>Tightly coupled domain (every change touches multiple services)</li>
+      </ul>
+    </section>
+
+    <section class="topic" id="mq">
+      <div class="topic__check"><input type="checkbox" data-topic="11" /></div>
+      <h3><span class="num">12</span> Message Queues & Event-Driven</h3>
+      <p class="concept">Async communication between services via a broker. Producer puts message, consumer takes — decoupled in time and space.</p>
+
+      <h4>Brokers</h4>
+      <ul>
+        <li><strong>RabbitMQ</strong> — classic, mature, easy</li>
+        <li><strong>Azure Service Bus</strong> — managed, enterprise features (sessions, dedup)</li>
+        <li><strong>Kafka</strong> — high-throughput streaming, log-based, used for event sourcing</li>
+        <li><strong>Redis Streams / SQS</strong> — lighter alternatives</li>
+      </ul>
+
+      <h4>Patterns</h4>
+      <ul>
+        <li><strong>Queue</strong> (point-to-point) — one consumer processes each message</li>
+        <li><strong>Topic / Pub-Sub</strong> — every subscriber gets a copy</li>
+        <li><strong>Dead Letter Queue</strong> — failed messages go here for inspection</li>
+        <li><strong>Idempotent consumers</strong> — handle duplicates safely</li>
+      </ul>
+
+      <h4>Why Use a Queue</h4>
+      <ul>
+        <li>Decouple services (producer doesn't wait for consumer)</li>
+        <li>Smooth out traffic spikes (queue absorbs bursts)</li>
+        <li>Retry / DLQ for resilience</li>
+        <li>Fan-out (one event → many handlers)</li>
+        <li>Cross-language interop</li>
+      </ul>
+
+      <p class="muted">In .NET, use <strong>MassTransit</strong> or <strong>NServiceBus</strong> as broker abstraction libraries.</p>
+    </section>
+
+    <section class="topic" id="cqrs">
+      <div class="topic__check"><input type="checkbox" data-topic="12" /></div>
+      <h3><span class="num">13</span> CQRS & Event Sourcing</h3>
+      <p class="concept"><strong>CQRS</strong> = separate read and write models. Reads use optimized projections, writes go through command handlers. <strong>Event Sourcing</strong> = store events instead of current state — replay to reconstruct.</p>
+
+      <h4>CQRS Benefits</h4>
+      <ul>
+        <li>Reads can use denormalized DB / cache for speed</li>
+        <li>Writes encapsulate business rules in command handlers</li>
+        <li>Independent scaling of reads vs writes</li>
+        <li>Cleaner code — different shapes for different needs</li>
+      </ul>
+
+      <pre><code><span class="com">// MediatR-based CQRS in .NET</span>
+<span class="kw">public record</span> CreateOrderCommand(<span class="kw">int</span> UserId, List&lt;<span class="kw">int</span>&gt; ProductIds) : IRequest&lt;<span class="kw">int</span>&gt;;
+
+<span class="kw">public class</span> CreateOrderHandler(AppDbContext db) : IRequestHandler&lt;CreateOrderCommand, <span class="kw">int</span>&gt; {
+    <span class="kw">public async</span> Task&lt;<span class="kw">int</span>&gt; Handle(CreateOrderCommand cmd, CancellationToken ct) {
+        <span class="com">// business logic, validation, persist</span>
+    }
+}
+
+<span class="com">// query side</span>
+<span class="kw">public record</span> GetOrderQuery(<span class="kw">int</span> Id) : IRequest&lt;OrderDto?&gt;;</code></pre>
+
+      <h4>Event Sourcing — when to use</h4>
+      <ul>
+        <li>Audit trail is a hard requirement (banking, compliance)</li>
+        <li>Need to replay history / fix past data via new projection</li>
+        <li>Ready to invest in operational complexity</li>
+      </ul>
+
+      <h4>Saga Pattern</h4>
+      <p>Coordinates a long-running transaction across services. Two flavors: <strong>orchestration</strong> (central coordinator like a state machine) and <strong>choreography</strong> (each service reacts to events).</p>
+    </section>
+
+    <section class="topic" id="patterns">
+      <div class="topic__check"><input type="checkbox" data-topic="13" /></div>
+      <h3><span class="num">14</span> GoF Design Patterns (the ones interviewers ask)</h3>
+
+      <h4>Creational</h4>
+      <ul>
+        <li><strong>Singleton</strong> — single instance (DI container handles this)</li>
+        <li><strong>Factory</strong> — encapsulate object creation</li>
+        <li><strong>Builder</strong> — fluent API for complex construction</li>
+        <li><strong>Prototype</strong> — clone existing object</li>
+      </ul>
+
+      <h4>Structural</h4>
+      <ul>
+        <li><strong>Adapter</strong> — make incompatible interfaces work</li>
+        <li><strong>Decorator</strong> — wrap to add behavior (LINQ/HTTP delegating handler are decorators)</li>
+        <li><strong>Facade</strong> — simple interface over complex subsystem</li>
+        <li><strong>Proxy</strong> — placeholder/wrapper (e.g., EF lazy loading proxy)</li>
+        <li><strong>Composite</strong> — tree structures, treat groups as single</li>
+      </ul>
+
+      <h4>Behavioral</h4>
+      <ul>
+        <li><strong>Strategy</strong> — pluggable algorithms (sort comparer, payment provider)</li>
+        <li><strong>Observer</strong> — events, pub/sub</li>
+        <li><strong>Command</strong> — encapsulate operation as object (CQRS commands)</li>
+        <li><strong>Mediator</strong> — central hub (MediatR library)</li>
+        <li><strong>Chain of Responsibility</strong> — middleware pipeline</li>
+        <li><strong>Template Method</strong> — base defines skeleton, subclass fills steps</li>
+      </ul>
+
+      <h4>🎯 Modern .NET Already Uses These</h4>
+      <ul>
+        <li>DI container = Service Locator (and IoC)</li>
+        <li>Middleware = Chain of Responsibility</li>
+        <li>EF DbContext = Unit of Work + Repository</li>
+        <li>MediatR = Mediator + Command</li>
+        <li>HttpClient handlers = Decorator</li>
+      </ul>
+    </section>
+
+    <section id="qa">
+      <h2 class="section-title">🎤 Interview Q&A — Phase 6</h2>
+      <div class="qa-block">
+        <details><summary>Q. Monolith vs Microservices — which to pick for new product?</summary>
+          <div>
+            <p><strong>Answer:</strong> Start with <strong>modular monolith</strong>, not microservices.</p>
+            <p><strong>Why NOT Microservices for new product:</strong></p>
+            <ul>
+              <li>Microservices solve ORG problems (many teams, independent deploys)</li>
+              <li>Cost = huge operational complexity</li>
+              <li>Service discovery, distributed transactions</li>
+              <li>Observability across many processes</li>
+              <li>Deployment pipeline per service</li>
+              <li>Network debugging hell</li>
+              <li>Small team get crushed by overhead</li>
+            </ul>
+            <p><strong>Why Modular Monolith:</strong></p>
+            <ul>
+              <li>One deployment unit — simple</li>
+              <li>Most architectural cleanliness</li>
+              <li>Clear internal boundaries (separate projects, interfaces)</li>
+              <li>No cross-module direct DB access</li>
+              <li>Can extract module to service later when needed</li>
+              <li>Shopify, Stack Overflow, Basecamp run on modular monolith at huge scale</li>
+            </ul>
+            <p><strong>Right Time to Split (microservices):</strong></p>
+            <ul>
+              <li>Multiple teams stepping on each other</li>
+              <li>Different scaling profiles for different parts</li>
+              <li>One bad module crashes whole app often</li>
+            </ul>
+            <p><strong>Note:</strong> Don't go microservices because it sounds modern.</p>
+          </div>
+        </details>
+
+        <details><summary>Q. Explain Clean Architecture?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>Way to organize code in layers</li>
+              <li>Dependencies always point INWARD, never outward</li>
+              <li>Made famous by Uncle Bob</li>
+            </ul>
+            <p><strong>Layers (inner to outer):</strong></p>
+            <ul>
+              <li><strong>Domain</strong> — pure business entities, value objects, domain rules. No dependencies.</li>
+              <li><strong>Application</strong> — use cases (MediatR handlers), DTOs, interfaces (<code>IEmailSender</code>, <code>IRepository</code>)</li>
+              <li><strong>Infrastructure</strong> — concrete implementations using EF Core, external APIs, file systems, email</li>
+              <li><strong>Web/API</strong> — controllers, middleware, Program.cs</li>
+            </ul>
+            <p><strong>Big Benefits:</strong></p>
+            <ul>
+              <li><strong>Testability</strong> — Domain + Application have no DB / HTTP dependency, easy unit test</li>
+              <li>Can swap EF for Dapper without touching domain code</li>
+              <li>Enforce SOLID Dependency Inversion principle</li>
+              <li>High-level policy don't depend on low-level details</li>
+            </ul>
+            <p><strong>Java parallel:</strong></p>
+            <ul>
+              <li>Same layered approach as Java enterprise apps</li>
+              <li>POJO + Service + Repository = similar layering</li>
+            </ul>
+            <p><strong>Note:</strong> Onion Architecture and Hexagonal Architecture = same idea, different names.</p>
+          </div>
+        </details>
+
+        <details><summary>Q. How to scale a read-heavy API?</summary>
+          <div>
+            <p><strong>Approach:</strong> Attack in layers, cheapest first.</p>
+            <p><strong>Step 1 — Caching (solve 80% of problems):</strong></p>
+            <ul>
+              <li>In-process cache (<code>IMemoryCache</code>) for hot static data (product categories)</li>
+              <li>Distributed cache (Redis) for cross-instance data (product details)</li>
+              <li>Cache-aside pattern with reasonable TTL</li>
+            </ul>
+            <p><strong>Step 2 — Read Replicas:</strong></p>
+            <ul>
+              <li>Route reads to replicas, writes to primary</li>
+              <li>EF support multiple connection strings</li>
+            </ul>
+            <p><strong>Step 3 — Denormalize Hot Reads:</strong></p>
+            <ul>
+              <li>Materialized views, pre-aggregated tables</li>
+              <li>Or separate read model in CQRS style</li>
+            </ul>
+            <p><strong>Step 4 — CDN for Cacheable Endpoints:</strong></p>
+            <ul>
+              <li>Set Cache-Control headers correctly</li>
+              <li>Even APIs can be CDN-cached</li>
+            </ul>
+            <p><strong>Step 5 — Horizontal Scale:</strong></p>
+            <ul>
+              <li>Multiple stateless app instances behind load balancer</li>
+              <li>Autoscale on CPU or queue depth</li>
+            </ul>
+            <p><strong>Step 6 — Search Engine:</strong></p>
+            <ul>
+              <li>Elasticsearch for read-heavy filtering</li>
+              <li>Event-driven projections</li>
+            </ul>
+            <p><strong>Note:</strong> Order matters — caching solve 80% of problems with 20% of effort.</p>
+          </div>
+        </details>
+
+        <details><summary>Q. What is CAP theorem?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>In distributed system — can guarantee at most 2 of 3 properties</li>
+            </ul>
+            <p><strong>3 Properties:</strong></p>
+            <ul>
+              <li><strong>C — Consistency</strong> — every read see most recent write</li>
+              <li><strong>A — Availability</strong> — every request get response (even if not latest)</li>
+              <li><strong>P — Partition tolerance</strong> — system work when network between nodes break</li>
+            </ul>
+            <p><strong>The Trick:</strong></p>
+            <ul>
+              <li>Network partitions inevitable in any distributed system</li>
+              <li>Cannot drop P</li>
+              <li>Real choice = CP or AP</li>
+            </ul>
+            <p><strong>CP — Consistency + Partition tolerance:</strong></p>
+            <ul>
+              <li>Refuse some requests to keep data consistent</li>
+              <li>Example: traditional SQL DBs in cluster mode</li>
+              <li>Use for banking transactions</li>
+            </ul>
+            <p><strong>AP — Availability + Partition tolerance:</strong></p>
+            <ul>
+              <li>Keep responding with possibly stale data</li>
+              <li>Example: Cassandra, DynamoDB, most NoSQL</li>
+              <li>Use for social media feeds</li>
+            </ul>
+            <p><strong>BASE Model (NoSQL counterpart to ACID):</strong></p>
+            <ul>
+              <li>Basically Available, Soft state, Eventual consistency</li>
+            </ul>
+          </div>
+        </details>
+
+        <details><summary>Q. When to use message queue?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>Decouple producer from consumer in time, scale, technology</li>
+              <li>Examples: RabbitMQ, Azure Service Bus, Kafka</li>
+            </ul>
+            <p><strong>5 Scenarios Where Queues Shine:</strong></p>
+            <ol>
+              <li><strong>Async background work</strong> — send emails, generate PDFs, process images</li>
+              <li><strong>Traffic smoothing</strong> — queue absorb spikes, consumer process at steady rate</li>
+              <li><strong>Fan-out</strong> — one event ("OrderPlaced") trigger many handlers (email, analytics, inventory)</li>
+              <li><strong>Resilience</strong> — if consumer down, messages wait safely. Dead Letter Queue for failed</li>
+              <li><strong>Cross-language interop</strong> — .NET service talk to Python ML service via JSON</li>
+            </ol>
+            <p><strong>When NOT to use:</strong></p>
+            <ul>
+              <li>Synchronous request/response</li>
+              <li>When you need immediate answer</li>
+            </ul>
+            <p><strong>Java parallel:</strong></p>
+            <ul>
+              <li>Same as JMS, ActiveMQ in Java world</li>
+              <li>Same producer-consumer pattern</li>
+            </ul>
+            <p><strong>Note:</strong> Queue add complexity — use only when async makes sense.</p>
+          </div>
+        </details>
+
+        <details><summary>Q. What is Circuit Breaker pattern?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>Resilience pattern to prevent cascading failures</li>
+              <li>Like electrical breaker in your house</li>
+              <li>Stop hammering failing dependency</li>
+            </ul>
+            <p><strong>3 States:</strong></p>
+            <ul>
+              <li><strong>Closed</strong> — normal operation, calls go through. If failures cross threshold (5 errors in 30 sec) — trip to Open</li>
+              <li><strong>Open</strong> — every call fail fast without trying. Save resources, give dependency time to recover. After cooldown (1 min) — go Half-Open</li>
+              <li><strong>Half-Open</strong> — next call allowed as test. Success → Closed. Fail → back to Open</li>
+            </ul>
+            <p><strong>Big Benefit:</strong></p>
+            <ul>
+              <li>Instead of 1000 threads waiting on dead API for 30 sec each</li>
+              <li>Calls fail in milliseconds</li>
+              <li>App stay responsive</li>
+            </ul>
+            <p><strong>.NET Implementation:</strong></p>
+            <ul>
+              <li><strong>Polly</strong> library — easy integration with HttpClient</li>
+            </ul>
+            <p><strong>Java parallel:</strong></p>
+            <ul>
+              <li>Same as Hystrix or Resilience4j in Java</li>
+            </ul>
+            <p><strong>Note:</strong> Always combine with retry (exponential backoff) and timeout for full resilience.</p>
+          </div>
+        </details>
+
+        <details><summary>Q. Explain CQRS in simple words?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>CQRS = Command Query Responsibility Segregation</li>
+              <li>Separate code for writes from code for reads</li>
+            </ul>
+            <p><strong>Commands (Write):</strong></p>
+            <ul>
+              <li>Operations like CreateOrder, UpdateProduct, DeleteUser</li>
+              <li>Go through dedicated handler classes</li>
+              <li>Contain validation, business rules</li>
+              <li>Don't return data, just success/failure</li>
+            </ul>
+            <p><strong>Queries (Read):</strong></p>
+            <ul>
+              <li>Operations like GetOrder, ListProducts</li>
+              <li>Own handlers</li>
+              <li>Read from optimized projections (denormalized or cached)</li>
+            </ul>
+            <p><strong>Benefits:</strong></p>
+            <ul>
+              <li>Reads and writes scale independently</li>
+              <li>Different complexity profiles</li>
+              <li>Reads can be denormalized for speed</li>
+              <li>Writes can be richly modeled with business rules</li>
+            </ul>
+            <p><strong>.NET Tool:</strong></p>
+            <ul>
+              <li><strong>MediatR</strong> library — controllers call <code>mediator.Send(command)</code></li>
+            </ul>
+            <p><strong>Note:</strong> CQRS doesn't always mean separate databases — can be just code pattern. When paired with Event Sourcing, get truly separate read/write storage.</p>
+          </div>
+        </details>
+
+        <details><summary>Q. What is N+1 problem at system level?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>Same N+1 problem you see in EF Core, but at service boundaries</li>
+            </ul>
+            <p><strong>Pattern:</strong></p>
+            <ul>
+              <li>One API call return list of items</li>
+              <li>For each item — client make follow-up call</li>
+              <li>List of 50 products = 51 HTTP requests total</li>
+              <li>Network latency stack up</li>
+              <li>Page feel slow, server pounded</li>
+            </ul>
+            <p><strong>4 Fixes:</strong></p>
+            <ol>
+              <li><strong>Batch endpoints</strong> — return all needed data in one call: <code>GET /products?include=reviews,inventory</code></li>
+              <li><strong>GraphQL</strong> — client specify exact fields, resolver batch DB calls</li>
+              <li><strong>BFF (Backend for Frontend)</strong> — server aggregator calls microservices and pre-assemble data</li>
+              <li><strong>DataLoader pattern</strong> — server-side batching of similar lookups within request</li>
+            </ol>
+            <p><strong>Goal:</strong> Fewer round trips between client and server.</p>
+          </div>
+        </details>
+
+        <details><summary>Q. How to design URL shortener?</summary>
+          <div>
+            <p><strong>Step 1 — Clarify Requirements:</strong></p>
+            <ul>
+              <li>How many URLs created per day?</li>
+              <li>How many redirects per day?</li>
+              <li>Custom aliases? Expiry? Click analytics?</li>
+              <li>Assume: 10M new URLs/day, 100M redirects/day (read-heavy)</li>
+            </ul>
+            <p><strong>Step 2 — Core Endpoints:</strong></p>
+            <ul>
+              <li><strong>POST /shorten</strong> — take long URL, generate code, store, return short URL</li>
+              <li><strong>GET /:code</strong> — lookup long URL, return 301 redirect</li>
+            </ul>
+            <p><strong>Step 3 — Short Code Generation:</strong></p>
+            <ul>
+              <li>Base62 encoding (a-z, A-Z, 0-9 = 62 chars)</li>
+              <li>Of auto-incrementing ID</li>
+              <li>7-char codes give 3.5 trillion URLs</li>
+            </ul>
+            <p><strong>Step 4 — Storage:</strong></p>
+            <ul>
+              <li>Write to SQL DB for durability</li>
+              <li>Populate Redis cache for fast reads</li>
+              <li>Redirect path: check Redis first, fall back to DB on miss</li>
+            </ul>
+            <p><strong>Step 5 — Performance:</strong></p>
+            <ul>
+              <li>CDN for hot codes at edge</li>
+              <li>Queue write traffic if spikes are bursty</li>
+            </ul>
+            <p><strong>Step 6 — Click Analytics:</strong></p>
+            <ul>
+              <li>Async events into queue</li>
+              <li>Worker process into separate analytics DB</li>
+              <li>Don't slow down redirects</li>
+            </ul>
+            <p><strong>Step 7 — Abuse Prevention:</strong></p>
+            <ul>
+              <li>Rate limit by IP</li>
+              <li>Validate URLs against malware blocklists</li>
+            </ul>
+          </div>
+        </details>
+
+        <details><summary>Q. Why statelessness important for scaling?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>Stateless server don't store per-user data in memory between requests</li>
+              <li>Every request carry everything needed (JWT with user identity)</li>
+            </ul>
+            <p><strong>Benefits:</strong></p>
+            <ul>
+              <li>ANY server instance can handle ANY request — interchangeable</li>
+              <li>Horizontal scaling trivial — spin up 10 more instances</li>
+              <li>No special configuration needed</li>
+              <li>If server crash — no user state lost</li>
+              <li>Next request go to another instance</li>
+            </ul>
+            <p><strong>vs Stateful Server:</strong></p>
+            <ul>
+              <li>Store session data in memory (cart contents)</li>
+              <li>Load balancer need "sticky sessions"</li>
+              <li>Same user always go to same server</li>
+              <li>Limit scaling, problem if server die</li>
+            </ul>
+            <p><strong>How to make API Stateless:</strong></p>
+            <ul>
+              <li><strong>Push state to client</strong> — JWT for auth, browser localStorage for cart</li>
+              <li><strong>Push state to shared store</strong> — Redis, database</li>
+            </ul>
+            <p><strong>Result:</strong> Architecture scale from 10 to 10,000 servers without code change.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <section id="mistakes" class="callout callout--warn">
+      <h3>⚠️ Common Mistakes</h3>
+      <ul>
+        <li>Choosing microservices for a small product — operational pain &gt;&gt; benefit</li>
+        <li>Sharing a DB across microservices (defeats the entire point)</li>
+        <li>Caching without an eviction strategy → stale data forever</li>
+        <li>Synchronous HTTP everywhere → cascading failures, latency stacks</li>
+        <li>Ignoring CAP — promising both consistency AND availability across regions</li>
+        <li>Adding NoSQL because it's "modern" when SQL would do the job better</li>
+        <li>Designing for scale you don't have (premature optimization)</li>
+      </ul>
+    </section>
+
+    <nav class="phase-nav">
+      <a href="phase-5-angular-integration.html"><span class="label">← Prev</span><strong>Phase 5: Angular + Integration</strong></a>
+      <a href="phase-7-devops-azure.html" class="next"><span class="label">Next →</span><strong>Phase 7: Docker, Azure, CI/CD</strong></a>
+    </nav>
+  </main>
+</div>
+
+<footer class="footer">Phase 6 of 9 · This is the layer that earns 15 LPA</footer>
+
+<script>
+  const phase = document.body.dataset.phase;
+  document.querySelectorAll('input[type="checkbox"][data-topic]').forEach(cb => {
+    const key = `phase-${phase}-topic-${cb.dataset.topic}`;
+    cb.checked = localStorage.getItem(key) === 'true';
+    cb.closest('.topic').classList.toggle('is-done', cb.checked);
+    cb.addEventListener('change', () => {
+      localStorage.setItem(key, cb.checked);
+      cb.closest('.topic').classList.toggle('is-done', cb.checked);
+    });
+  });
+  const links = document.querySelectorAll('.sidebar a[href^="#"]');
+  const sections = [...links].map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  window.addEventListener('scroll', () => {
+    let current = sections[0]?.id;
+    sections.forEach(s => { if (window.scrollY + 100 >= s.offsetTop) current = s.id; });
+    links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current));
+  });
+</script>
+</body>
+</html>

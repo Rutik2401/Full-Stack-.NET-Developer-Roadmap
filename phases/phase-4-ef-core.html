@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Phase 4 — Entity Framework Core | .NET Roadmap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/global.css" />
+</head>
+<body data-phase="4">
+
+<nav class="topnav">
+  <div class="topnav__inner">
+    <div class="brand"><a href="../index.html" style="color:inherit">.NET<span class="dot">·</span>Roadmap</a></div>
+    <div class="topnav__links">
+      <a href="../index.html">Home</a>
+      <a href="phase-0-foundation.html">P0</a>
+      <a href="phase-1-csharp.html">P1</a>
+      <a href="phase-2-sql.html">P2</a>
+      <a href="phase-3-aspnet-core.html">P3</a>
+      <a href="phase-4-ef-core.html" class="active">P4</a>
+      <a href="phase-5-angular-integration.html">P5</a>
+      <a href="phase-6-system-design.html">P6</a>
+      <a href="phase-7-devops-azure.html">P7</a>
+      <a href="phase-8-projects.html">P8</a>
+      <a href="phase-9-interview.html">P9</a>
+    </div>
+  </div>
+</nav>
+
+<div class="phase-page">
+  <aside class="sidebar">
+    <h4>Week 1 · Basics</h4>
+    <ul>
+      <li><a href="#orm">1. What is an ORM?</a></li>
+      <li><a href="#dbcontext">2. DbContext & DbSet</a></li>
+      <li><a href="#approach">3. Code/DB-First Approaches</a></li>
+      <li><a href="#migrations">4. Migrations</a></li>
+      <li><a href="#crud">5. CRUD Operations</a></li>
+      <li><a href="#config">6. Annotations & Fluent API</a></li>
+    </ul>
+    <h4>Week 2 · Relationships & Querying</h4>
+    <ul>
+      <li><a href="#relations">7. Relationships</a></li>
+      <li><a href="#loading">8. Eager / Lazy / Explicit Loading</a></li>
+      <li><a href="#linq-ef">9. LINQ to EF</a></li>
+      <li><a href="#raw-sql">10. Raw SQL & Stored Procs</a></li>
+    </ul>
+    <h4>Week 3 · Advanced</h4>
+    <ul>
+      <li><a href="#tracking">11. Change Tracking & AsNoTracking ⭐</a></li>
+      <li><a href="#concurrency">12. Concurrency & Transactions</a></li>
+      <li><a href="#perf">13. Performance & N+1 ⭐</a></li>
+      <li><a href="#repo">14. Repository / UoW / Dapper</a></li>
+    </ul>
+    <h4>Sections</h4>
+    <ul>
+      <li><a href="#qa">Interview Q&A</a></li>
+      <li><a href="#mistakes">Common Mistakes</a></li>
+    </ul>
+  </aside>
+
+  <main class="content">
+    <div class="breadcrumb"><a href="../index.html">Home</a> / Phase 4</div>
+
+    <header class="phase-header">
+      <h1>Phase 4 — Entity Framework Core</h1>
+      <p class="lede">EF Core is the dominant .NET ORM. Learning it well means understanding the SQL it generates, when to use it, and when to drop to Dapper for performance.</p>
+      <div class="phase-meta">
+        <span class="pill">⏱ 3 Weeks</span>
+        <span class="pill">14 Topics</span>
+        <span class="pill">⭐ Senior expectation</span>
+      </div>
+    </header>
+
+    <div class="callout callout--prereq">
+      <h3>📋 Prerequisites (READ FIRST!)</h3>
+      <ul>
+        <li>✔ Strong SQL fluency — joins, indexing, query plans (Phase 2)</li>
+        <li>✔ LINQ deep dive (Phase 1) — EF Core uses LINQ to express queries</li>
+        <li>✔ C# generics, async/await, IQueryable concept</li>
+        <li>✔ ASP.NET Core DI (Phase 3) — DbContext is registered as Scoped</li>
+      </ul>
+      <p class="muted"><strong>Why this matters:</strong> EF Core is a leaky abstraction. You'll write LINQ and EF will translate to SQL. Without SQL fluency, you can't debug the generated queries or fix N+1 issues.</p>
+    </div>
+
+    <h2 class="section-title">📅 Week 1 — Basics</h2>
+
+    <section class="topic" id="orm">
+      <div class="topic__check"><input type="checkbox" data-topic="0" /></div>
+      <h3><span class="num">1</span> What is an ORM?</h3>
+      <p class="concept">Object-Relational Mapper. Translates C# objects ↔ database rows so you write LINQ instead of raw SQL. EF Core is Microsoft's official ORM; Dapper is the lightweight competitor.</p>
+
+      <table>
+        <thead><tr><th></th><th>EF Core (full ORM)</th><th>Dapper (micro-ORM)</th></tr></thead>
+        <tbody>
+          <tr><td>Speed</td><td>Slower (overhead)</td><td>Near raw ADO.NET</td></tr>
+          <tr><td>Productivity</td><td>High (LINQ, migrations)</td><td>You write SQL</td></tr>
+          <tr><td>Learning curve</td><td>Higher</td><td>Tiny</td></tr>
+          <tr><td>Use when</td><td>CRUD-heavy apps, rapid dev</td><td>Read-heavy hot paths, complex SQL</td></tr>
+        </tbody>
+      </table>
+
+      <h4>🎯 Why EF Core Wins for Most Apps</h4>
+      <ul>
+        <li>Auto-tracks changes — call <code>SaveChanges()</code> once</li>
+        <li>Migrations evolve schema versioned with code</li>
+        <li>Strong typing — compiler catches column rename bugs</li>
+        <li>LINQ unifies syntax with the rest of C#</li>
+      </ul>
+    </section>
+
+    <section class="topic" id="dbcontext">
+      <div class="topic__check"><input type="checkbox" data-topic="1" /></div>
+      <h3><span class="num">2</span> DbContext & DbSet — the Heart of EF</h3>
+      <p class="concept"><code>DbContext</code> is your unit-of-work and connection. Each <code>DbSet&lt;T&gt;</code> represents a table. You inherit from DbContext, declare DbSets, register it in DI as <strong>Scoped</strong> (one per request).</p>
+
+      <pre><code><span class="kw">public class</span> AppDbContext(DbContextOptions&lt;AppDbContext&gt; opts) : DbContext(opts) {
+    <span class="kw">public</span> DbSet&lt;Product&gt; Products =&gt; Set&lt;Product&gt;();
+    <span class="kw">public</span> DbSet&lt;Order&gt; Orders =&gt; Set&lt;Order&gt;();
+    <span class="kw">public</span> DbSet&lt;User&gt; Users =&gt; Set&lt;User&gt;();
+
+    <span class="kw">protected override void</span> OnModelCreating(ModelBuilder b) {
+        b.Entity&lt;Product&gt;().HasIndex(p =&gt; p.Sku).IsUnique();
+        b.Entity&lt;Order&gt;().Property(o =&gt; o.Total).HasPrecision(18, 2);
+    }
+}
+
+<span class="com">// Program.cs</span>
+builder.Services.AddDbContext&lt;AppDbContext&gt;(o =&gt;
+    o.UseSqlServer(builder.Configuration.GetConnectionString(<span class="str">"Default"</span>)));</code></pre>
+
+      <div class="interview">
+        <h4>🎯 DbContext Lifecycle Rules</h4>
+        <ul>
+          <li><strong>Scoped lifetime</strong> in web apps (one per HTTP request)</li>
+          <li><strong>Not thread-safe</strong> — never share across threads</li>
+          <li>Implements <code>IDisposable</code>, but DI handles disposal</li>
+          <li>Use <code>DbContextFactory</code> for background services / parallel work</li>
+          <li>Should be light to construct (lazy init internally)</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="topic" id="approach">
+      <div class="topic__check"><input type="checkbox" data-topic="2" /></div>
+      <h3><span class="num">3</span> Code-First vs Database-First</h3>
+      <p class="concept">Two ways to define the model. Code-First is the modern default for new projects.</p>
+
+      <table>
+        <thead><tr><th></th><th>Code-First</th><th>Database-First</th></tr></thead>
+        <tbody>
+          <tr><td>Source of truth</td><td>C# entities</td><td>Existing DB</td></tr>
+          <tr><td>Schema changes</td><td>Migrations</td><td>Update via <code>Scaffold-DbContext</code></td></tr>
+          <tr><td>Best for</td><td>New projects, agile teams</td><td>Legacy DBs, DBA-controlled schemas</td></tr>
+        </tbody>
+      </table>
+
+      <pre><code><span class="com">// Database-first scaffolding (legacy DB)</span>
+dotnet ef dbcontext scaffold <span class="str">"Server=...;Database=Old;..."</span> Microsoft.EntityFrameworkCore.SqlServer -o Models</code></pre>
+    </section>
+
+    <section class="topic" id="migrations">
+      <div class="topic__check"><input type="checkbox" data-topic="3" /></div>
+      <h3><span class="num">4</span> Migrations — Version-Controlled Schema</h3>
+      <p class="concept">A migration captures schema diff as code. Run them in CI/CD to evolve DB safely. Always commit migrations.</p>
+
+      <pre><code>dotnet tool install --global dotnet-ef
+
+<span class="com"># create</span>
+dotnet ef migrations add InitialCreate
+dotnet ef migrations add AddOrdersTable
+
+<span class="com"># apply</span>
+dotnet ef database update                <span class="com"># to latest</span>
+dotnet ef database update AddOrdersTable <span class="com"># to specific</span>
+dotnet ef database update 0              <span class="com"># revert all</span>
+
+<span class="com"># inspect / script</span>
+dotnet ef migrations list
+dotnet ef migrations script              <span class="com"># SQL for review (CI/CD use)</span>
+dotnet ef migrations remove              <span class="com"># undo last (before applied)</span></code></pre>
+
+      <div class="interview">
+        <h4>🎯 Production Migration Best Practices</h4>
+        <ul>
+          <li><strong>Never edit applied migrations</strong> — create a new one to fix mistakes</li>
+          <li>Generate SQL scripts for prod (<code>migrations script</code>) and have DBA review</li>
+          <li>Use <strong>idempotent scripts</strong> (<code>--idempotent</code> flag) for safe re-runs</li>
+          <li>Apply migrations in a separate step from app deployment for zero-downtime</li>
+          <li>Watch for breaking changes (drop column, rename) — needs blue/green deploy</li>
+        </ul>
+      </div>
+
+      <div class="gotcha">⚠️ <strong>Gotcha:</strong> Calling <code>db.Database.Migrate()</code> at app startup is OK for small apps but NOT for multi-instance prod (race condition).</div>
+    </section>
+
+    <section class="topic" id="crud">
+      <div class="topic__check"><input type="checkbox" data-topic="4" /></div>
+      <h3><span class="num">5</span> CRUD Operations</h3>
+
+      <pre><code><span class="com">// CREATE</span>
+<span class="kw">var</span> p = <span class="kw">new</span> Product { Name = <span class="str">"Pen"</span>, Price = 10 };
+db.Products.Add(p);
+<span class="kw">await</span> db.SaveChangesAsync();    <span class="com">// p.Id now populated</span>
+
+<span class="com">// READ</span>
+<span class="kw">var</span> all = <span class="kw">await</span> db.Products.ToListAsync();
+<span class="kw">var</span> one = <span class="kw">await</span> db.Products.FindAsync(5);                 <span class="com">// by PK, uses cache first</span>
+<span class="kw">var</span> first = <span class="kw">await</span> db.Products.FirstOrDefaultAsync(p =&gt; p.Sku == <span class="str">"abc"</span>);
+<span class="kw">var</span> exists = <span class="kw">await</span> db.Products.AnyAsync(p =&gt; p.Price &gt; 100);
+<span class="kw">var</span> count = <span class="kw">await</span> db.Products.CountAsync();
+
+<span class="com">// UPDATE — tracked entity</span>
+<span class="kw">var</span> p2 = <span class="kw">await</span> db.Products.FindAsync(5);
+p2.Price = 99;
+<span class="kw">await</span> db.SaveChangesAsync();    <span class="com">// EF detects change</span>
+
+<span class="com">// UPDATE — bulk (EF Core 7+)</span>
+<span class="kw">await</span> db.Products
+  .Where(p =&gt; p.Category == <span class="str">"Old"</span>)
+  .ExecuteUpdateAsync(s =&gt; s.SetProperty(p =&gt; p.IsActive, <span class="kw">false</span>));
+
+<span class="com">// DELETE</span>
+db.Products.Remove(p2);
+<span class="kw">await</span> db.SaveChangesAsync();
+
+<span class="com">// bulk delete (EF 7+)</span>
+<span class="kw">await</span> db.Products.Where(p =&gt; !p.IsActive).ExecuteDeleteAsync();</code></pre>
+
+      <div class="gotcha">⚠️ <strong>Gotcha:</strong> Pre-EF 7, "bulk delete" loaded all entities, then deleted one-by-one. Always use <code>ExecuteDelete/Update</code> on EF 7+.</div>
+    </section>
+
+    <section class="topic" id="config">
+      <div class="topic__check"><input type="checkbox" data-topic="5" /></div>
+      <h3><span class="num">6</span> Data Annotations vs Fluent API</h3>
+      <p class="concept">Two ways to configure mappings. Annotations are quick for simple cases; Fluent API is more powerful and keeps entities clean.</p>
+
+      <pre><code><span class="com">// Annotations</span>
+<span class="kw">public class</span> Product {
+    [Key] <span class="kw">public int</span> Id { <span class="kw">get</span>; <span class="kw">set</span>; }
+    [Required, MaxLength(100)] <span class="kw">public string</span> Name { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="str">""</span>;
+    [Column(TypeName = <span class="str">"decimal(18,2)"</span>)] <span class="kw">public decimal</span> Price { <span class="kw">get</span>; <span class="kw">set</span>; }
+    [ForeignKey(<span class="kw">nameof</span>(Category))] <span class="kw">public int</span> CategoryId { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> Category Category { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="kw">null</span>!;
+}
+
+<span class="com">// Fluent API (preferred for complex setups)</span>
+<span class="kw">protected override void</span> OnModelCreating(ModelBuilder b) {
+    b.Entity&lt;Product&gt;(e =&gt; {
+        e.HasKey(p =&gt; p.Id);
+        e.Property(p =&gt; p.Name).HasMaxLength(100).IsRequired();
+        e.Property(p =&gt; p.Price).HasPrecision(18, 2);
+        e.HasIndex(p =&gt; p.Sku).IsUnique();
+        e.HasOne(p =&gt; p.Category).WithMany(c =&gt; c.Products).HasForeignKey(p =&gt; p.CategoryId);
+    });
+}</code></pre>
+
+      <h4>🎯 Why Prefer Fluent API in Big Projects</h4>
+      <ul>
+        <li>Keeps entity classes free of EF dependencies (clean domain layer)</li>
+        <li>Configures things annotations can't (composite keys, table splitting)</li>
+        <li>Easier to apply conventions across many entities</li>
+      </ul>
+    </section>
+
+    <h2 class="section-title">📅 Week 2 — Relationships & Querying</h2>
+
+    <section class="topic" id="relations">
+      <div class="topic__check"><input type="checkbox" data-topic="6" /></div>
+      <h3><span class="num">7</span> Relationships — 1:1, 1:Many, Many:Many</h3>
+
+      <pre><code><span class="com">// One-to-Many: Category has many Products</span>
+<span class="kw">public class</span> Category {
+    <span class="kw">public int</span> Id { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public string</span> Name { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="str">""</span>;
+    <span class="kw">public</span> ICollection&lt;Product&gt; Products { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="kw">new</span> List&lt;Product&gt;();
+}
+<span class="kw">public class</span> Product {
+    <span class="kw">public int</span> Id { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public int</span> CategoryId { <span class="kw">get</span>; <span class="kw">set</span>; }       <span class="com">// FK</span>
+    <span class="kw">public</span> Category Category { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="kw">null</span>!;  <span class="com">// nav</span>
+}
+
+<span class="com">// One-to-One: User &lt;-&gt; UserProfile</span>
+<span class="kw">public class</span> User { <span class="kw">public int</span> Id { <span class="kw">get</span>; <span class="kw">set</span>; } <span class="kw">public</span> UserProfile? Profile { <span class="kw">get</span>; <span class="kw">set</span>; } }
+<span class="kw">public class</span> UserProfile { <span class="kw">public int</span> UserId { <span class="kw">get</span>; <span class="kw">set</span>; } <span class="kw">public</span> User User { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="kw">null</span>!; }
+
+b.Entity&lt;UserProfile&gt;().HasKey(p =&gt; p.UserId);
+b.Entity&lt;User&gt;().HasOne(u =&gt; u.Profile).WithOne(p =&gt; p.User).HasForeignKey&lt;UserProfile&gt;(p =&gt; p.UserId);
+
+<span class="com">// Many-to-Many: Student &lt;-&gt; Course (EF 5+ auto join table)</span>
+<span class="kw">public class</span> Student { <span class="kw">public int</span> Id { <span class="kw">get</span>; <span class="kw">set</span>; } <span class="kw">public</span> ICollection&lt;Course&gt; Courses { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="kw">new</span> List&lt;Course&gt;(); }
+<span class="kw">public class</span> Course  { <span class="kw">public int</span> Id { <span class="kw">get</span>; <span class="kw">set</span>; } <span class="kw">public</span> ICollection&lt;Student&gt; Students { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="kw">new</span> List&lt;Student&gt;(); }
+<span class="com">// EF auto-creates StudentCourse join table</span></code></pre>
+
+      <h4>Cascade Delete Behaviors</h4>
+      <ul>
+        <li><code>Cascade</code> — delete parent → children deleted (default for required FK)</li>
+        <li><code>Restrict</code> — block delete if children exist</li>
+        <li><code>SetNull</code> — set FK to NULL (nullable FK)</li>
+        <li><code>NoAction</code> — let DB decide</li>
+      </ul>
+    </section>
+
+    <section class="topic" id="loading">
+      <div class="topic__check"><input type="checkbox" data-topic="7" /></div>
+      <h3><span class="num">8</span> Eager / Lazy / Explicit Loading ⭐</h3>
+      <p class="concept">By default, navigation properties are NOT loaded. You explicitly choose how to fetch related data — wrong choice = N+1 query disaster.</p>
+
+      <h4>Three Strategies</h4>
+      <ul>
+        <li><strong>Eager (Include)</strong> — load related entities in same query (JOIN). Recommended.</li>
+        <li><strong>Lazy</strong> — load on first access (proxies). Easy but dangerous (N+1).</li>
+        <li><strong>Explicit</strong> — manually load via <code>db.Entry(x).Collection(...).LoadAsync()</code></li>
+      </ul>
+
+      <pre><code><span class="com">// EAGER — preferred</span>
+<span class="kw">var</span> orders = <span class="kw">await</span> db.Orders
+    .Include(o =&gt; o.Customer)
+    .Include(o =&gt; o.Items).ThenInclude(i =&gt; i.Product)
+    .Where(o =&gt; o.Total &gt; 100)
+    .ToListAsync();
+
+<span class="com">// PROJECTION — fastest, fetch only needed columns</span>
+<span class="kw">var</span> dtos = <span class="kw">await</span> db.Orders
+    .Where(o =&gt; o.Total &gt; 100)
+    .Select(o =&gt; <span class="kw">new</span> { o.Id, o.Total, CustomerName = o.Customer.Name })
+    .ToListAsync();
+
+<span class="com">// LAZY (avoid in web apps) — needs Microsoft.EntityFrameworkCore.Proxies</span>
+options.UseLazyLoadingProxies();
+<span class="com">// nav properties must be virtual</span>
+<span class="kw">public virtual</span> Customer Customer { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+<span class="com">// EXPLICIT — load on demand without lazy</span>
+<span class="kw">await</span> db.Entry(order).Collection(o =&gt; o.Items).LoadAsync();</code></pre>
+
+      <div class="gotcha">⚠️ <strong>Gotcha:</strong> Lazy loading + JSON serialization = infinite loops or N+1 queries hidden in API responses. Disable lazy loading by default.</div>
+    </section>
+
+    <section class="topic" id="linq-ef">
+      <div class="topic__check"><input type="checkbox" data-topic="8" /></div>
+      <h3><span class="num">9</span> LINQ to EF — IQueryable Magic</h3>
+      <p class="concept">Same LINQ you learned in Phase 1 — but EF translates the expression tree to SQL. Stay on <code>IQueryable</code> until you really need the data in memory.</p>
+
+      <pre><code><span class="kw">var</span> result = <span class="kw">await</span> db.Orders
+    .Where(o =&gt; o.Status == <span class="str">"Paid"</span>)         <span class="com">// SQL WHERE</span>
+    .GroupBy(o =&gt; o.CustomerId)              <span class="com">// SQL GROUP BY</span>
+    .Select(g =&gt; <span class="kw">new</span> {
+        CustomerId = g.Key,
+        Total = g.Sum(o =&gt; o.Total),
+        Count = g.Count()
+    })
+    .OrderByDescending(x =&gt; x.Total)
+    .Take(10)
+    .ToListAsync();   <span class="com">// 1 SQL query — perfect</span>
+
+<span class="com">// inspect generated SQL</span>
+<span class="kw">var</span> q = db.Orders.Where(o =&gt; o.Total &gt; 100);
+Console.WriteLine(q.ToQueryString());   <span class="com">// see the SQL!</span></code></pre>
+
+      <div class="interview">
+        <h4>🎯 IQueryable vs IEnumerable — the EF Trap</h4>
+        <ul>
+          <li><code>db.Orders</code> is <strong>IQueryable</strong> — operations build expression tree, executed at DB</li>
+          <li>Calling <code>.AsEnumerable()</code> or <code>.ToList()</code> too early pulls everything into memory and filters in C# (slow!)</li>
+          <li>Always filter / project on IQueryable, materialize last</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="topic" id="raw-sql">
+      <div class="topic__check"><input type="checkbox" data-topic="9" /></div>
+      <h3><span class="num">10</span> Raw SQL & Stored Procedures</h3>
+      <p class="concept">When LINQ can't express what you need (CTEs, window functions, complex hints), drop to SQL via <code>FromSql</code>.</p>
+
+      <pre><code><span class="com">// Raw SQL with parameters (always parameterize!)</span>
+<span class="kw">var</span> products = <span class="kw">await</span> db.Products
+    .FromSql($<span class="str">"SELECT * FROM Products WHERE Price &gt; {minPrice}"</span>)
+    .ToListAsync();
+<span class="com">// FromSql with FormattableString = parameterized SQL automatically</span>
+
+<span class="com">// stored procedure</span>
+<span class="kw">var</span> top = <span class="kw">await</span> db.Customers
+    .FromSql($<span class="str">"EXEC sp_GetTopCustomers @Top = {n}"</span>, n: 10)
+    .ToListAsync();
+
+<span class="com">// non-query SQL</span>
+<span class="kw">var</span> rows = <span class="kw">await</span> db.Database.ExecuteSqlAsync($<span class="str">"DELETE FROM Logs WHERE CreatedAt &lt; {cutoff}"</span>);
+
+<span class="com">// SqlQuery for ad-hoc results (EF 7+)</span>
+<span class="kw">var</span> stats = <span class="kw">await</span> db.Database.SqlQuery&lt;StatRow&gt;($<span class="str">"SELECT ..."</span>).ToListAsync();</code></pre>
+
+      <div class="gotcha">⚠️ <strong>Gotcha:</strong> NEVER use string concatenation in raw SQL — SQL injection. Always use <code>FromSql</code> with interpolation (it converts to parameters).</div>
+    </section>
+
+    <h2 class="section-title">📅 Week 3 — Advanced</h2>
+
+    <section class="topic" id="tracking">
+      <div class="topic__check"><input type="checkbox" data-topic="10" /></div>
+      <h3><span class="num">11</span> Change Tracking & AsNoTracking ⭐</h3>
+      <p class="concept">By default, EF tracks every queried entity to detect modifications. For read-only queries, this is wasted work and memory — use <code>AsNoTracking()</code>.</p>
+
+      <pre><code><span class="com">// Tracked (default) — slower, can update</span>
+<span class="kw">var</span> p = <span class="kw">await</span> db.Products.FirstAsync(x =&gt; x.Id == 5);
+p.Price = 99;
+<span class="kw">await</span> db.SaveChangesAsync();   <span class="com">// EF knows price changed</span>
+
+<span class="com">// No tracking — faster, read-only</span>
+<span class="kw">var</span> products = <span class="kw">await</span> db.Products
+    .AsNoTracking()
+    .Where(p =&gt; p.IsActive)
+    .ToListAsync();
+
+<span class="com">// global default for read-heavy app</span>
+optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+
+<span class="com">// inspect tracker</span>
+<span class="kw">foreach</span> (<span class="kw">var</span> entry <span class="kw">in</span> db.ChangeTracker.Entries()) {
+    Console.WriteLine($<span class="str">"{entry.Entity.GetType().Name}: {entry.State}"</span>);
+    <span class="com">// State: Added, Modified, Deleted, Unchanged, Detached</span>
+}</code></pre>
+
+      <div class="interview">
+        <h4>🎯 When to Use Each</h4>
+        <ul>
+          <li><strong>Tracked</strong>: when you'll modify and save the entity</li>
+          <li><strong>NoTracking</strong>: API GET endpoints, lists, anything read-only — <strong>20-50% faster</strong></li>
+          <li><strong>AsNoTrackingWithIdentityResolution</strong>: NoTracking but de-duplicates entities by key (large joins)</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="topic" id="concurrency">
+      <div class="topic__check"><input type="checkbox" data-topic="11" /></div>
+      <h3><span class="num">12</span> Concurrency Control & Transactions</h3>
+      <p class="concept">When two users edit the same row, you need a strategy: <strong>optimistic</strong> (last writer wins, with detection) or <strong>pessimistic</strong> (locks).</p>
+
+      <h4>Optimistic Concurrency (recommended)</h4>
+      <pre><code><span class="kw">public class</span> Product {
+    <span class="kw">public int</span> Id { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public string</span> Name { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="str">""</span>;
+    [Timestamp] <span class="kw">public byte</span>[] RowVersion { <span class="kw">get</span>; <span class="kw">set</span>; } = [];   <span class="com">// SQL Server</span>
+}
+
+<span class="kw">try</span> {
+    <span class="kw">var</span> p = <span class="kw">await</span> db.Products.FindAsync(5);
+    p.Name = <span class="str">"Updated"</span>;
+    <span class="kw">await</span> db.SaveChangesAsync();
+} <span class="kw">catch</span> (DbUpdateConcurrencyException ex) {
+    <span class="com">// row changed since you read it — handle conflict</span>
+    <span class="kw">var</span> entry = ex.Entries.Single();
+    <span class="kw">var</span> dbValues = <span class="kw">await</span> entry.GetDatabaseValuesAsync();
+    <span class="com">// merge or surface to user</span>
+}</code></pre>
+
+      <h4>Transactions</h4>
+      <pre><code><span class="kw">using var</span> tx = <span class="kw">await</span> db.Database.BeginTransactionAsync();
+<span class="kw">try</span> {
+    db.Accounts.Find(1)!.Balance -= 100;
+    db.Accounts.Find(2)!.Balance += 100;
+    <span class="kw">await</span> db.SaveChangesAsync();
+    <span class="kw">await</span> tx.CommitAsync();
+} <span class="kw">catch</span> {
+    <span class="kw">await</span> tx.RollbackAsync(); <span class="kw">throw</span>;
+}
+
+<span class="com">// SaveChanges is auto-transactional, so explicit tx only needed across multiple SaveChanges</span></code></pre>
+    </section>
+
+    <section class="topic" id="perf">
+      <div class="topic__check"><input type="checkbox" data-topic="12" /></div>
+      <h3><span class="num">13</span> Performance — N+1 & Optimization ⭐</h3>
+      <p class="concept">The <strong>N+1 problem</strong> is the #1 EF performance killer and a classic interview question.</p>
+
+      <pre><code><span class="com">// 🚨 N+1: 1 query for orders + N queries for customers</span>
+<span class="kw">var</span> orders = <span class="kw">await</span> db.Orders.ToListAsync();
+<span class="kw">foreach</span> (<span class="kw">var</span> o <span class="kw">in</span> orders)
+    Console.WriteLine(o.Customer.Name);   <span class="com">// triggers N queries (lazy)</span>
+
+<span class="com">// ✅ FIX 1: eager loading</span>
+<span class="kw">var</span> orders = <span class="kw">await</span> db.Orders.Include(o =&gt; o.Customer).ToListAsync();
+
+<span class="com">// ✅ FIX 2: projection (best for reads)</span>
+<span class="kw">var</span> dtos = <span class="kw">await</span> db.Orders
+    .Select(o =&gt; <span class="kw">new</span> { o.Id, CustomerName = o.Customer.Name })
+    .ToListAsync();</code></pre>
+
+      <h4>🎯 EF Performance Checklist</h4>
+      <ol>
+        <li>Use <code>AsNoTracking()</code> on read-only queries</li>
+        <li>Use <code>.Select()</code> projection — fetch only needed columns</li>
+        <li>Eager-load with <code>.Include()</code>; avoid lazy loading</li>
+        <li>Use <code>.AsSplitQuery()</code> for large includes (avoids cartesian explosion)</li>
+        <li>Page large result sets (<code>Skip/Take</code>)</li>
+        <li>Use <code>ExecuteUpdate</code>/<code>ExecuteDelete</code> for bulk ops (EF 7+)</li>
+        <li>Use <code>CompiledQuery</code> for hot paths (rare)</li>
+        <li>Inspect generated SQL with <code>.ToQueryString()</code></li>
+        <li>Add indexes on FKs and frequently-filtered columns</li>
+        <li>Drop to <strong>Dapper</strong> for super-hot read endpoints</li>
+      </ol>
+
+      <pre><code><span class="com">// Split query — avoids cartesian product when including multiple collections</span>
+<span class="kw">var</span> orders = <span class="kw">await</span> db.Orders
+    .Include(o =&gt; o.Items)
+    .Include(o =&gt; o.Payments)
+    .AsSplitQuery()        <span class="com">// 3 separate queries</span>
+    .ToListAsync();</code></pre>
+
+      <div class="gotcha">⚠️ <strong>Gotcha:</strong> Multiple <code>.Include()</code> with collections creates a Cartesian product. Use <code>.AsSplitQuery()</code>.</div>
+    </section>
+
+    <section class="topic" id="repo">
+      <div class="topic__check"><input type="checkbox" data-topic="13" /></div>
+      <h3><span class="num">14</span> Repository, Unit of Work & Dapper</h3>
+      <p class="concept">Repository abstracts data access; Unit of Work groups changes. EF Core itself IS a UoW + repo (DbContext + DbSet) — many seniors say <strong>don't add another layer</strong>.</p>
+
+      <h4>🎯 To Wrap or Not to Wrap (interview opinion)</h4>
+      <ul>
+        <li><strong>For:</strong> testability (mock IRepository), DB swap-ability, encapsulating complex queries</li>
+        <li><strong>Against:</strong> EF Core already IS a Repo + UoW; extra layer is often pure overhead and leaks IQueryable</li>
+        <li><strong>Pragmatic:</strong> use <strong>Specification pattern</strong> or service classes that take DbContext directly; skip generic repos</li>
+      </ul>
+
+      <pre><code><span class="kw">public interface</span> IProductRepository {
+    Task&lt;Product?&gt; GetByIdAsync(<span class="kw">int</span> id);
+    Task&lt;IReadOnlyList&lt;Product&gt;&gt; GetActiveAsync();
+    <span class="kw">void</span> Add(Product p);
+}
+
+<span class="kw">public class</span> ProductRepository(AppDbContext db) : IProductRepository {
+    <span class="kw">public</span> Task&lt;Product?&gt; GetByIdAsync(<span class="kw">int</span> id) =&gt; db.Products.FindAsync(id).AsTask();
+    <span class="kw">public async</span> Task&lt;IReadOnlyList&lt;Product&gt;&gt; GetActiveAsync() =&gt;
+        <span class="kw">await</span> db.Products.AsNoTracking().Where(p =&gt; p.IsActive).ToListAsync();
+    <span class="kw">public void</span> Add(Product p) =&gt; db.Products.Add(p);
+}</code></pre>
+
+      <h4>Dapper — when EF isn't fast enough</h4>
+      <pre><code><span class="kw">using</span> Dapper;
+<span class="kw">using var</span> conn = <span class="kw">new</span> SqlConnection(connectionString);
+<span class="kw">var</span> products = <span class="kw">await</span> conn.QueryAsync&lt;Product&gt;(
+    <span class="str">"SELECT Id, Name, Price FROM Products WHERE CategoryId = @cat"</span>,
+    <span class="kw">new</span> { cat = 5 });</code></pre>
+
+      <p class="muted">Use Dapper for: complex reporting queries, hot read paths with stored procedures, or when the team is more comfortable with raw SQL.</p>
+    </section>
+
+    <section id="qa">
+      <h2 class="section-title">🎤 Interview Q&A — Phase 4</h2>
+      <div class="qa-block">
+        <details><summary>Q. What is EF Core and how it relate to LINQ?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>EF Core = Entity Framework Core</li>
+              <li>Microsoft's official ORM (Object-Relational Mapper) for .NET</li>
+              <li>Bridge between C# objects and database tables</li>
+            </ul>
+            <p><strong>What it does:</strong></p>
+            <ul>
+              <li>You define class like <code>Product</code> — EF map it to Products table</li>
+              <li>You query using LINQ — EF generate SQL behind the scene</li>
+              <li>No need to write SQL by hand for normal CRUD</li>
+            </ul>
+            <p><strong>How LINQ + EF work together:</strong></p>
+            <ul>
+              <li>EF expose <code>DbSet&lt;T&gt;</code> as <code>IQueryable&lt;T&gt;</code></li>
+              <li>You write <code>db.Products.Where(p =&gt; p.Price &gt; 100)</code></li>
+              <li>EF capture lambda as expression tree</li>
+              <li>EF walk tree and generate SQL WHERE clause</li>
+              <li>Complex queries (join, group) become single SQL statement</li>
+            </ul>
+            <p><strong>Other features:</strong></p>
+            <ul>
+              <li>Migrations — version your schema</li>
+              <li>Change tracking — know what to update</li>
+              <li>Connection management</li>
+            </ul>
+            <p><strong>Java parallel:</strong></p>
+            <ul>
+              <li>EF Core is similar to Hibernate / JPA in Java</li>
+              <li>Same idea — write Java/C# code, ORM generate SQL</li>
+              <li>EF Core LINQ = JPA Criteria API but more friendly</li>
+            </ul>
+            <p><strong>Note:</strong> EF is "leaky abstraction" — must understand SQL it generates.</p>
+          </div>
+        </details>
+        <details><summary>Q. Explain N+1 query problem and how to fix?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>N+1 = most common EF performance bug</li>
+              <li>1 query for parent + N queries for navigation property</li>
+              <li>Total = 1 + N queries</li>
+            </ul>
+            <p><strong>Example:</strong></p>
+            <ul>
+              <li>Load 100 orders — 1 query</li>
+              <li>Loop and access <code>order.Customer.Name</code> — 100 separate queries</li>
+              <li>Total = 101 queries</li>
+              <li>50 requests = 5050 queries — database fall over</li>
+            </ul>
+            <p><strong>Fix 1 — Eager Loading (<code>.Include()</code>):</strong></p>
+            <pre><code>db.Orders.Include(o =&gt; o.Customer).ToListAsync()</code></pre>
+            <ul>
+              <li>EF do JOIN in same query</li>
+              <li>One SQL query for everything</li>
+            </ul>
+            <p><strong>Fix 2 — Projection (<code>.Select()</code>) — BEST:</strong></p>
+            <pre><code>.Select(o =&gt; new { o.Id, CustomerName = o.Customer.Name })</code></pre>
+            <ul>
+              <li>Shape query directly into DTO</li>
+              <li>Fetch only exact columns needed</li>
+              <li>Fastest option</li>
+            </ul>
+            <p><strong>Java parallel:</strong></p>
+            <ul>
+              <li>Same problem in Hibernate / JPA also</li>
+              <li>Fix with fetch join or @EntityGraph</li>
+            </ul>
+            <p><strong>Note:</strong> Always check generated SQL with <code>.ToQueryString()</code>.</p>
+          </div>
+        </details>
+        <details><summary>What's the difference between IEnumerable, IQueryable, and how does it matter for EF?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li><strong>IEnumerable&lt;T&gt;</strong> — in-memory sequence (LINQ to Objects)</li>
+              <li><strong>IQueryable&lt;T&gt;</strong> — expression tree run on external source (database)</li>
+              <li>EF Core's <code>DbSet&lt;T&gt;</code> implement <code>IQueryable&lt;T&gt;</code></li>
+            </ul>
+            <p><strong>Where filtering happens:</strong></p>
+            <ul>
+              <li>IQueryable — at database (only matching rows return)</li>
+              <li>IEnumerable — in your app memory (after fetching all)</li>
+            </ul>
+            <p><strong>Performance Example:</strong></p>
+            <ul>
+              <li>Good: <code>db.Products.Where(p =&gt; p.IsActive).ToList()</code> — SQL WHERE</li>
+              <li>Bad: <code>db.Products.ToList().Where(p =&gt; p.IsActive)</code> — load all rows first</li>
+              <li>Bad version on million-row table = disaster</li>
+            </ul>
+            <p><strong>Rule:</strong></p>
+            <ul>
+              <li>Stay on IQueryable as long as possible</li>
+              <li>Call <code>.ToListAsync()</code> at very end</li>
+              <li>Don't call <code>.AsEnumerable()</code> too early</li>
+            </ul>
+            <p><strong>Java parallel:</strong></p>
+            <ul>
+              <li>IEnumerable = Java Stream API (in-memory)</li>
+              <li>IQueryable = JPA Criteria API (translated to SQL)</li>
+            </ul>
+          </div>
+        </details>
+        <details><summary>Q. Tracking vs No-Tracking — when to use?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>EF tracks every entity returned from query by default</li>
+              <li>Tracking detect changes for UPDATE statements at SaveChanges</li>
+            </ul>
+            <p><strong>Cost of Tracking:</strong></p>
+            <ul>
+              <li>Extra memory — EF store snapshot of every entity</li>
+              <li>Extra CPU — EF compare snapshots to detect changes</li>
+              <li>Wasted for read-only queries</li>
+            </ul>
+            <p><strong>NoTracking:</strong></p>
+            <ul>
+              <li>Use <code>.AsNoTracking()</code> for read-only queries</li>
+              <li>Skip change tracker entirely</li>
+              <li>20-50% faster, less memory</li>
+              <li>Best for GET endpoints, list endpoints</li>
+            </ul>
+            <p><strong>Example:</strong></p>
+            <pre><code>var products = await db.Products.AsNoTracking().ToListAsync();</code></pre>
+            <p><strong>Rule of thumb:</strong></p>
+            <ul>
+              <li>AsNoTracking — every GET / list endpoint</li>
+              <li>Tracking — when you will modify and save</li>
+            </ul>
+            <p><strong>Global default:</strong></p>
+            <ul>
+              <li><code>UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)</code> for read-heavy apps</li>
+            </ul>
+          </div>
+        </details>
+        <details><summary>Q. Eager vs Lazy vs Explicit loading?</summary>
+          <div>
+            <p><strong>Definition:</strong> 3 strategies EF use to fetch related data via navigation properties.</p>
+            <p><strong>Eager Loading (BEST):</strong></p>
+            <ul>
+              <li>Use <code>.Include()</code> to fetch related data in same query</li>
+              <li>EF generate JOIN</li>
+              <li>Example: <code>db.Orders.Include(o =&gt; o.Customer)</code></li>
+              <li>You control exactly what loads</li>
+            </ul>
+            <p><strong>Lazy Loading (AVOID in web):</strong></p>
+            <ul>
+              <li>Load related data on first access</li>
+              <li>Read <code>order.Customer</code> — EF fire query at that moment</li>
+              <li>Need <code>Microsoft.EntityFrameworkCore.Proxies</code> package</li>
+              <li>Navigation properties marked <code>virtual</code></li>
+              <li>Cause N+1 problem in loops</li>
+              <li>Break JSON serialization (infinite recursion)</li>
+            </ul>
+            <p><strong>Explicit Loading:</strong></p>
+            <ul>
+              <li>Manual: <code>db.Entry(order).Reference(o =&gt; o.Customer).LoadAsync()</code></li>
+              <li>Use when sometimes need related data, sometimes not</li>
+              <li>You control timing</li>
+            </ul>
+            <p><strong>Java parallel:</strong></p>
+            <ul>
+              <li>Same as Hibernate <code>FetchType.EAGER</code> vs <code>LAZY</code></li>
+              <li>Hibernate also has lazy loading problems</li>
+            </ul>
+            <p><strong>Best Practice:</strong> Eager with <code>.Include()</code> OR <code>.Select()</code> projection into DTOs.</p>
+          </div>
+        </details>
+        <details><summary>Q. How to handle concurrency in EF?</summary>
+          <div>
+            <p><strong>Why needed:</strong></p>
+            <ul>
+              <li>Two users edit same row at same time</li>
+              <li>Need to handle conflict</li>
+            </ul>
+            <p><strong>EF Approach — Optimistic Concurrency:</strong></p>
+            <ul>
+              <li>Assume conflicts are rare</li>
+              <li>Detect at save time, no DB locks</li>
+              <li>Much more scalable than pessimistic locking</li>
+            </ul>
+            <p><strong>How to setup:</strong></p>
+            <ul>
+              <li>Add <code>RowVersion</code> column (byte array with <code>[Timestamp]</code>)</li>
+              <li>SQL Server auto-increment on every UPDATE</li>
+              <li>EF include in UPDATE: <code>WHERE Id = @id AND RowVersion = @original</code></li>
+              <li>If row changed in between — UPDATE affect 0 rows</li>
+              <li>EF throw <code>DbUpdateConcurrencyException</code></li>
+            </ul>
+            <p><strong>How to Handle Exception:</strong></p>
+            <ul>
+              <li>Retry operation</li>
+              <li>Merge conflict by re-fetching</li>
+              <li>Show user "modified by someone else"</li>
+              <li>Pick winner (last-write-wins)</li>
+            </ul>
+            <p><strong>Note:</strong> Pessimistic locking — use raw SQL with <code>SELECT ... FOR UPDATE</code>. Rarely needed.</p>
+          </div>
+        </details>
+        <details><summary>Q. EF Core vs Dapper — when to choose?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>EF Core — full ORM</li>
+              <li>Dapper — micro-ORM, thin layer over ADO.NET</li>
+            </ul>
+            <p><strong>Compare Table:</strong></p>
+            <table>
+              <thead><tr><th>Aspect</th><th>EF Core</th><th>Dapper</th></tr></thead>
+              <tbody>
+                <tr><td>Type</td><td>Full ORM</td><td>Micro-ORM</td></tr>
+                <tr><td>Query syntax</td><td>LINQ</td><td>You write SQL</td></tr>
+                <tr><td>Change tracking</td><td>Yes</td><td>No</td></tr>
+                <tr><td>Migrations</td><td>Yes</td><td>No</td></tr>
+                <tr><td>Speed</td><td>Slightly slower</td><td>Same as ADO.NET</td></tr>
+                <tr><td>Productivity</td><td>High</td><td>Lower (manual SQL)</td></tr>
+              </tbody>
+            </table>
+            <p><strong>When to use EF Core:</strong></p>
+            <ul>
+              <li>80% of CRUD work</li>
+              <li>Standard write operations</li>
+              <li>Productivity matters more than 5% perf</li>
+            </ul>
+            <p><strong>When to use Dapper:</strong></p>
+            <ul>
+              <li>Hot read paths (millions of hits)</li>
+              <li>Heavy reporting queries</li>
+              <li>Complex queries with CTEs, window functions, hints</li>
+              <li>When LINQ cannot express the query well</li>
+            </ul>
+            <p><strong>Java parallel:</strong></p>
+            <ul>
+              <li>EF Core = Hibernate/JPA</li>
+              <li>Dapper = JDBC with light wrapper</li>
+            </ul>
+            <p><strong>Note:</strong> Many serious projects use BOTH — EF for writes, Dapper for read-optimized queries.</p>
+          </div>
+        </details>
+        <details><summary>Q. Code-First vs Database-First?</summary>
+          <div>
+            <p><strong>Definition:</strong> 2 ways to setup relationship between C# entities and DB schema.</p>
+            <p><strong>Code-First (Modern Default):</strong></p>
+            <ul>
+              <li>Write C# entity classes first (Product, Order, Category)</li>
+              <li>Define relationships with attributes or Fluent API</li>
+              <li>Run <code>dotnet ef migrations add InitialCreate</code></li>
+              <li>Run <code>dotnet ef database update</code></li>
+              <li>EF read classes and create tables</li>
+              <li>Every change = new migration in source control</li>
+              <li>Best for new projects where dev team owns schema</li>
+            </ul>
+            <p><strong>Database-First:</strong></p>
+            <ul>
+              <li>Database already exists (cannot change)</li>
+              <li>For legacy enterprise DB owned by DBA team</li>
+              <li>Run <code>dotnet ef dbcontext scaffold "ConnString" Microsoft.EntityFrameworkCore.SqlServer -o Models</code></li>
+              <li>Schema change first in DB, then re-scaffold C# side</li>
+            </ul>
+            <p><strong>Java parallel:</strong></p>
+            <ul>
+              <li>Code-First = Hibernate <code>hbm2ddl.auto=update</code></li>
+              <li>Database-First = Hibernate reverse engineering</li>
+            </ul>
+            <p><strong>Note:</strong> For 90% of new projects, choose Code-First.</p>
+          </div>
+        </details>
+        <details><summary>Q. What does SaveChanges do internally?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li><code>SaveChanges</code> push in-memory changes to database</li>
+              <li><code>SaveChangesAsync</code> is async version</li>
+            </ul>
+            <p><strong>Internal Steps:</strong></p>
+            <ol>
+              <li>Walk every entity in DbContext's <strong>ChangeTracker</strong></li>
+              <li>Check entity State — Added, Modified, Deleted, Unchanged</li>
+              <li>For Added — generate INSERT statement</li>
+              <li>For Modified — generate UPDATE with only changed columns</li>
+              <li>For Deleted — generate DELETE statement</li>
+              <li>Open implicit transaction (whole batch atomic)</li>
+              <li>Execute all statements in order</li>
+              <li>Populate auto-generated keys back into entities</li>
+              <li>Commit transaction</li>
+              <li>Set all entities back to Unchanged</li>
+            </ol>
+            <p><strong>Return value:</strong></p>
+            <ul>
+              <li>Number of affected database rows</li>
+              <li>Check expected rows modified</li>
+            </ul>
+            <p><strong>If anything fails:</strong></p>
+            <ul>
+              <li>Database error, concurrency conflict, constraint violation</li>
+              <li>EF rollback transaction</li>
+              <li>Throw exception</li>
+            </ul>
+            <p><strong>Note:</strong> Always use <code>SaveChangesAsync</code> in web apps to avoid blocking threads.</p>
+          </div>
+        </details>
+        <details><summary>Q. Should you use Repository pattern with EF?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>Repository pattern wrap data access in interface like <code>IProductRepository</code></li>
+              <li>Methods: <code>GetById</code>, <code>Add</code>, <code>Update</code></li>
+            </ul>
+            <p><strong>Argument FOR:</strong></p>
+            <ul>
+              <li>Abstract DB technology — can swap EF for Dapper later</li>
+              <li>Easier to unit-test (mock the interface)</li>
+              <li>Centralize complex queries</li>
+            </ul>
+            <p><strong>Argument AGAINST:</strong></p>
+            <ul>
+              <li>EF Core's DbContext IS already Unit of Work</li>
+              <li>EF Core's DbSet IS already a Repository</li>
+              <li>Extra layer duplicate EF features</li>
+              <li>Leak IQueryable everywhere (defeat abstraction)</li>
+              <li>Add boilerplate without real benefit</li>
+            </ul>
+            <p><strong>Modern Senior Advice:</strong></p>
+            <ul>
+              <li>Don't add generic <code>Repository&lt;T&gt;</code> just for pattern sake</li>
+              <li>Write service classes that depend on DbContext directly</li>
+              <li>Test with in-memory provider or test containers</li>
+              <li>For complex reusable queries — use Specification pattern</li>
+            </ul>
+            <p><strong>Java parallel:</strong></p>
+            <ul>
+              <li>You know POJO + Service + Repository layered architecture from Java</li>
+              <li>In .NET, EF DbContext often replace Repository layer</li>
+              <li>Service can depend on DbContext directly — fine</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <section id="mistakes" class="callout callout--warn">
+      <h3>⚠️ Common Mistakes in EF Core</h3>
+      <ul>
+        <li>Forgetting <code>AsNoTracking()</code> on read-only queries (perf hit).</li>
+        <li>N+1 queries from missing <code>.Include()</code> or accidental lazy loading.</li>
+        <li>Calling <code>.ToList()</code> too early — pulls everything into memory.</li>
+        <li>Multiple <code>.Include()</code> with collections → Cartesian explosion (use <code>.AsSplitQuery()</code>).</li>
+        <li>String concat in <code>FromSql</code> — SQL injection.</li>
+        <li>Updating without fetching first (when you mean to track changes).</li>
+        <li>Sharing DbContext across threads — not thread-safe.</li>
+        <li>Editing applied migrations instead of creating new ones.</li>
+        <li>Calling <code>db.Database.Migrate()</code> in multi-instance prod (race).</li>
+      </ul>
+    </section>
+
+    <nav class="phase-nav">
+      <a href="phase-3-aspnet-core.html"><span class="label">← Prev</span><strong>Phase 3: ASP.NET Core</strong></a>
+      <a href="phase-5-angular-integration.html" class="next"><span class="label">Next →</span><strong>Phase 5: Angular + .NET Integration</strong></a>
+    </nav>
+  </main>
+</div>
+
+<footer class="footer">Phase 4 of 9 · Now you can persist data like a senior</footer>
+
+<script>
+  const phase = document.body.dataset.phase;
+  document.querySelectorAll('input[type="checkbox"][data-topic]').forEach(cb => {
+    const key = `phase-${phase}-topic-${cb.dataset.topic}`;
+    cb.checked = localStorage.getItem(key) === 'true';
+    cb.closest('.topic').classList.toggle('is-done', cb.checked);
+    cb.addEventListener('change', () => {
+      localStorage.setItem(key, cb.checked);
+      cb.closest('.topic').classList.toggle('is-done', cb.checked);
+    });
+  });
+  const links = document.querySelectorAll('.sidebar a[href^="#"]');
+  const sections = [...links].map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  window.addEventListener('scroll', () => {
+    let current = sections[0]?.id;
+    sections.forEach(s => { if (window.scrollY + 100 >= s.offsetTop) current = s.id; });
+    links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current));
+  });
+</script>
+</body>
+</html>

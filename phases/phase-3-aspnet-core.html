@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Phase 3 — ASP.NET Core Web API | .NET Roadmap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/global.css" />
+</head>
+<body data-phase="3">
+
+<nav class="topnav">
+  <div class="topnav__inner">
+    <div class="brand"><a href="../index.html" style="color:inherit">.NET<span class="dot">·</span>Roadmap</a></div>
+    <div class="topnav__links">
+      <a href="../index.html">Home</a>
+      <a href="phase-0-foundation.html">P0</a>
+      <a href="phase-1-csharp.html">P1</a>
+      <a href="phase-2-sql.html">P2</a>
+      <a href="phase-3-aspnet-core.html" class="active">P3</a>
+      <a href="phase-4-ef-core.html">P4</a>
+      <a href="phase-5-angular-integration.html">P5</a>
+      <a href="phase-6-system-design.html">P6</a>
+      <a href="phase-7-devops-azure.html">P7</a>
+      <a href="phase-8-projects.html">P8</a>
+      <a href="phase-9-interview.html">P9</a>
+    </div>
+  </div>
+</nav>
+
+<div class="phase-page">
+  <aside class="sidebar">
+    <h4>Week 1 · Fundamentals</h4>
+    <ul>
+      <li><a href="#program-cs">1. Program.cs & Hosting</a></li>
+      <li><a href="#config">2. Configuration</a></li>
+    </ul>
+    <h4>Week 2 · Web API Core</h4>
+    <ul>
+      <li><a href="#controllers">3. Controllers & Routing</a></li>
+      <li><a href="#binding">4. Model Binding & Validation</a></li>
+      <li><a href="#dto">5. DTOs & AutoMapper</a></li>
+      <li><a href="#status">6. Status Codes & REST</a></li>
+      <li><a href="#swagger">7. Swagger / OpenAPI</a></li>
+    </ul>
+    <h4>Week 3 · DI & Middleware</h4>
+    <ul>
+      <li><a href="#di">8. Dependency Injection ⭐</a></li>
+      <li><a href="#middleware">9. Middleware Pipeline</a></li>
+      <li><a href="#filters">10. Filters</a></li>
+    </ul>
+    <h4>Week 4 · Logging & Errors</h4>
+    <ul>
+      <li><a href="#logging">11. Logging (Serilog)</a></li>
+      <li><a href="#exceptions">12. Global Exception Handling</a></li>
+    </ul>
+    <h4>Week 5 · Auth</h4>
+    <ul>
+      <li><a href="#jwt">13. JWT Authentication ⭐</a></li>
+      <li><a href="#authz">14. Role / Policy Authorization</a></li>
+      <li><a href="#cors">15. CORS</a></li>
+    </ul>
+    <h4>Week 6 · Real-World</h4>
+    <ul>
+      <li><a href="#paging">16. Pagination, Filter, Sort</a></li>
+      <li><a href="#versioning">17. API Versioning, Rate Limit</a></li>
+      <li><a href="#bg">18. Background Services</a></li>
+    </ul>
+    <h4>Sections</h4>
+    <ul>
+      <li><a href="#qa">Interview Q&A</a></li>
+      <li><a href="#mistakes">Common Mistakes</a></li>
+    </ul>
+  </aside>
+
+  <main class="content">
+    <div class="breadcrumb"><a href="../index.html">Home</a> / Phase 3</div>
+
+    <header class="phase-header">
+      <h1>Phase 3 — ASP.NET Core Web API</h1>
+      <p class="lede">Build production REST APIs. Master DI, middleware, JWT auth, validation, logging, and error handling — these are the backbone of every senior .NET interview.</p>
+      <div class="phase-meta">
+        <span class="pill">⏱ 6 Weeks</span>
+        <span class="pill">18 Topics</span>
+        <span class="pill">⭐ Backend core</span>
+      </div>
+    </header>
+
+    <div class="callout callout--prereq">
+      <h3>📋 Prerequisites</h3>
+      <ul>
+        <li>C# Advanced (delegates, async/await, generics) — Phase 1</li>
+        <li>SQL basics — Phase 2</li>
+        <li>HTTP fundamentals: GET/POST/PUT/DELETE, status codes, headers</li>
+        <li>JSON understanding (you have this from Angular)</li>
+      </ul>
+    </div>
+
+    <h2 class="section-title">📅 Week 1 — Fundamentals</h2>
+
+    <section class="topic" id="program-cs">
+      <div class="topic__check"><input type="checkbox" data-topic="0" /></div>
+      <h3><span class="num">1</span> Program.cs & The Hosting Model</h3>
+      <p class="concept">In .NET 6+, <code>Program.cs</code> is the single entry point. The <strong>WebApplicationBuilder</strong> configures services + middleware in two clear sections (Build phase + Run phase).</p>
+
+      <pre><code><span class="kw">var</span> builder = WebApplication.CreateBuilder(args);
+
+<span class="com">// 1️⃣ REGISTER SERVICES (DI container)</span>
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddDbContext&lt;AppDbContext&gt;(opt =&gt;
+    opt.UseSqlServer(builder.Configuration.GetConnectionString(<span class="str">"Default"</span>)));
+builder.Services.AddScoped&lt;IUserService, UserService&gt;();
+
+<span class="kw">var</span> app = builder.Build();
+
+<span class="com">// 2️⃣ CONFIGURE MIDDLEWARE PIPELINE (order matters!)</span>
+<span class="kw">if</span> (app.Environment.IsDevelopment()) {
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
+
+app.Run();</code></pre>
+
+      <div class="interview">
+        <h4>🎯 Hosting Model Facts</h4>
+        <ul>
+          <li><strong>Kestrel</strong> — built-in cross-platform web server (default)</li>
+          <li><strong>IIS / Nginx</strong> — reverse proxy in front of Kestrel for production</li>
+          <li><strong>WebApplication</strong> = simplified host (.NET 6+); replaces older <code>Startup.cs</code> pattern</li>
+          <li>Configuration auto-loads <code>appsettings.json</code>, <code>appsettings.{Environment}.json</code>, env vars, command line</li>
+        </ul>
+      </div>
+
+      <div class="angular-bridge">🔗 <strong>Angular Parallel:</strong> <code>builder.Services.AddXxx()</code> ≈ Angular's <code>NgModule.providers</code>. Middleware pipeline ≈ Angular HTTP interceptor chain.</div>
+    </section>
+
+    <section class="topic" id="config">
+      <div class="topic__check"><input type="checkbox" data-topic="1" /></div>
+      <h3><span class="num">2</span> Configuration & Options Pattern</h3>
+      <p class="concept">Settings live in <code>appsettings.json</code> (per-environment). Read via <code>IConfiguration</code> directly, or — better — bind to a strongly-typed class via the <strong>Options pattern</strong>.</p>
+
+      <pre><code><span class="com">// appsettings.json</span>
+{
+  <span class="str">"ConnectionStrings"</span>: { <span class="str">"Default"</span>: <span class="str">"Server=...;Database=Shop;..."</span> },
+  <span class="str">"Jwt"</span>: { <span class="str">"Issuer"</span>: <span class="str">"shop-api"</span>, <span class="str">"Key"</span>: <span class="str">"super-secret"</span>, <span class="str">"ExpiryMinutes"</span>: 60 }
+}
+
+<span class="com">// strongly typed</span>
+<span class="kw">public class</span> JwtOptions {
+    <span class="kw">public string</span> Issuer { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="str">""</span>;
+    <span class="kw">public string</span> Key { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="str">""</span>;
+    <span class="kw">public int</span> ExpiryMinutes { <span class="kw">get</span>; <span class="kw">set</span>; }
+}
+
+<span class="com">// register</span>
+builder.Services.Configure&lt;JwtOptions&gt;(builder.Configuration.GetSection(<span class="str">"Jwt"</span>));
+
+<span class="com">// inject</span>
+<span class="kw">public class</span> TokenService(IOptions&lt;JwtOptions&gt; opts) {
+    <span class="kw">private readonly</span> JwtOptions _jwt = opts.Value;
+}</code></pre>
+
+      <div class="interview">
+        <h4>🎯 IOptions vs IOptionsSnapshot vs IOptionsMonitor</h4>
+        <ul>
+          <li><code>IOptions&lt;T&gt;</code> — singleton, read once at startup</li>
+          <li><code>IOptionsSnapshot&lt;T&gt;</code> — scoped, re-binds per request (config can change)</li>
+          <li><code>IOptionsMonitor&lt;T&gt;</code> — singleton + listens for changes (notifications)</li>
+        </ul>
+      </div>
+
+      <div class="gotcha">⚠️ <strong>Gotcha:</strong> Never store secrets (passwords, JWT keys) in <code>appsettings.json</code> in source control. Use <strong>User Secrets</strong> (dev) and <strong>Azure Key Vault</strong> (prod).</div>
+    </section>
+
+    <h2 class="section-title">📅 Week 2 — Web API Core</h2>
+
+    <section class="topic" id="controllers">
+      <div class="topic__check"><input type="checkbox" data-topic="2" /></div>
+      <h3><span class="num">3</span> Controllers, Actions & Routing</h3>
+      <p class="concept">Controllers handle HTTP requests. Each public method (<em>action</em>) maps to a route. Modern Web API uses <strong>attribute routing</strong>.</p>
+
+      <pre><code>[ApiController]
+[Route(<span class="str">"api/[controller]"</span>)]   <span class="com">// → /api/products</span>
+<span class="kw">public class</span> ProductsController : ControllerBase {
+    <span class="kw">private readonly</span> IProductService _svc;
+    <span class="kw">public</span> ProductsController(IProductService svc) =&gt; _svc = svc;
+
+    [HttpGet]                              <span class="com">// GET /api/products</span>
+    <span class="kw">public async</span> Task&lt;IActionResult&gt; GetAll() =&gt; Ok(<span class="kw">await</span> _svc.GetAll());
+
+    [HttpGet(<span class="str">"{id:int}"</span>)]               <span class="com">// GET /api/products/5  (constraint)</span>
+    <span class="kw">public async</span> Task&lt;IActionResult&gt; Get(<span class="kw">int</span> id) {
+        <span class="kw">var</span> p = <span class="kw">await</span> _svc.Get(id);
+        <span class="kw">return</span> p <span class="kw">is null</span> ? NotFound() : Ok(p);
+    }
+
+    [HttpPost]
+    <span class="kw">public async</span> Task&lt;IActionResult&gt; Create([FromBody] CreateProductDto dto) {
+        <span class="kw">var</span> created = <span class="kw">await</span> _svc.Create(dto);
+        <span class="kw">return</span> CreatedAtAction(<span class="kw">nameof</span>(Get), <span class="kw">new</span> { id = created.Id }, created);
+    }
+
+    [HttpPut(<span class="str">"{id:int}"</span>)]
+    <span class="kw">public async</span> Task&lt;IActionResult&gt; Update(<span class="kw">int</span> id, [FromBody] UpdateProductDto dto) {
+        <span class="kw">await</span> _svc.Update(id, dto);
+        <span class="kw">return</span> NoContent();
+    }
+
+    [HttpDelete(<span class="str">"{id:int}"</span>)]
+    <span class="kw">public async</span> Task&lt;IActionResult&gt; Delete(<span class="kw">int</span> id) {
+        <span class="kw">await</span> _svc.Delete(id);
+        <span class="kw">return</span> NoContent();
+    }
+}</code></pre>
+
+      <div class="interview">
+        <h4>🎯 [ApiController] gives you</h4>
+        <ul>
+          <li>Auto model validation (returns 400 on invalid)</li>
+          <li>Binding source inference ([FromBody] for complex types, [FromRoute] for route params)</li>
+          <li>Problem-Details responses (RFC 7807) for errors</li>
+          <li>Required attribute routing</li>
+        </ul>
+      </div>
+
+      <h4>Route Constraints</h4>
+      <ul>
+        <li><code>{id:int}</code>, <code>{guid:guid}</code>, <code>{slug:alpha}</code>, <code>{date:datetime}</code>, <code>{name:minlength(3)}</code></li>
+      </ul>
+
+      <div class="angular-bridge">🔗 <strong>Angular Parallel:</strong> <code>[Route]</code> ≈ Angular routing config. <code>[HttpGet]</code> attribute ≈ Angular's route definition. Constructor injection is identical.</div>
+    </section>
+
+    <section class="topic" id="binding">
+      <div class="topic__check"><input type="checkbox" data-topic="3" /></div>
+      <h3><span class="num">4</span> Model Binding & Validation</h3>
+      <p class="concept">Model Binding maps HTTP request data (URL, body, headers) to action parameters. Validation runs via Data Annotations or FluentValidation.</p>
+
+      <h4>Binding Sources</h4>
+      <ul>
+        <li><code>[FromBody]</code> — JSON request body (one per action)</li>
+        <li><code>[FromRoute]</code> — URL segment</li>
+        <li><code>[FromQuery]</code> — query string</li>
+        <li><code>[FromHeader]</code> — HTTP header</li>
+        <li><code>[FromForm]</code> — form data (file upload)</li>
+        <li><code>[FromServices]</code> — pull from DI directly into action</li>
+      </ul>
+
+      <pre><code><span class="kw">public class</span> CreateUserDto {
+    [Required, EmailAddress]
+    <span class="kw">public string</span> Email { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="str">""</span>;
+
+    [Required, StringLength(50, MinimumLength = 8)]
+    <span class="kw">public string</span> Password { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="str">""</span>;
+
+    [Range(18, 120)]
+    <span class="kw">public int</span> Age { <span class="kw">get</span>; <span class="kw">set</span>; }
+}
+
+[HttpPost]
+<span class="kw">public</span> IActionResult Register([FromBody] CreateUserDto dto) {
+    <span class="com">// [ApiController] auto-returns 400 with ProblemDetails if invalid</span>
+    <span class="kw">return</span> Ok();
+}
+
+<span class="com">// FluentValidation alternative — better for complex rules</span>
+<span class="kw">public class</span> CreateUserValidator : AbstractValidator&lt;CreateUserDto&gt; {
+    <span class="kw">public</span> CreateUserValidator() {
+        RuleFor(x =&gt; x.Email).NotEmpty().EmailAddress();
+        RuleFor(x =&gt; x.Password).MinimumLength(8).Matches(<span class="str">"[A-Z]"</span>).Matches(<span class="str">"[0-9]"</span>);
+    }
+}</code></pre>
+    </section>
+
+    <section class="topic" id="dto">
+      <div class="topic__check"><input type="checkbox" data-topic="4" /></div>
+      <h3><span class="num">5</span> DTOs & AutoMapper</h3>
+      <p class="concept">Never expose DB entities directly via API — use <strong>DTOs</strong> (Data Transfer Objects). They decouple wire format from storage and prevent over-posting attacks.</p>
+
+      <pre><code><span class="com">// Entity (DB)</span>
+<span class="kw">public class</span> User {
+    <span class="kw">public int</span> Id { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public string</span> Email { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="str">""</span>;
+    <span class="kw">public string</span> PasswordHash { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="str">""</span>;   <span class="com">// 🚨 don't expose</span>
+    <span class="kw">public</span> DateTime CreatedAt { <span class="kw">get</span>; <span class="kw">set</span>; }
+}
+
+<span class="com">// DTO (API)</span>
+<span class="kw">public record</span> UserDto(<span class="kw">int</span> Id, <span class="kw">string</span> Email, DateTime CreatedAt);
+
+<span class="com">// AutoMapper profile</span>
+<span class="kw">public class</span> MappingProfile : Profile {
+    <span class="kw">public</span> MappingProfile() {
+        CreateMap&lt;User, UserDto&gt;();
+        CreateMap&lt;CreateUserDto, User&gt;();
+    }
+}
+
+builder.Services.AddAutoMapper(<span class="kw">typeof</span>(MappingProfile));
+
+<span class="com">// usage</span>
+<span class="kw">var</span> dto = _mapper.Map&lt;UserDto&gt;(user);</code></pre>
+
+      <div class="interview">
+        <h4>🎯 Why DTOs Matter (interview answer)</h4>
+        <ul>
+          <li>Prevents <strong>over-posting</strong> (client sets fields they shouldn't, e.g., IsAdmin)</li>
+          <li>Hides sensitive fields (PasswordHash, internal IDs)</li>
+          <li>Decouples API contract from DB schema — can refactor DB without breaking clients</li>
+          <li>Keeps response payload small (fetch what you need)</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="topic" id="status">
+      <div class="topic__check"><input type="checkbox" data-topic="5" /></div>
+      <h3><span class="num">6</span> HTTP Status Codes & REST</h3>
+      <p class="concept">Use the right status code — clients (and senior reviewers) judge an API by it.</p>
+
+      <table>
+        <thead><tr><th>Code</th><th>Meaning</th><th>Helper</th></tr></thead>
+        <tbody>
+          <tr><td>200 OK</td><td>Success with body</td><td><code>Ok(data)</code></td></tr>
+          <tr><td>201 Created</td><td>Resource created</td><td><code>CreatedAtAction(...)</code></td></tr>
+          <tr><td>202 Accepted</td><td>Queued / async</td><td><code>Accepted()</code></td></tr>
+          <tr><td>204 No Content</td><td>Success no body (PUT/DELETE)</td><td><code>NoContent()</code></td></tr>
+          <tr><td>400 Bad Request</td><td>Invalid input</td><td><code>BadRequest(error)</code></td></tr>
+          <tr><td>401 Unauthorized</td><td>Not authenticated</td><td><code>Unauthorized()</code></td></tr>
+          <tr><td>403 Forbidden</td><td>Authenticated but not allowed</td><td><code>Forbid()</code></td></tr>
+          <tr><td>404 Not Found</td><td>Resource missing</td><td><code>NotFound()</code></td></tr>
+          <tr><td>409 Conflict</td><td>State conflict (e.g., duplicate email)</td><td><code>Conflict()</code></td></tr>
+          <tr><td>422 Unprocessable</td><td>Validation failed</td><td><code>UnprocessableEntity()</code></td></tr>
+          <tr><td>500 Server Error</td><td>Unhandled exception</td><td>Default for exceptions</td></tr>
+        </tbody>
+      </table>
+
+      <h4>🎯 REST URL Conventions</h4>
+      <ul>
+        <li><code>GET /api/products</code> — list all</li>
+        <li><code>GET /api/products/5</code> — single</li>
+        <li><code>POST /api/products</code> — create (body)</li>
+        <li><code>PUT /api/products/5</code> — full update</li>
+        <li><code>PATCH /api/products/5</code> — partial update</li>
+        <li><code>DELETE /api/products/5</code> — remove</li>
+        <li>Nested: <code>GET /api/users/5/orders</code></li>
+      </ul>
+    </section>
+
+    <section class="topic" id="swagger">
+      <div class="topic__check"><input type="checkbox" data-topic="6" /></div>
+      <h3><span class="num">7</span> Swagger / OpenAPI</h3>
+      <p class="concept">Swagger UI auto-generates interactive API documentation from your code — great for testing and frontend handoff.</p>
+
+      <pre><code>builder.Services.AddSwaggerGen(c =&gt; {
+    c.SwaggerDoc(<span class="str">"v1"</span>, <span class="kw">new</span>() { Title = <span class="str">"Shop API"</span>, Version = <span class="str">"v1"</span> });
+    c.AddSecurityDefinition(<span class="str">"Bearer"</span>, <span class="kw">new</span>() {
+        Name = <span class="str">"Authorization"</span>, Type = SecuritySchemeType.Http, Scheme = <span class="str">"bearer"</span>
+    });
+});
+
+app.UseSwagger();
+app.UseSwaggerUI();   <span class="com">// available at /swagger</span></code></pre>
+
+      <h4>Add XML Comments to Swagger</h4>
+      <ul>
+        <li>Enable XML output in <code>.csproj</code>: <code>&lt;GenerateDocumentationFile&gt;true&lt;/GenerateDocumentationFile&gt;</code></li>
+        <li>Configure Swagger to read it; your <code>///</code> comments become Swagger descriptions</li>
+      </ul>
+    </section>
+
+    <h2 class="section-title">📅 Week 3 — DI, Middleware, Filters</h2>
+
+    <section class="topic" id="di">
+      <div class="topic__check"><input type="checkbox" data-topic="7" /></div>
+      <h3><span class="num">8</span> Dependency Injection ⭐</h3>
+      <p class="concept">DI is built into ASP.NET Core. Services are registered with a <strong>lifetime</strong>; the framework supplies them via constructor parameters.</p>
+
+      <table>
+        <thead><tr><th>Lifetime</th><th>Created</th><th>Use For</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Singleton</strong></td><td>Once per app</td><td>Stateless config / cache / logger</td></tr>
+          <tr><td><strong>Scoped</strong></td><td>Once per HTTP request</td><td>DbContext, request-bound services</td></tr>
+          <tr><td><strong>Transient</strong></td><td>Every injection</td><td>Lightweight stateless helpers</td></tr>
+        </tbody>
+      </table>
+
+      <pre><code>builder.Services.AddSingleton&lt;IClock, SystemClock&gt;();
+builder.Services.AddScoped&lt;IUserService, UserService&gt;();
+builder.Services.AddTransient&lt;IEmailSender, EmailSender&gt;();
+
+<span class="com">// constructor injection</span>
+<span class="kw">public class</span> UserService(AppDbContext db, IEmailSender mailer, ILogger&lt;UserService&gt; log) {
+    <span class="com">// db is Scoped, mailer Transient, log Singleton — all injected automatically</span>
+}</code></pre>
+
+      <div class="interview">
+        <h4>🎯 Captive Dependency Bug</h4>
+        <ul>
+          <li><strong>Never</strong> inject Scoped (DbContext) into Singleton — it gets "captured" and lives forever, breaking thread safety</li>
+          <li>Compiler/runtime won't catch this. <code>ValidateScopes</code> in Development helps surface it.</li>
+        </ul>
+      </div>
+
+      <div class="angular-bridge">🔗 <strong>Angular Parallel:</strong> Identical concept!<br>
+        <code>AddSingleton</code> ≈ <code>providedIn: 'root'</code><br>
+        <code>AddScoped</code> ≈ providing per-route module<br>
+        <code>AddTransient</code> ≈ creating new instance each injection.
+      </div>
+    </section>
+
+    <section class="topic" id="middleware">
+      <div class="topic__check"><input type="checkbox" data-topic="8" /></div>
+      <h3><span class="num">9</span> Middleware Pipeline ⭐</h3>
+      <p class="concept">Middleware are components that handle requests in a pipeline. Each can short-circuit or call the next. <strong>Order matters</strong> — common interview question.</p>
+
+      <pre><code>app.UseHttpsRedirection();    <span class="com">// 1. force HTTPS</span>
+app.UseStaticFiles();         <span class="com">// 2. serve wwwroot</span>
+app.UseRouting();             <span class="com">// 3. match endpoints</span>
+app.UseCors(<span class="str">"AllowAll"</span>);       <span class="com">// 4. CORS</span>
+app.UseAuthentication();      <span class="com">// 5. who are you?</span>
+app.UseAuthorization();       <span class="com">// 6. are you allowed?</span>
+app.UseMiddleware&lt;ExceptionMiddleware&gt;();  <span class="com">// 7. catch unhandled</span>
+app.MapControllers();         <span class="com">// 8. dispatch to controllers</span></code></pre>
+
+      <h4>Custom Middleware (3 styles)</h4>
+      <pre><code><span class="com">// 1. Inline</span>
+app.Use(<span class="kw">async</span> (ctx, next) =&gt; {
+    Console.WriteLine($<span class="str">"&gt; {ctx.Request.Path}"</span>);
+    <span class="kw">await</span> next();
+    Console.WriteLine($<span class="str">"&lt; {ctx.Response.StatusCode}"</span>);
+});
+
+<span class="com">// 2. Class-based (preferred for production)</span>
+<span class="kw">public class</span> RequestLoggingMiddleware {
+    <span class="kw">private readonly</span> RequestDelegate _next;
+    <span class="kw">public</span> RequestLoggingMiddleware(RequestDelegate next) =&gt; _next = next;
+
+    <span class="kw">public async</span> Task InvokeAsync(HttpContext ctx, ILogger&lt;RequestLoggingMiddleware&gt; log) {
+        <span class="kw">var</span> sw = Stopwatch.StartNew();
+        <span class="kw">await</span> _next(ctx);
+        log.LogInformation(<span class="str">"{Method} {Path} → {Status} in {Ms}ms"</span>,
+            ctx.Request.Method, ctx.Request.Path, ctx.Response.StatusCode, sw.ElapsedMilliseconds);
+    }
+}
+app.UseMiddleware&lt;RequestLoggingMiddleware&gt;();</code></pre>
+
+      <div class="gotcha">⚠️ <strong>Gotcha:</strong> <code>UseAuthentication</code> MUST come before <code>UseAuthorization</code>. <code>UseRouting</code> must come before both.</div>
+      <div class="angular-bridge">🔗 <strong>Angular Parallel:</strong> Like HTTP interceptors. The pipeline is identical: each interceptor processes request → calls next → processes response.</div>
+    </section>
+
+    <section class="topic" id="filters">
+      <div class="topic__check"><input type="checkbox" data-topic="9" /></div>
+      <h3><span class="num">10</span> Filters (Action, Exception, Authorization, Resource)</h3>
+      <p class="concept">Filters run inside MVC pipeline (after routing). Use them for cross-cutting concerns scoped to controllers.</p>
+
+      <ul>
+        <li><strong>Authorization filter</strong> — runs first, checks auth</li>
+        <li><strong>Resource filter</strong> — wraps the rest, used for caching</li>
+        <li><strong>Action filter</strong> — runs before/after action method</li>
+        <li><strong>Exception filter</strong> — catches exceptions in actions</li>
+        <li><strong>Result filter</strong> — runs around result execution</li>
+      </ul>
+
+      <pre><code><span class="kw">public class</span> LogActionFilter : IAsyncActionFilter {
+    <span class="kw">public async</span> Task OnActionExecutionAsync(ActionExecutingContext ctx, ActionExecutionDelegate next) {
+        Console.WriteLine($<span class="str">"&gt; {ctx.ActionDescriptor.DisplayName}"</span>);
+        <span class="kw">var</span> result = <span class="kw">await</span> next();
+        Console.WriteLine($<span class="str">"&lt; {ctx.ActionDescriptor.DisplayName}"</span>);
+    }
+}
+
+[ServiceFilter(<span class="kw">typeof</span>(LogActionFilter))]
+[HttpGet] <span class="kw">public</span> IActionResult Get() =&gt; Ok();</code></pre>
+    </section>
+
+    <h2 class="section-title">📅 Week 4 — Logging & Errors</h2>
+
+    <section class="topic" id="logging">
+      <div class="topic__check"><input type="checkbox" data-topic="10" /></div>
+      <h3><span class="num">11</span> Logging — ILogger & Serilog</h3>
+      <p class="concept">Inject <code>ILogger&lt;T&gt;</code> anywhere. Use <strong>structured logging</strong> with placeholders, not string concatenation, for searchable logs.</p>
+
+      <pre><code><span class="com">// built-in</span>
+<span class="kw">public class</span> OrderService(ILogger&lt;OrderService&gt; log) {
+    <span class="kw">public void</span> Place(Order o) {
+        log.LogInformation(<span class="str">"Placing order {OrderId} for user {UserId}"</span>, o.Id, o.UserId);
+        <span class="kw">try</span> { ... }
+        <span class="kw">catch</span> (Exception ex) {
+            log.LogError(ex, <span class="str">"Failed to place order {OrderId}"</span>, o.Id);
+            <span class="kw">throw</span>;
+        }
+    }
+}</code></pre>
+
+      <h4>Log Levels (low → high)</h4>
+      <ul><li><code>Trace, Debug, Information, Warning, Error, Critical</code></li></ul>
+
+      <h4>Serilog Setup (recommended)</h4>
+      <pre><code>builder.Host.UseSerilog((ctx, cfg) =&gt; cfg
+    .ReadFrom.Configuration(ctx.Configuration)
+    .WriteTo.Console()
+    .WriteTo.File(<span class="str">"logs/log-.txt"</span>, rollingInterval: RollingInterval.Day)
+    .Enrich.FromLogContext()
+    .Enrich.WithProperty(<span class="str">"App"</span>, <span class="str">"Shop.Api"</span>));</code></pre>
+
+      <div class="gotcha">⚠️ <strong>Gotcha:</strong> Use placeholders (<code>"User {UserId}"</code>, value), NOT interpolation (<code>$"User {userId}"</code>). Placeholders create searchable, structured fields.</div>
+    </section>
+
+    <section class="topic" id="exceptions">
+      <div class="topic__check"><input type="checkbox" data-topic="11" /></div>
+      <h3><span class="num">12</span> Global Exception Handling</h3>
+      <p class="concept">Don't try/catch in every controller. Centralize via middleware that returns standardized error responses (RFC 7807 ProblemDetails).</p>
+
+      <pre><code><span class="kw">public class</span> ExceptionHandlingMiddleware(RequestDelegate next, ILogger&lt;ExceptionHandlingMiddleware&gt; log) {
+    <span class="kw">public async</span> Task Invoke(HttpContext ctx) {
+        <span class="kw">try</span> {
+            <span class="kw">await</span> next(ctx);
+        } <span class="kw">catch</span> (NotFoundException ex) {
+            <span class="kw">await</span> Write(ctx, 404, ex.Message);
+        } <span class="kw">catch</span> (ValidationException ex) {
+            <span class="kw">await</span> Write(ctx, 400, ex.Message);
+        } <span class="kw">catch</span> (Exception ex) {
+            log.LogError(ex, <span class="str">"Unhandled"</span>);
+            <span class="kw">await</span> Write(ctx, 500, <span class="str">"Internal Server Error"</span>);
+        }
+    }
+
+    <span class="kw">private static</span> Task Write(HttpContext ctx, <span class="kw">int</span> status, <span class="kw">string</span> msg) {
+        ctx.Response.StatusCode = status;
+        ctx.Response.ContentType = <span class="str">"application/problem+json"</span>;
+        <span class="kw">return</span> ctx.Response.WriteAsJsonAsync(<span class="kw">new</span> ProblemDetails {
+            Status = status, Title = msg, Type = $<span class="str">"https://httpstatuses.com/{status}"</span>
+        });
+    }
+}
+
+app.UseMiddleware&lt;ExceptionHandlingMiddleware&gt;();</code></pre>
+
+      <h4>.NET 8+ alternative</h4>
+      <ul>
+        <li>Use <code>IExceptionHandler</code> + <code>app.UseExceptionHandler()</code> + <code>AddProblemDetails()</code> — built-in, cleaner</li>
+      </ul>
+    </section>
+
+    <h2 class="section-title">📅 Week 5 — Authentication & Authorization</h2>
+
+    <section class="topic" id="jwt">
+      <div class="topic__check"><input type="checkbox" data-topic="12" /></div>
+      <h3><span class="num">13</span> JWT Authentication ⭐</h3>
+      <p class="concept">JWT (JSON Web Token) is a signed, base64-encoded token containing claims (user info). Stateless — server doesn't store sessions.</p>
+
+      <h4>Token Structure</h4>
+      <ul>
+        <li><strong>Header</strong>: algorithm + type</li>
+        <li><strong>Payload</strong>: claims (sub, exp, role, custom)</li>
+        <li><strong>Signature</strong>: HMAC of header.payload using secret</li>
+        <li>Format: <code>xxx.yyy.zzz</code></li>
+      </ul>
+
+      <pre><code>builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(opts =&gt; {
+        opts.TokenValidationParameters = <span class="kw">new</span>() {
+            ValidateIssuer = <span class="kw">true</span>,
+            ValidateAudience = <span class="kw">true</span>,
+            ValidateLifetime = <span class="kw">true</span>,
+            ValidateIssuerSigningKey = <span class="kw">true</span>,
+            ValidIssuer = jwt.Issuer,
+            ValidAudience = jwt.Audience,
+            IssuerSigningKey = <span class="kw">new</span> SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Key))
+        };
+    });
+builder.Services.AddAuthorization();
+
+<span class="com">// generate token</span>
+<span class="kw">public string</span> GenerateToken(User user) {
+    <span class="kw">var</span> claims = <span class="kw">new</span>[] {
+        <span class="kw">new</span> Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+        <span class="kw">new</span> Claim(ClaimTypes.Email, user.Email),
+        <span class="kw">new</span> Claim(ClaimTypes.Role, user.Role)
+    };
+    <span class="kw">var</span> key = <span class="kw">new</span> SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key));
+    <span class="kw">var</span> token = <span class="kw">new</span> JwtSecurityToken(_jwt.Issuer, _jwt.Audience, claims,
+        expires: DateTime.UtcNow.AddMinutes(_jwt.ExpiryMinutes),
+        signingCredentials: <span class="kw">new</span>(key, SecurityAlgorithms.HmacSha256));
+    <span class="kw">return new</span> JwtSecurityTokenHandler().WriteToken(token);
+}</code></pre>
+
+      <div class="interview">
+        <h4>🎯 JWT Interview Hot Topics</h4>
+        <ul>
+          <li>Stateless: server doesn't track sessions — scales horizontally</li>
+          <li>Token sent in <code>Authorization: Bearer xxx</code> header</li>
+          <li><strong>Refresh token</strong> pattern: short-lived JWT (15 min) + long-lived refresh token (DB-stored, revocable)</li>
+          <li>Storage: <strong>HttpOnly cookie</strong> (XSS-safe) vs <strong>localStorage</strong> (CSRF-safe but XSS-vulnerable)</li>
+          <li>Revocation: pure JWT can't revoke; combine with token blacklist or short expiry + refresh</li>
+          <li>Don't put sensitive data in JWT — it's only base64, anyone can decode</li>
+        </ul>
+      </div>
+
+      <div class="angular-bridge">🔗 <strong>Angular Parallel:</strong> You'll set up a matching HTTP interceptor in Phase 5 to attach the JWT to outgoing requests and refresh on 401.</div>
+    </section>
+
+    <section class="topic" id="authz">
+      <div class="topic__check"><input type="checkbox" data-topic="13" /></div>
+      <h3><span class="num">14</span> Role & Policy Authorization</h3>
+      <p class="concept">Authentication = who you are. Authorization = what you can do. Choose between simple role checks and richer policies.</p>
+
+      <pre><code>[Authorize]                                <span class="com">// any authenticated user</span>
+[Authorize(Roles = <span class="str">"Admin"</span>)]              <span class="com">// role check</span>
+[Authorize(Roles = <span class="str">"Admin,Manager"</span>)]      <span class="com">// any of</span>
+[AllowAnonymous]                           <span class="com">// override on action</span>
+
+<span class="com">// policy-based — flexible</span>
+builder.Services.AddAuthorization(opt =&gt; {
+    opt.AddPolicy(<span class="str">"Adult"</span>, p =&gt; p.RequireClaim(<span class="str">"Age"</span>).RequireAssertion(c =&gt;
+        <span class="kw">int</span>.Parse(c.User.FindFirst(<span class="str">"Age"</span>)!.Value) &gt;= 18));
+    opt.AddPolicy(<span class="str">"AdminOrSelf"</span>, p =&gt; p.AddRequirements(<span class="kw">new</span> AdminOrSelfRequirement()));
+});
+
+[Authorize(Policy = <span class="str">"Adult"</span>)]
+<span class="kw">public</span> IActionResult Buy() =&gt; Ok();</code></pre>
+    </section>
+
+    <section class="topic" id="cors">
+      <div class="topic__check"><input type="checkbox" data-topic="14" /></div>
+      <h3><span class="num">15</span> CORS — Cross-Origin Resource Sharing</h3>
+      <p class="concept">Browsers block JS calls across origins by default. CORS is the server saying "this origin is allowed." Critical when Angular (localhost:4200) calls .NET (localhost:5000).</p>
+
+      <pre><code>builder.Services.AddCors(o =&gt; {
+    o.AddPolicy(<span class="str">"AllowAngular"</span>, p =&gt; p
+        .WithOrigins(<span class="str">"http://localhost:4200"</span>, <span class="str">"https://shop.com"</span>)
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials());
+});
+
+app.UseCors(<span class="str">"AllowAngular"</span>);   <span class="com">// before UseAuthentication</span></code></pre>
+
+      <div class="gotcha">⚠️ <strong>Gotcha:</strong> <code>AllowAnyOrigin()</code> + <code>AllowCredentials()</code> is forbidden by spec. Use specific <code>WithOrigins(...)</code> when sending cookies/auth.</div>
+    </section>
+
+    <h2 class="section-title">📅 Week 6 — Real-World Skills</h2>
+
+    <section class="topic" id="paging">
+      <div class="topic__check"><input type="checkbox" data-topic="15" /></div>
+      <h3><span class="num">16</span> Pagination, Filtering, Sorting</h3>
+      <p class="concept">Production APIs never return entire tables. Always page, allow filter/sort. Wrap result in a metadata envelope.</p>
+
+      <pre><code><span class="kw">public record</span> PagedQuery(<span class="kw">int</span> Page = 1, <span class="kw">int</span> Size = 20, <span class="kw">string</span>? Sort = <span class="kw">null</span>, <span class="kw">string</span>? Filter = <span class="kw">null</span>);
+<span class="kw">public record</span> PagedResult&lt;T&gt;(IReadOnlyList&lt;T&gt; Items, <span class="kw">int</span> Total, <span class="kw">int</span> Page, <span class="kw">int</span> Size);
+
+[HttpGet]
+<span class="kw">public async</span> Task&lt;PagedResult&lt;ProductDto&gt;&gt; List([FromQuery] PagedQuery q) {
+    <span class="kw">var</span> query = _db.Products.AsQueryable();
+    <span class="kw">if</span> (!<span class="kw">string</span>.IsNullOrWhiteSpace(q.Filter))
+        query = query.Where(p =&gt; p.Name.Contains(q.Filter));
+    <span class="kw">var</span> total = <span class="kw">await</span> query.CountAsync();
+    <span class="kw">var</span> items = <span class="kw">await</span> query
+        .OrderBy(q.Sort ?? <span class="str">"Id"</span>)        <span class="com">// System.Linq.Dynamic.Core</span>
+        .Skip((q.Page - 1) * q.Size).Take(q.Size)
+        .ProjectTo&lt;ProductDto&gt;(_mapper.ConfigurationProvider).ToListAsync();
+    <span class="kw">return new</span>(items, total, q.Page, q.Size);
+}</code></pre>
+    </section>
+
+    <section class="topic" id="versioning">
+      <div class="topic__check"><input type="checkbox" data-topic="16" /></div>
+      <h3><span class="num">17</span> API Versioning & Rate Limiting</h3>
+      <p class="concept">Public APIs must be versionable without breaking clients. .NET 8+ ships with built-in <strong>RateLimiter</strong> middleware.</p>
+
+      <h4>Versioning Strategies</h4>
+      <ul>
+        <li><strong>URL segment</strong>: <code>/api/v1/products</code> — most common</li>
+        <li><strong>Query string</strong>: <code>/api/products?api-version=1.0</code></li>
+        <li><strong>Header</strong>: <code>X-Api-Version: 1.0</code></li>
+        <li><strong>Media type</strong>: <code>Accept: application/json;v=1.0</code></li>
+      </ul>
+
+      <pre><code><span class="com">// Asp.Versioning.Mvc package</span>
+builder.Services.AddApiVersioning(o =&gt; {
+    o.DefaultApiVersion = <span class="kw">new</span>(1, 0);
+    o.AssumeDefaultVersionWhenUnspecified = <span class="kw">true</span>;
+    o.ReportApiVersions = <span class="kw">true</span>;
+});
+
+[ApiVersion(<span class="str">"1.0"</span>)]
+[ApiVersion(<span class="str">"2.0"</span>)]
+[Route(<span class="str">"api/v{version:apiVersion}/[controller]"</span>)]
+<span class="kw">public class</span> ProductsController { ... }</code></pre>
+
+      <h4>Rate Limiting (.NET 8+)</h4>
+      <pre><code>builder.Services.AddRateLimiter(o =&gt; {
+    o.AddFixedWindowLimiter(<span class="str">"perUser"</span>, opt =&gt; {
+        opt.PermitLimit = 100;
+        opt.Window = TimeSpan.FromMinutes(1);
+    });
+});
+app.UseRateLimiter();
+[EnableRateLimiting(<span class="str">"perUser"</span>)] <span class="kw">public class</span> Ctrl ...</code></pre>
+    </section>
+
+    <section class="topic" id="bg">
+      <div class="topic__check"><input type="checkbox" data-topic="17" /></div>
+      <h3><span class="num">18</span> Background Services & Caching</h3>
+      <p class="concept">For periodic / queued work, use <code>BackgroundService</code>. For caching, use <code>IMemoryCache</code> (in-process) or <code>IDistributedCache</code> + Redis (multi-node).</p>
+
+      <pre><code><span class="kw">public class</span> EmailQueueWorker(IServiceScopeFactory scopes, ILogger&lt;EmailQueueWorker&gt; log) : BackgroundService {
+    <span class="kw">protected override async</span> Task ExecuteAsync(CancellationToken ct) {
+        <span class="kw">while</span> (!ct.IsCancellationRequested) {
+            <span class="kw">using var</span> scope = scopes.CreateScope();
+            <span class="kw">var</span> svc = scope.ServiceProvider.GetRequiredService&lt;IMailSvc&gt;();
+            <span class="kw">await</span> svc.FlushQueueAsync(ct);
+            <span class="kw">await</span> Task.Delay(TimeSpan.FromSeconds(30), ct);
+        }
+    }
+}
+builder.Services.AddHostedService&lt;EmailQueueWorker&gt;();
+
+<span class="com">// In-memory cache</span>
+builder.Services.AddMemoryCache();
+<span class="kw">public class</span> ProductService(IMemoryCache cache, ...) {
+    <span class="kw">public async</span> Task&lt;Product&gt; Get(<span class="kw">int</span> id) =&gt;
+        <span class="kw">await</span> cache.GetOrCreateAsync($<span class="str">"prod-{id}"</span>, <span class="kw">async</span> e =&gt; {
+            e.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
+            <span class="kw">return await</span> _db.Products.FindAsync(id);
+        });
+}
+
+<span class="com">// Distributed cache (Redis) — multi-server</span>
+builder.Services.AddStackExchangeRedisCache(o =&gt; o.Configuration = <span class="str">"localhost:6379"</span>);</code></pre>
+
+      <h4>Other Real-World Skills (study list)</h4>
+      <ul>
+        <li><strong>Health Checks</strong>: <code>app.MapHealthChecks("/healthz")</code></li>
+        <li><strong>SignalR</strong> (real-time WebSocket framework — used in Phase 5)</li>
+        <li><strong>gRPC</strong> (high-perf RPC, internal service-to-service)</li>
+        <li><strong>MediatR + CQRS</strong> pattern for handler-based architecture</li>
+        <li><strong>Polly</strong> for retry/circuit-breaker/timeout</li>
+        <li><strong>Output Caching</strong> (built-in .NET 8): <code>app.UseOutputCache()</code></li>
+      </ul>
+    </section>
+
+    <section id="qa">
+      <h2 class="section-title">🎤 Interview Q&A — Phase 3</h2>
+      <div class="qa-block">
+        <details><summary>Q. Explain ASP.NET Core middleware pipeline?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>Middleware = chain of small components</li>
+              <li>Every HTTP request pass through this chain</li>
+            </ul>
+            <p><strong>How it works:</strong></p>
+            <ul>
+              <li>Each middleware get HttpContext (request + response)</li>
+              <li>Do its work, then call <code>next()</code> to pass to next middleware</li>
+              <li>After next() return — control come back up the chain</li>
+              <li>Like onion layers — go inward, then come back outward</li>
+            </ul>
+            <p><strong>Standard Order (must remember):</strong></p>
+            <ol>
+              <li><code>UseRouting</code> — endpoint matching first</li>
+              <li><code>UseCors</code> — CORS check</li>
+              <li><code>UseAuthentication</code> — WHO is the user?</li>
+              <li><code>UseAuthorization</code> — WHAT they can do?</li>
+              <li><code>MapControllers</code> — call controller</li>
+            </ol>
+            <p><strong>Java parallel:</strong></p>
+            <ul>
+              <li>Same like Servlet Filter chain in Java</li>
+              <li>Filter <code>chain.doFilter()</code> = .NET <code>next()</code></li>
+            </ul>
+            <p><strong>Note:</strong> Authentication MUST come before Authorization.</p>
+          </div>
+        </details>
+        <details><summary>Q. Singleton vs Scoped vs Transient — when to use?</summary>
+          <div>
+            <p><strong>Definition:</strong> Three lifetimes for services in DI container.</p>
+            <p><strong>Compare Table:</strong></p>
+            <table>
+              <thead><tr><th>Lifetime</th><th>Created</th><th>Use For</th></tr></thead>
+              <tbody>
+                <tr><td>Singleton</td><td>Once for app</td><td>Config, cache, logger, HttpClient</td></tr>
+                <tr><td>Scoped</td><td>Once per request</td><td>DbContext, request-bound services</td></tr>
+                <tr><td>Transient</td><td>Every injection</td><td>Lightweight stateless helpers</td></tr>
+              </tbody>
+            </table>
+            <p><strong>Captive Dependency Bug (interview trap):</strong></p>
+            <ul>
+              <li>Don't inject Scoped (DbContext) into Singleton</li>
+              <li>Scoped get captured — live forever as Singleton</li>
+              <li>Break request isolation, not thread-safe</li>
+              <li>Use <code>ValidateScopes</code> in dev to catch this</li>
+            </ul>
+            <p><strong>Java parallel:</strong></p>
+            <ul>
+              <li>Singleton = static instance / Singleton pattern</li>
+              <li>Scoped = per-request scope</li>
+              <li>Transient = new object every time</li>
+            </ul>
+          </div>
+        </details>
+        <details><summary>Q. What is [ApiController] attribute?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>Attribute on controller class</li>
+              <li>Enable modern Web API conventions automatically</li>
+            </ul>
+            <p><strong>What it does:</strong></p>
+            <ul>
+              <li><strong>Auto model validation</strong> — invalid JSON return 400 before action run</li>
+              <li><strong>Binding source inference</strong> — complex type = <code>[FromBody]</code>, simple = <code>[FromRoute]</code>/<code>[FromQuery]</code></li>
+              <li><strong>ProblemDetails errors</strong> — RFC 7807 standard JSON format</li>
+              <li><strong>Force attribute routing</strong> — no conventional routing</li>
+            </ul>
+            <p><strong>Use it:</strong></p>
+            <ul>
+              <li>Almost every new ASP.NET Core API controller should have it</li>
+              <li>Make code cleaner and consistent</li>
+            </ul>
+          </div>
+        </details>
+        <details><summary>Q. How does JWT authentication work end-to-end?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>JWT = JSON Web Token</li>
+              <li>Stateless way to authenticate without server session</li>
+            </ul>
+            <p><strong>Token Structure (3 parts separated by dot):</strong></p>
+            <ul>
+              <li><strong>Header</strong> — algorithm info</li>
+              <li><strong>Payload</strong> — claims (userId, email, role, expiry)</li>
+              <li><strong>Signature</strong> — hash signed with secret key</li>
+              <li>Format: <code>xxx.yyy.zzz</code></li>
+            </ul>
+            <p><strong>Flow Steps:</strong></p>
+            <ol>
+              <li>Client send username + password to login endpoint</li>
+              <li>Server validate credentials against DB</li>
+              <li>Server create JWT and return</li>
+              <li>Client store token (localStorage / cookie)</li>
+              <li>Client send token in <code>Authorization: Bearer &lt;token&gt;</code> header</li>
+              <li>Middleware verify signature + expiry + issuer + audience</li>
+              <li>If valid — populate <code>HttpContext.User</code> with claims</li>
+            </ol>
+            <p><strong>Advantages:</strong></p>
+            <ul>
+              <li>Stateless — no DB lookup for session</li>
+              <li>Scale horizontally easily</li>
+              <li>Token cannot be tampered (signature check)</li>
+            </ul>
+            <p><strong>Disadvantage:</strong></p>
+            <ul>
+              <li>Cannot revoke token easily</li>
+              <li>Use short-lived JWT (15 min) + refresh token (DB stored)</li>
+            </ul>
+          </div>
+        </details>
+        <details><summary>Q. Why use DTOs instead of returning entities?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>DTO = Data Transfer Object</li>
+              <li>Separate class for data sent over wire</li>
+              <li>Different from database entity</li>
+            </ul>
+            <p><strong>4 Big Reasons:</strong></p>
+            <ul>
+              <li><strong>Security</strong> — User entity has PasswordHash, don't leak it</li>
+              <li><strong>Over-posting protection</strong> — client cannot send <code>{"isAdmin": true}</code> sneakily</li>
+              <li><strong>Decoupling</strong> — DB schema can change without breaking API</li>
+              <li><strong>Payload size</strong> — include only fields client need</li>
+            </ul>
+            <p><strong>Tools:</strong></p>
+            <ul>
+              <li>AutoMapper — map Entity to DTO automatically</li>
+            </ul>
+            <p><strong>Java parallel:</strong></p>
+            <ul>
+              <li>Same as Java DTO pattern — POJO for transfer</li>
+              <li>Java POJO = .NET POCO (Plain Old CLR Object)</li>
+            </ul>
+          </div>
+        </details>
+        <details><summary>Q. Authentication vs Authorization?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li><strong>Authentication</strong> — WHO are you? (verify identity)</li>
+              <li><strong>Authorization</strong> — WHAT can you do? (check permission)</li>
+            </ul>
+            <p><strong>Compare Table:</strong></p>
+            <table>
+              <thead><tr><th>Aspect</th><th>Authentication</th><th>Authorization</th></tr></thead>
+              <tbody>
+                <tr><td>Question</td><td>Who are you?</td><td>What can you do?</td></tr>
+                <tr><td>Method</td><td>Username/password, JWT</td><td>Roles, policies, claims</td></tr>
+                <tr><td>Fail status</td><td>401 Unauthorized</td><td>403 Forbidden</td></tr>
+                <tr><td>Middleware</td><td>UseAuthentication()</td><td>UseAuthorization()</td></tr>
+              </tbody>
+            </table>
+            <p><strong>Real Example — Office:</strong></p>
+            <ul>
+              <li>Show ID at gate = authentication</li>
+              <li>Gate check if ID allow 5th floor = authorization</li>
+            </ul>
+            <p><strong>Note:</strong> UseAuthentication MUST come BEFORE UseAuthorization.</p>
+          </div>
+        </details>
+        <details><summary>Q. How to handle exceptions globally in Web API?</summary>
+          <div>
+            <p><strong>Wrong Way:</strong></p>
+            <ul>
+              <li>try/catch in every controller action</li>
+              <li>Repetitive, easy to miss, clutter business code</li>
+            </ul>
+            <p><strong>Right Way — Custom Middleware:</strong></p>
+            <ul>
+              <li>Write <code>ExceptionHandlingMiddleware</code></li>
+              <li>Wrap call to <code>next()</code> in try/catch</li>
+              <li>Catch unhandled exceptions</li>
+              <li>Log with full context (path, user, correlation ID)</li>
+              <li>Map exception type to HTTP status code:
+                <ul>
+                  <li>NotFoundException → 404</li>
+                  <li>ValidationException → 400</li>
+                  <li>Any other → 500</li>
+                </ul>
+              </li>
+              <li>Return ProblemDetails JSON (RFC 7807)</li>
+            </ul>
+            <p><strong>.NET 8 — Cleaner Way:</strong></p>
+            <ul>
+              <li>Implement <code>IExceptionHandler</code></li>
+              <li>Register with <code>AddExceptionHandler&lt;T&gt;()</code></li>
+              <li>Add <code>app.UseExceptionHandler()</code> in pipeline</li>
+              <li>Call <code>builder.Services.AddProblemDetails()</code></li>
+            </ul>
+            <p><strong>Java parallel:</strong></p>
+            <ul>
+              <li>Same idea like Java exception filter / handler chain</li>
+              <li>One central place to handle all exceptions</li>
+            </ul>
+          </div>
+        </details>
+        <details><summary>Q. IActionResult vs ActionResult&lt;T&gt;?</summary>
+          <div>
+            <p><strong>Definition:</strong> Both are return types for controller actions.</p>
+            <p><strong>IActionResult:</strong></p>
+            <ul>
+              <li>Base interface for all action results</li>
+              <li>Can return Ok(), NotFound(), BadRequest(), CreatedAtAction()</li>
+              <li>Flexible — return any of these</li>
+              <li>Downside — Swagger don't know data shape</li>
+            </ul>
+            <p><strong>ActionResult&lt;T&gt;:</strong></p>
+            <ul>
+              <li>Generic version (newer .NET)</li>
+              <li>Return either status code OR typed data directly (<code>return user;</code>)</li>
+              <li>Better Swagger documentation</li>
+              <li>Stronger typing for callers</li>
+            </ul>
+            <p><strong>Best Practice:</strong></p>
+            <ul>
+              <li>Use <code>ActionResult&lt;T&gt;</code> when action return data</li>
+              <li>Use <code>IActionResult</code> for actions return only status (204 NoContent on delete)</li>
+            </ul>
+          </div>
+        </details>
+        <details><summary>Q. What is CORS and when needed?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>CORS = Cross-Origin Resource Sharing</li>
+              <li>Browser security mechanism</li>
+              <li>Block JS from one origin calling API on different origin</li>
+            </ul>
+            <p><strong>Why exists:</strong></p>
+            <ul>
+              <li>Protect user from malicious sites calling their bank app</li>
+            </ul>
+            <p><strong>When needed:</strong></p>
+            <ul>
+              <li>Frontend on different origin than backend</li>
+              <li>Common: Angular on <code>localhost:4200</code> calling .NET on <code>localhost:5000</code></li>
+              <li>Different port = different origin = CORS check</li>
+            </ul>
+            <p><strong>How to configure (.NET):</strong></p>
+            <ul>
+              <li>Configure on SERVER side</li>
+              <li>In services: <code>AddCors</code> with policy</li>
+              <li>Specify <code>WithOrigins</code>, <code>AllowAnyHeader</code>, <code>AllowAnyMethod</code></li>
+              <li>Optional: <code>AllowCredentials</code> for cookies</li>
+              <li>In pipeline: <code>app.UseCors("PolicyName")</code></li>
+            </ul>
+            <p><strong>Note:</strong> Cannot combine <code>AllowAnyOrigin()</code> + <code>AllowCredentials()</code> — forbidden by spec.</p>
+          </div>
+        </details>
+        <details><summary>Q. How to secure secrets in ASP.NET Core?</summary>
+          <div>
+            <p><strong>Common Mistake:</strong></p>
+            <ul>
+              <li>Storing connection strings, API keys in <code>appsettings.json</code> committed to source control</li>
+              <li>One of biggest security mistakes</li>
+            </ul>
+            <p><strong>Local Development — User Secrets:</strong></p>
+            <ul>
+              <li>Run <code>dotnet user-secrets init</code> in project</li>
+              <li>Run <code>dotnet user-secrets set "Jwt:Key" "mysecret"</code></li>
+              <li>Stored in home folder, outside repo</li>
+              <li>Auto loaded in Development environment</li>
+            </ul>
+            <p><strong>Production — Azure Key Vault + Managed Identity:</strong></p>
+            <ul>
+              <li>App Service get Azure AD identity automatically</li>
+              <li>Grant identity Get/List permission on Key Vault</li>
+              <li>Read secrets via <code>DefaultAzureCredential</code></li>
+              <li>No credentials hardcoded anywhere</li>
+              <li>Azure manage rotation, audit, access policies</li>
+            </ul>
+            <p><strong>Simpler Alternative:</strong></p>
+            <ul>
+              <li>Environment variables set on host</li>
+              <li>Docker secrets</li>
+            </ul>
+            <p><strong>Golden Rule:</strong> Search repo for "ConnectionString" or "Password" before every commit.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <section id="mistakes" class="callout callout--warn">
+      <h3>⚠️ Common Mistakes</h3>
+      <ul>
+        <li>Wrong middleware order (UseAuthorization before UseAuthentication, or both before UseRouting).</li>
+        <li>Returning entities directly — over-posting and sensitive data leaks.</li>
+        <li>Using try/catch in every controller instead of a global exception handler.</li>
+        <li>Storing JWT secrets / DB connection strings in <code>appsettings.json</code> source-controlled.</li>
+        <li>Injecting Scoped DbContext into a Singleton (captive dependency).</li>
+        <li>Calling <code>.Result</code> on async tasks → deadlock.</li>
+        <li>String concat in logs instead of structured placeholders.</li>
+        <li>Returning 200 for everything (errors should be 4xx/5xx).</li>
+      </ul>
+    </section>
+
+    <nav class="phase-nav">
+      <a href="phase-2-sql.html"><span class="label">← Prev</span><strong>Phase 2: SQL</strong></a>
+      <a href="phase-4-ef-core.html" class="next"><span class="label">Next →</span><strong>Phase 4: Entity Framework Core</strong></a>
+    </nav>
+  </main>
+</div>
+
+<footer class="footer">Phase 3 of 9 · You can now build production REST APIs</footer>
+
+<script>
+  const phase = document.body.dataset.phase;
+  document.querySelectorAll('input[type="checkbox"][data-topic]').forEach(cb => {
+    const key = `phase-${phase}-topic-${cb.dataset.topic}`;
+    cb.checked = localStorage.getItem(key) === 'true';
+    cb.closest('.topic').classList.toggle('is-done', cb.checked);
+    cb.addEventListener('change', () => {
+      localStorage.setItem(key, cb.checked);
+      cb.closest('.topic').classList.toggle('is-done', cb.checked);
+    });
+  });
+  const links = document.querySelectorAll('.sidebar a[href^="#"]');
+  const sections = [...links].map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  window.addEventListener('scroll', () => {
+    let current = sections[0]?.id;
+    sections.forEach(s => { if (window.scrollY + 100 >= s.offsetTop) current = s.id; });
+    links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current));
+  });
+</script>
+</body>
+</html>

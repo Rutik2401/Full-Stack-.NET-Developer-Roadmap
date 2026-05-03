@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Phase 8 — Real Portfolio Projects | .NET Roadmap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/global.css" />
+</head>
+<body data-phase="8">
+
+<nav class="topnav">
+  <div class="topnav__inner">
+    <div class="brand"><a href="../index.html" style="color:inherit">.NET<span class="dot">·</span>Roadmap</a></div>
+    <div class="topnav__links">
+      <a href="../index.html">Home</a>
+      <a href="phase-0-foundation.html">P0</a>
+      <a href="phase-1-csharp.html">P1</a>
+      <a href="phase-2-sql.html">P2</a>
+      <a href="phase-3-aspnet-core.html">P3</a>
+      <a href="phase-4-ef-core.html">P4</a>
+      <a href="phase-5-angular-integration.html">P5</a>
+      <a href="phase-6-system-design.html">P6</a>
+      <a href="phase-7-devops-azure.html">P7</a>
+      <a href="phase-8-projects.html" class="active">P8</a>
+      <a href="phase-9-interview.html">P9</a>
+    </div>
+  </div>
+</nav>
+
+<div class="phase-page">
+  <aside class="sidebar">
+    <h4>Projects</h4>
+    <ul>
+      <li><a href="#project-1">P1 · E-commerce</a></li>
+      <li><a href="#project-2">P2 · Microservices</a></li>
+      <li><a href="#project-3">P3 · Real-Time Dashboard</a></li>
+    </ul>
+    <h4>Cross-Cutting</h4>
+    <ul>
+      <li><a href="#standards">Standards Every Project</a></li>
+      <li><a href="#readme">README Template</a></li>
+      <li><a href="#talk">How to Talk About Projects</a></li>
+    </ul>
+  </aside>
+
+  <main class="content">
+    <div class="breadcrumb"><a href="../index.html">Home</a> / Phase 8</div>
+
+    <header class="phase-header">
+      <h1>Phase 8 — Real Portfolio Projects</h1>
+      <p class="lede">This is the phase that lands offers. Three deployed projects beat any certification or course list. Build them with production discipline: Clean Architecture, tests, Docker, deployed to Azure, public GitHub.</p>
+      <div class="phase-meta">
+        <span class="pill">⏱ 6 Weeks</span>
+        <span class="pill">3 Projects</span>
+        <span class="pill">⭐ The interview ammunition</span>
+      </div>
+    </header>
+
+    <div class="callout callout--prereq">
+      <h3>📋 Prerequisites</h3>
+      <ul>
+        <li>All previous phases — these projects exercise everything</li>
+        <li>GitHub account with public repos</li>
+        <li>Azure free account active</li>
+        <li>Docker Desktop running</li>
+      </ul>
+    </div>
+
+    <!-- ============ PROJECT 1 ============ -->
+    <section class="topic" id="project-1">
+      <div class="topic__check"><input type="checkbox" data-topic="0" /></div>
+      <h3><span class="num">P1</span> Full-Stack E-Commerce (3 weeks) ⭐ flagship</h3>
+      <p class="concept">Your headline project. Every interviewer will ask about it. Build it like a real product — features, polish, tests, deployment, monitoring.</p>
+
+      <h4>📦 Stack</h4>
+      <ul>
+        <li><strong>Frontend</strong>: Angular 17+ (Standalone, Signals), Angular Material or Tailwind</li>
+        <li><strong>Backend</strong>: ASP.NET Core 8 Web API, Clean Architecture (Domain / Application / Infrastructure / Api)</li>
+        <li><strong>DB</strong>: SQL Server (local Docker, Azure SQL prod)</li>
+        <li><strong>Cache</strong>: Redis (Docker dev, Azure Cache for Redis prod)</li>
+        <li><strong>Auth</strong>: JWT + Refresh Token + Role-based (Admin / Customer)</li>
+        <li><strong>Files</strong>: Azure Blob Storage for product images</li>
+        <li><strong>Payments</strong>: Stripe sandbox</li>
+        <li><strong>Logging</strong>: Serilog → Seq (dev) / Application Insights (prod)</li>
+        <li><strong>Testing</strong>: xUnit + Moq + FluentAssertions (unit), WebApplicationFactory (integration)</li>
+        <li><strong>Docker</strong>: Dockerfile + Compose for full-stack local run</li>
+        <li><strong>CI/CD</strong>: GitHub Actions → Azure App Service + Static Web App</li>
+      </ul>
+
+      <h4>🎯 Required Features</h4>
+      <ul>
+        <li><strong>Catalog</strong>: products, categories, search, filter by price/category, sort, pagination</li>
+        <li><strong>Auth</strong>: Register, Login, Logout, Refresh, Forgot password (email)</li>
+        <li><strong>Cart</strong>: add/remove, quantity, persisted (server for logged-in, localStorage for guest)</li>
+        <li><strong>Checkout</strong>: address, payment (Stripe), order confirmation email</li>
+        <li><strong>Orders</strong>: customer order history, order detail with status timeline</li>
+        <li><strong>Admin Dashboard</strong>: CRUD products/categories, view orders, mark shipped, basic sales chart</li>
+        <li><strong>Image upload</strong> to Azure Blob (multipart, progress)</li>
+        <li><strong>Wishlist / favorites</strong></li>
+        <li><strong>Reviews & ratings</strong></li>
+      </ul>
+
+      <h4>🎯 Non-functional Requirements (the senior signals)</h4>
+      <ul>
+        <li>Clean Architecture with explicit layer dependencies</li>
+        <li>FluentValidation for all input</li>
+        <li>Global exception middleware + ProblemDetails</li>
+        <li>JWT interceptor + refresh flow on Angular side</li>
+        <li>Redis caching for product list (cache-aside, 5 min TTL)</li>
+        <li>Pagination metadata in response envelope</li>
+        <li>API versioning from day 1</li>
+        <li>Health check endpoint</li>
+        <li>Swagger docs with auth</li>
+        <li>Unit tests for services (>70% coverage on Application layer)</li>
+        <li>1-2 integration tests for critical flows (checkout)</li>
+        <li>Dockerfile + docker-compose (API + DB + Redis)</li>
+        <li>Deployed to Azure (App Service + Azure SQL + Static Web App + Key Vault)</li>
+        <li>App Insights wired up</li>
+        <li>README with screenshots, architecture diagram, run instructions</li>
+      </ul>
+
+      <h4>📁 Suggested Solution Structure</h4>
+      <pre><code>Shop.sln
+├── Shop.Domain/              <span class="com">// Entities, value objects, domain events</span>
+├── Shop.Application/         <span class="com">// Use cases (MediatR), DTOs, interfaces, validators</span>
+├── Shop.Infrastructure/      <span class="com">// EF DbContext, Repos, Email, Blob, Stripe</span>
+├── Shop.Api/                 <span class="com">// Controllers, middleware, Program.cs</span>
+└── tests/
+    ├── Shop.UnitTests/
+    └── Shop.IntegrationTests/
+
+shop-web/                     <span class="com">// Angular app (separate repo or monorepo)</span>
+├── src/app/
+│   ├── core/                 <span class="com">// auth, interceptors, guards</span>
+│   ├── shared/               <span class="com">// pipes, components</span>
+│   ├── features/
+│   │   ├── catalog/
+│   │   ├── cart/
+│   │   ├── checkout/
+│   │   ├── account/
+│   │   └── admin/
+│   └── app.routes.ts</code></pre>
+
+      <div class="interview">
+        <h4>🎯 Be Ready to Discuss</h4>
+        <ul>
+          <li>Why Clean Architecture? What if you used a layered MVC instead?</li>
+          <li>How do you handle JWT refresh — what about race conditions on concurrent 401s?</li>
+          <li>Cart implementation: where do guest carts live? How do you merge on login?</li>
+          <li>How do you handle inventory when 2 users try to buy the last item?</li>
+          <li>How do you deploy with zero downtime?</li>
+          <li>What's your test pyramid look like?</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ PROJECT 2 ============ -->
+    <section class="topic" id="project-2">
+      <div class="topic__check"><input type="checkbox" data-topic="1" /></div>
+      <h3><span class="num">P2</span> Microservices Demo (2 weeks)</h3>
+      <p class="concept">Even a small microservices project demonstrates senior thinking. Don't go overboard — 3-4 services is plenty.</p>
+
+      <h4>📦 Architecture</h4>
+      <pre><code>          ┌─────────────────────┐
+          │   Angular SPA       │
+          └──────────┬──────────┘
+                     │
+              ┌──────▼──────┐
+              │ API Gateway │  (Ocelot or YARP)
+              └──────┬──────┘
+       ┌─────────────┼─────────────┐
+       │             │             │
+┌──────▼──┐   ┌──────▼──┐   ┌──────▼──────┐
+│Identity │   │Catalog  │   │Order        │
+│ Service │   │ Service │   │ Service     │
+└────┬────┘   └────┬────┘   └─────┬───────┘
+     │             │              │
+   [SQL]         [SQL]          [SQL]   ← DB per service
+                                  │
+                         ┌────────▼────────┐
+                         │ RabbitMQ /      │
+                         │ Azure Service   │
+                         │ Bus             │
+                         └────────┬────────┘
+                                  │
+                         ┌────────▼────────┐
+                         │ Notification    │
+                         │ Worker (Func)   │  ← async email/SMS
+                         └─────────────────┘</code></pre>
+
+      <h4>🎯 Services</h4>
+      <ol>
+        <li><strong>Identity</strong> — register, login, JWT issuance</li>
+        <li><strong>Catalog</strong> — products CRUD</li>
+        <li><strong>Order</strong> — places order, publishes <code>OrderPlaced</code> event</li>
+        <li><strong>Notification</strong> — Background worker subscribed to <code>OrderPlaced</code>, sends email</li>
+      </ol>
+
+      <h4>🎯 Demonstrates</h4>
+      <ul>
+        <li>API Gateway (Ocelot or YARP) routing + JWT validation</li>
+        <li>Inter-service communication via REST + async via Service Bus / RabbitMQ</li>
+        <li>Database per service (no shared tables)</li>
+        <li>Polly: retry + circuit breaker on inter-service calls</li>
+        <li>Centralized logging (Serilog → Seq locally, App Insights in cloud)</li>
+        <li>Distributed tracing with correlation IDs</li>
+        <li>Outbox pattern for reliable event publishing (bonus)</li>
+        <li>Containerized with Docker Compose; deployable to Azure (Container Apps)</li>
+      </ul>
+
+      <h4>📚 Libraries & Tools</h4>
+      <ul>
+        <li><strong>YARP</strong> (modern) or <strong>Ocelot</strong> (mature) — gateway</li>
+        <li><strong>MassTransit</strong> — broker abstraction over RabbitMQ / Service Bus</li>
+        <li><strong>Polly</strong> — resilience</li>
+        <li><strong>Seq</strong> — log viewer locally</li>
+        <li><strong>OpenTelemetry</strong> — tracing (bonus)</li>
+      </ul>
+    </section>
+
+    <!-- ============ PROJECT 3 ============ -->
+    <section class="topic" id="project-3">
+      <div class="topic__check"><input type="checkbox" data-topic="2" /></div>
+      <h3><span class="num">P3</span> Real-Time Dashboard / Chat (1 week)</h3>
+      <p class="concept">Quick project to show SignalR + Angular real-time integration. Pick one of two flavors below.</p>
+
+      <h4>Option A: Live Notifications Dashboard</h4>
+      <ul>
+        <li>Admin dashboard showing live order events from Project 1</li>
+        <li>Charts updating in real time as orders come in</li>
+        <li>Toast notifications for high-value orders</li>
+        <li>Online users count</li>
+      </ul>
+
+      <h4>Option B: Group Chat App</h4>
+      <ul>
+        <li>Auth (reuse Identity service)</li>
+        <li>Channels (rooms)</li>
+        <li>Live message stream, typing indicators, presence</li>
+        <li>Message history persisted to DB</li>
+        <li>File/image upload to Blob</li>
+      </ul>
+
+      <h4>📦 Stack</h4>
+      <ul>
+        <li>Angular standalone + Signals + <code>@microsoft/signalr</code> client</li>
+        <li>.NET 8 SignalR Hub</li>
+        <li>Redis backplane (so multiple API instances broadcast correctly)</li>
+        <li>SQL for persistence</li>
+        <li>Deployed to Azure (App Service + Cache for Redis)</li>
+      </ul>
+    </section>
+
+    <!-- CROSS-CUTTING -->
+    <section id="standards" class="callout callout--prereq">
+      <h3>📐 Standards Every Project Must Hit</h3>
+      <ul>
+        <li><strong>Clean Architecture</strong> with project boundaries enforced</li>
+        <li><strong>Conventional commits</strong> (<code>feat:</code>, <code>fix:</code>, <code>chore:</code>)</li>
+        <li><strong>Pull Request</strong> per feature with description</li>
+        <li><strong>Branch strategy</strong>: main protected, feature branches</li>
+        <li><strong>.editorconfig</strong> + <strong>.gitignore</strong> at root</li>
+        <li><strong>Tests</strong> with at least 60% coverage on Application layer</li>
+        <li><strong>Swagger</strong> at /swagger with auth configured</li>
+        <li><strong>Health endpoint</strong> at /healthz</li>
+        <li><strong>Environment configs</strong> for dev / prod</li>
+        <li><strong>Dockerfile</strong> + docker-compose</li>
+        <li><strong>CI pipeline</strong> (GitHub Actions YAML)</li>
+        <li><strong>Live deployment URL</strong> in README</li>
+        <li><strong>Architecture diagram</strong> (excalidraw, draw.io, or mermaid)</li>
+        <li><strong>Screenshots / GIFs</strong> in README</li>
+        <li><strong>LICENSE</strong> file (MIT is fine)</li>
+      </ul>
+    </section>
+
+    <section id="readme" class="topic">
+      <h3>📝 README Template (use this verbatim)</h3>
+      <pre><code><span class="com"># 🛒 Shop — Full-Stack E-Commerce</span>
+
+A production-style e-commerce platform built with Angular 17 + .NET 8.
+**Live demo**: https://shop.azurewebsites.net  ·  **API**: https://shop-api.azurewebsites.net/swagger
+
+![Hero screenshot](docs/hero.png)
+
+## ✨ Features
+- 🔐 JWT auth with refresh tokens, role-based admin
+- 🛍️ Product catalog with search, filter, pagination
+- 🛒 Persistent cart, checkout, Stripe sandbox payments
+- 📦 Order tracking with status timeline
+- 👨‍💼 Admin dashboard (products, orders, sales chart)
+- ⚡ Redis caching, SignalR live order events
+- 📨 Email notifications via Azure Service Bus
+
+## 🏗️ Architecture
+![Architecture diagram](docs/architecture.png)
+
+- **Frontend**: Angular 17 standalone + Signals + Tailwind
+- **Backend**: ASP.NET Core 8, Clean Architecture
+- **DB**: Azure SQL  ·  **Cache**: Azure Redis  ·  **Files**: Blob Storage
+- **Auth**: JWT + Refresh  ·  **Logging**: Serilog → App Insights
+
+## 🚀 Run Locally
+```bash
+git clone https://github.com/you/shop
+cd shop
+docker compose up -d                 # API + SQL + Redis
+cd shop-web &amp;&amp; npm install &amp;&amp; npm start
+```
+
+## 🧪 Tests
+```bash
+dotnet test                          # all tests + coverage
+```
+
+## 📦 Deployment
+GitHub Actions → Azure App Service + Static Web App.
+See [.github/workflows/ci-cd.yml](.github/workflows/ci-cd.yml).
+
+## 🎓 What I Learned
+- Clean Architecture pays off — swapping EF for Dapper in 2 services took 30 min
+- Refresh-token race conditions: queued 401s with shared observable solved it
+- Stripe webhook signing prevented multiple critical bugs in production
+- Redis cache invalidation strategy: versioned keys beat TTL-only
+
+## 📜 License
+MIT</code></pre>
+    </section>
+
+    <section id="talk" class="callout callout--success">
+      <h3>🗣️ How to Talk About Projects in Interviews</h3>
+      <p>Use the <strong>STAR</strong> format compressed into a story arc:</p>
+      <ol>
+        <li><strong>What it does</strong> (30 sec) — the elevator pitch</li>
+        <li><strong>Tech choices</strong> (30 sec) — stack and WHY each</li>
+        <li><strong>One hard problem you solved</strong> (1-2 min) — concurrency, perf, design tradeoff</li>
+        <li><strong>What you'd do differently</strong> (30 sec) — shows reflection</li>
+        <li><strong>Live URL</strong> + GitHub link sent in chat</li>
+      </ol>
+      <p><strong>Pick 2-3 "war stories" per project</strong> ahead of time — specific bugs, perf wins, architecture pivots. These convert interviews to offers.</p>
+    </section>
+
+    <nav class="phase-nav">
+      <a href="phase-7-devops-azure.html"><span class="label">← Prev</span><strong>Phase 7: Azure & CI/CD</strong></a>
+      <a href="phase-9-interview.html" class="next"><span class="label">Next →</span><strong>Phase 9: Interview Prep</strong></a>
+    </nav>
+  </main>
+</div>
+
+<footer class="footer">Phase 8 of 9 · Code that ships beats any certification</footer>
+
+<script>
+  const phase = document.body.dataset.phase;
+  document.querySelectorAll('input[type="checkbox"][data-topic]').forEach(cb => {
+    const key = `phase-${phase}-topic-${cb.dataset.topic}`;
+    cb.checked = localStorage.getItem(key) === 'true';
+    cb.closest('.topic').classList.toggle('is-done', cb.checked);
+    cb.addEventListener('change', () => {
+      localStorage.setItem(key, cb.checked);
+      cb.closest('.topic').classList.toggle('is-done', cb.checked);
+    });
+  });
+  const links = document.querySelectorAll('.sidebar a[href^="#"]');
+  const sections = [...links].map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  window.addEventListener('scroll', () => {
+    let current = sections[0]?.id;
+    sections.forEach(s => { if (window.scrollY + 100 >= s.offsetTop) current = s.id; });
+    links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current));
+  });
+</script>
+</body>
+</html>

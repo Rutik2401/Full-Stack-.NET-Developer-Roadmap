@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Phase 2 — SQL & Database Design | .NET Roadmap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/global.css" />
+</head>
+<body data-phase="2">
+
+<nav class="topnav">
+  <div class="topnav__inner">
+    <div class="brand"><a href="../index.html" style="color:inherit">.NET<span class="dot">·</span>Roadmap</a></div>
+    <div class="topnav__links">
+      <a href="../index.html">Home</a>
+      <a href="phase-0-foundation.html">P0</a>
+      <a href="phase-1-csharp.html">P1</a>
+      <a href="phase-2-sql.html" class="active">P2</a>
+      <a href="phase-3-aspnet-core.html">P3</a>
+      <a href="phase-4-ef-core.html">P4</a>
+      <a href="phase-5-angular-integration.html">P5</a>
+      <a href="phase-6-system-design.html">P6</a>
+      <a href="phase-7-devops-azure.html">P7</a>
+      <a href="phase-8-projects.html">P8</a>
+      <a href="phase-9-interview.html">P9</a>
+    </div>
+  </div>
+</nav>
+
+<div class="phase-page">
+  <aside class="sidebar">
+    <h4>Week 1 · Core SQL</h4>
+    <ul>
+      <li><a href="#ddl-dml">1. DDL vs DML vs DQL</a></li>
+      <li><a href="#select">2. SELECT, WHERE, ORDER</a></li>
+      <li><a href="#agg">3. Aggregates & GROUP BY</a></li>
+      <li><a href="#filter">4. Filtering Operators</a></li>
+    </ul>
+    <h4>Week 2 · Joins & Design</h4>
+    <ul>
+      <li><a href="#joins">5. Joins (deep)</a></li>
+      <li><a href="#subquery">6. Subqueries & CTE</a></li>
+      <li><a href="#constraints">7. Constraints</a></li>
+      <li><a href="#normalization">8. Normalization</a></li>
+    </ul>
+    <h4>Week 3 · Advanced</h4>
+    <ul>
+      <li><a href="#sp">9. Stored Procedures & Functions</a></li>
+      <li><a href="#views">10. Views</a></li>
+      <li><a href="#indexes">11. Indexes</a></li>
+      <li><a href="#tx">12. Transactions & ACID</a></li>
+      <li><a href="#window">13. Window Functions</a></li>
+      <li><a href="#perf">14. Query Optimization</a></li>
+    </ul>
+    <h4>Sections</h4>
+    <ul>
+      <li><a href="#qa">Interview Q&A</a></li>
+      <li><a href="#mistakes">Common Mistakes</a></li>
+    </ul>
+  </aside>
+
+  <main class="content">
+    <div class="breadcrumb"><a href="../index.html">Home</a> / Phase 2</div>
+
+    <header class="phase-header">
+      <h1>Phase 2 — SQL & Database Design</h1>
+      <p class="lede">Strong SQL is the prerequisite to EF Core, performance tuning, and senior-level architecture. ORMs hide bad queries; you should be able to read what they generate and fix it.</p>
+      <div class="phase-meta">
+        <span class="pill">⏱ 3 Weeks</span>
+        <span class="pill">14 Topics</span>
+        <span class="pill">⭐ Prerequisite for EF Core</span>
+      </div>
+    </header>
+
+    <div class="callout callout--prereq">
+      <h3>📋 Prerequisites</h3>
+      <ul>
+        <li>SQL Server Express + SSMS installed (Phase 0)</li>
+        <li>Sample database (Northwind / AdventureWorks) — download from Microsoft</li>
+        <li>Basic understanding of tables, rows, columns</li>
+      </ul>
+    </div>
+
+    <h2 class="section-title">📅 Week 1 — Core SQL</h2>
+
+    <section class="topic" id="ddl-dml">
+      <div class="topic__check"><input type="checkbox" data-topic="0" /></div>
+      <h3><span class="num">1</span> DDL vs DML vs DQL vs DCL vs TCL</h3>
+      <p class="concept">SQL commands fall into 5 groups. Knowing the categories helps you discuss permissions, transactions, and execution behavior with senior devs and DBAs.</p>
+
+      <table>
+        <thead><tr><th>Category</th><th>Commands</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><strong>DDL</strong> Data Definition</td><td>CREATE, ALTER, DROP, TRUNCATE, RENAME</td><td>Schema (structure)</td></tr>
+          <tr><td><strong>DML</strong> Data Manipulation</td><td>INSERT, UPDATE, DELETE, MERGE</td><td>Modify data</td></tr>
+          <tr><td><strong>DQL</strong> Data Query</td><td>SELECT</td><td>Read data</td></tr>
+          <tr><td><strong>DCL</strong> Data Control</td><td>GRANT, REVOKE</td><td>Permissions</td></tr>
+          <tr><td><strong>TCL</strong> Transaction Control</td><td>BEGIN, COMMIT, ROLLBACK, SAVEPOINT</td><td>Transactions</td></tr>
+        </tbody>
+      </table>
+
+      <div class="interview">
+        <h4>🎯 Interview Trap: TRUNCATE vs DELETE vs DROP</h4>
+        <ul>
+          <li><strong>DELETE</strong> — DML, row-by-row, can use WHERE, fires triggers, logged, slow, rollback-able</li>
+          <li><strong>TRUNCATE</strong> — DDL, deallocates pages, no WHERE, no triggers, minimally logged, fast, resets identity</li>
+          <li><strong>DROP</strong> — DDL, removes table entirely (data + structure)</li>
+        </ul>
+      </div>
+
+      <pre><code><span class="com">-- DDL</span>
+CREATE TABLE Users (
+  Id INT IDENTITY(1,1) PRIMARY KEY,
+  Email NVARCHAR(150) NOT NULL UNIQUE,
+  CreatedAt DATETIME2 DEFAULT GETUTCDATE()
+);
+
+ALTER TABLE Users ADD IsActive BIT DEFAULT 1;
+
+<span class="com">-- DML</span>
+INSERT INTO Users (Email) VALUES ('rutik@example.com');
+UPDATE Users SET IsActive = 0 WHERE Id = 1;
+DELETE FROM Users WHERE Id = 1;</code></pre>
+    </section>
+
+    <section class="topic" id="select">
+      <div class="topic__check"><input type="checkbox" data-topic="1" /></div>
+      <h3><span class="num">2</span> SELECT — WHERE, ORDER BY, LIMIT/TOP</h3>
+      <p class="concept">SELECT is the workhorse. Learn the order in which clauses logically execute — interviewers love this question.</p>
+
+      <div class="interview">
+        <h4>🎯 Logical Execution Order (NOT the writing order)</h4>
+        <ol>
+          <li><strong>FROM</strong> + JOIN</li>
+          <li><strong>WHERE</strong></li>
+          <li><strong>GROUP BY</strong></li>
+          <li><strong>HAVING</strong></li>
+          <li><strong>SELECT</strong> (column projection happens here!)</li>
+          <li><strong>DISTINCT</strong></li>
+          <li><strong>ORDER BY</strong></li>
+          <li><strong>TOP / LIMIT / OFFSET</strong></li>
+        </ol>
+        <p class="muted">This is why you can't reference a SELECT alias in WHERE but can in ORDER BY.</p>
+      </div>
+
+      <pre><code>SELECT TOP 10 Id, Name, Total
+FROM Orders
+WHERE Total &gt; 100 AND Status = 'Paid'
+ORDER BY Total DESC;
+
+<span class="com">-- pagination (modern, SQL Server 2012+)</span>
+SELECT Id, Name FROM Products
+ORDER BY Id
+OFFSET 20 ROWS FETCH NEXT 10 ROWS ONLY;</code></pre>
+    </section>
+
+    <section class="topic" id="agg">
+      <div class="topic__check"><input type="checkbox" data-topic="2" /></div>
+      <h3><span class="num">3</span> Aggregates & GROUP BY / HAVING</h3>
+      <p class="concept">Aggregates collapse rows: COUNT, SUM, AVG, MIN, MAX. GROUP BY buckets rows. HAVING filters those buckets (WHERE filters rows).</p>
+
+      <div class="interview">
+        <h4>🎯 WHERE vs HAVING (most-asked SQL question)</h4>
+        <ul>
+          <li><strong>WHERE</strong> filters rows BEFORE aggregation — can't reference aggregate functions</li>
+          <li><strong>HAVING</strong> filters AFTER aggregation — used with GROUP BY, can reference aggregates</li>
+        </ul>
+      </div>
+
+      <pre><code>SELECT CustomerId, COUNT(*) AS Orders, SUM(Total) AS Revenue
+FROM Orders
+WHERE OrderDate &gt;= '2025-01-01'
+GROUP BY CustomerId
+HAVING SUM(Total) &gt; 10000
+ORDER BY Revenue DESC;</code></pre>
+    </section>
+
+    <section class="topic" id="filter">
+      <div class="topic__check"><input type="checkbox" data-topic="3" /></div>
+      <h3><span class="num">4</span> Filtering — LIKE, IN, BETWEEN, NULL, CASE</h3>
+      <p class="concept">Beyond <code>=</code>, SQL has rich filter operators. NULL handling trips up most devs — NULL ≠ NULL.</p>
+
+      <pre><code><span class="com">-- pattern matching</span>
+WHERE Email LIKE '%@gmail.com'
+WHERE Name LIKE 'A_%'           <span class="com">-- A then any single char</span>
+
+<span class="com">-- set membership</span>
+WHERE Status IN ('Pending', 'Paid', 'Shipped')
+
+<span class="com">-- ranges</span>
+WHERE Price BETWEEN 100 AND 500     <span class="com">-- inclusive both ends</span>
+
+<span class="com">-- NULL handling — common bug source</span>
+WHERE DeletedAt IS NULL             <span class="com">-- NEVER use = NULL</span>
+WHERE COALESCE(Phone, '') = ''     <span class="com">-- treat NULL as empty</span>
+SELECT ISNULL(Discount, 0) FROM Orders   <span class="com">-- replace NULL</span>
+
+<span class="com">-- conditional expressions</span>
+SELECT
+  Name,
+  CASE
+    WHEN Total &gt;= 1000 THEN 'Premium'
+    WHEN Total &gt;= 500  THEN 'Gold'
+    ELSE 'Regular'
+  END AS Tier
+FROM Customers;</code></pre>
+
+      <div class="gotcha">⚠️ <strong>Gotcha:</strong> <code>NULL = NULL</code> is unknown, not true. Always use <code>IS NULL</code> / <code>IS NOT NULL</code>.</div>
+    </section>
+
+    <h2 class="section-title">📅 Week 2 — Joins, Subqueries, Design</h2>
+
+    <section class="topic" id="joins">
+      <div class="topic__check"><input type="checkbox" data-topic="4" /></div>
+      <h3><span class="num">5</span> Joins — INNER, LEFT, RIGHT, FULL, CROSS, SELF ⭐</h3>
+      <p class="concept">Joins are the #1 SQL skill. EF Core can write them for you, but if you can't read the generated SQL you can't tune it.</p>
+
+      <table>
+        <thead><tr><th>Type</th><th>Returns</th></tr></thead>
+        <tbody>
+          <tr><td><strong>INNER JOIN</strong></td><td>Rows where match exists in both tables</td></tr>
+          <tr><td><strong>LEFT (OUTER) JOIN</strong></td><td>All rows from left + matching from right (or NULL)</td></tr>
+          <tr><td><strong>RIGHT JOIN</strong></td><td>All from right + matches from left (rarely used)</td></tr>
+          <tr><td><strong>FULL OUTER JOIN</strong></td><td>All rows from both, NULL where no match</td></tr>
+          <tr><td><strong>CROSS JOIN</strong></td><td>Cartesian product — every row × every row</td></tr>
+          <tr><td><strong>SELF JOIN</strong></td><td>Table joined to itself (e.g., Employee → Manager)</td></tr>
+        </tbody>
+      </table>
+
+      <pre><code><span class="com">-- inner — only customers who placed orders</span>
+SELECT c.Name, o.Id, o.Total
+FROM Customers c
+INNER JOIN Orders o ON o.CustomerId = c.Id;
+
+<span class="com">-- left — all customers, even those with no orders (NULL columns)</span>
+SELECT c.Name, COUNT(o.Id) AS OrderCount
+FROM Customers c
+LEFT JOIN Orders o ON o.CustomerId = c.Id
+GROUP BY c.Name;
+
+<span class="com">-- self join — find employees and their managers</span>
+SELECT e.Name AS Employee, m.Name AS Manager
+FROM Employees e
+LEFT JOIN Employees m ON m.Id = e.ManagerId;</code></pre>
+
+      <div class="interview">
+        <h4>🎯 Pro Tips</h4>
+        <ul>
+          <li>Always alias tables (<code>c</code>, <code>o</code>) — readability + ambiguity prevention</li>
+          <li>Filter in JOIN's ON clause vs WHERE: matters for OUTER joins (changes semantics)</li>
+          <li>EXISTS often beats JOIN+DISTINCT for "does any match exist" checks</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="topic" id="subquery">
+      <div class="topic__check"><input type="checkbox" data-topic="5" /></div>
+      <h3><span class="num">6</span> Subqueries, EXISTS, CTE, Set Ops</h3>
+      <p class="concept">Subqueries nest queries. <strong>CTE (WITH)</strong> makes complex queries readable. <strong>EXISTS</strong> is faster than <code>IN</code> for large subquery results.</p>
+
+      <pre><code><span class="com">-- subquery in WHERE</span>
+SELECT * FROM Products
+WHERE Price &gt; (SELECT AVG(Price) FROM Products);
+
+<span class="com">-- EXISTS — semi-join, stops at first match</span>
+SELECT * FROM Customers c
+WHERE EXISTS (SELECT 1 FROM Orders o WHERE o.CustomerId = c.Id);
+
+<span class="com">-- CTE — readable for complex logic, can be recursive</span>
+WITH MonthlyRevenue AS (
+  SELECT MONTH(OrderDate) AS M, SUM(Total) AS Rev
+  FROM Orders
+  GROUP BY MONTH(OrderDate)
+)
+SELECT * FROM MonthlyRevenue WHERE Rev &gt; 50000;
+
+<span class="com">-- recursive CTE — org hierarchy</span>
+WITH OrgTree AS (
+  SELECT Id, Name, ManagerId, 0 AS Level FROM Employees WHERE ManagerId IS NULL
+  UNION ALL
+  SELECT e.Id, e.Name, e.ManagerId, t.Level + 1
+  FROM Employees e INNER JOIN OrgTree t ON e.ManagerId = t.Id
+)
+SELECT * FROM OrgTree;
+
+<span class="com">-- set operators</span>
+SELECT Email FROM Users
+UNION       <span class="com">-- distinct merge</span>
+SELECT Email FROM Subscribers;
+
+SELECT Email FROM A
+INTERSECT   <span class="com">-- in both</span>
+SELECT Email FROM B;
+
+SELECT Email FROM A
+EXCEPT      <span class="com">-- in A but not B (= MINUS in Oracle)</span>
+SELECT Email FROM B;</code></pre>
+
+      <div class="gotcha">⚠️ <strong>Gotcha:</strong> <code>UNION</code> removes duplicates (slow). Use <code>UNION ALL</code> if you don't need dedup — much faster.</div>
+    </section>
+
+    <section class="topic" id="constraints">
+      <div class="topic__check"><input type="checkbox" data-topic="6" /></div>
+      <h3><span class="num">7</span> Constraints (PK, FK, UNIQUE, CHECK, DEFAULT, NOT NULL)</h3>
+      <p class="concept">Constraints enforce data integrity at the database level — the strongest guarantee, since app code can be bypassed.</p>
+
+      <ul>
+        <li><strong>PRIMARY KEY</strong> — uniquely identifies row, NOT NULL implicit</li>
+        <li><strong>FOREIGN KEY</strong> — references another table's PK; can have ON DELETE CASCADE / SET NULL / NO ACTION</li>
+        <li><strong>UNIQUE</strong> — column values must be unique (allows one NULL in SQL Server)</li>
+        <li><strong>NOT NULL</strong> — column requires a value</li>
+        <li><strong>DEFAULT</strong> — auto-fills when not specified</li>
+        <li><strong>CHECK</strong> — custom predicate (<code>CHECK (Age &gt;= 18)</code>)</li>
+        <li><strong>IDENTITY(1,1)</strong> — auto-incrementing column</li>
+      </ul>
+
+      <pre><code>CREATE TABLE Orders (
+  Id INT IDENTITY(1,1) PRIMARY KEY,
+  CustomerId INT NOT NULL,
+  Total DECIMAL(10,2) NOT NULL CHECK (Total &gt;= 0),
+  Status NVARCHAR(20) NOT NULL DEFAULT 'Pending',
+  CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+  CONSTRAINT FK_Orders_Customers
+    FOREIGN KEY (CustomerId) REFERENCES Customers(Id) ON DELETE CASCADE,
+  CONSTRAINT UQ_Orders_TrackingNumber UNIQUE (TrackingNumber)
+);</code></pre>
+    </section>
+
+    <section class="topic" id="normalization">
+      <div class="topic__check"><input type="checkbox" data-topic="7" /></div>
+      <h3><span class="num">8</span> Normalization (1NF → 3NF) ⭐</h3>
+      <p class="concept">Splitting data into related tables to eliminate redundancy and update anomalies. Senior interviews always ask: "explain 1NF/2NF/3NF with an example."</p>
+
+      <table>
+        <thead><tr><th>Form</th><th>Rule</th></tr></thead>
+        <tbody>
+          <tr><td><strong>1NF</strong></td><td>Atomic columns (no comma-separated lists). Unique rows.</td></tr>
+          <tr><td><strong>2NF</strong></td><td>1NF + every non-key column depends on the WHOLE primary key (matters for composite keys)</td></tr>
+          <tr><td><strong>3NF</strong></td><td>2NF + no transitive dependencies (non-key column shouldn't depend on another non-key column)</td></tr>
+          <tr><td><strong>BCNF</strong></td><td>Stricter 3NF; rare to need this in interviews</td></tr>
+        </tbody>
+      </table>
+
+      <h4>🎯 Real-World Tradeoffs</h4>
+      <ul>
+        <li>OLTP systems (transactions) → highly normalized (3NF) — minimize updates</li>
+        <li>OLAP / reporting → denormalized (star schema) — fast reads</li>
+        <li>Often you'll <strong>denormalize on purpose</strong> for performance — that's a senior decision</li>
+      </ul>
+
+      <div class="angular-bridge">🔗 <strong>Angular Parallel:</strong> Normalization is to DB what component reuse is to UI — DRY for data, with the same maintainability benefits.</div>
+    </section>
+
+    <h2 class="section-title">📅 Week 3 — Advanced</h2>
+
+    <section class="topic" id="sp">
+      <div class="topic__check"><input type="checkbox" data-topic="8" /></div>
+      <h3><span class="num">9</span> Stored Procedures & Functions</h3>
+      <p class="concept">Stored Procedures (SP) are precompiled SQL routines stored in the DB. Functions return values or tables and can be used in SELECT.</p>
+
+      <pre><code>CREATE PROCEDURE sp_GetTopCustomers
+  @Top INT = 10,
+  @MinTotal DECIMAL(10,2) = 0
+AS
+BEGIN
+  SET NOCOUNT ON;
+  SELECT TOP (@Top) c.Id, c.Name, SUM(o.Total) AS Revenue
+  FROM Customers c
+  INNER JOIN Orders o ON o.CustomerId = c.Id
+  GROUP BY c.Id, c.Name
+  HAVING SUM(o.Total) &gt;= @MinTotal
+  ORDER BY Revenue DESC;
+END;
+
+EXEC sp_GetTopCustomers @Top = 5, @MinTotal = 1000;
+
+<span class="com">-- scalar function</span>
+CREATE FUNCTION fn_GetAge(@DOB DATE)
+RETURNS INT
+AS BEGIN
+  RETURN DATEDIFF(YEAR, @DOB, GETDATE());
+END;
+
+<span class="com">-- table-valued function</span>
+CREATE FUNCTION fn_OrdersByCustomer(@CustomerId INT)
+RETURNS TABLE
+AS RETURN (SELECT * FROM Orders WHERE CustomerId = @CustomerId);</code></pre>
+
+      <div class="interview">
+        <h4>🎯 SP vs Function (interview classic)</h4>
+        <ul>
+          <li>SP can do INSERT/UPDATE/DELETE; function generally can't (DML restricted)</li>
+          <li>SP can return multiple result sets; function returns one value or table</li>
+          <li>Function can be used in SELECT/WHERE; SP cannot</li>
+          <li>SP can use TRY/CATCH and transactions; functions can't</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="topic" id="views">
+      <div class="topic__check"><input type="checkbox" data-topic="9" /></div>
+      <h3><span class="num">10</span> Views & Indexed (Materialized) Views</h3>
+      <p class="concept">A View is a saved SELECT — virtual table for abstraction, security (hide columns), and reuse.</p>
+
+      <pre><code>CREATE VIEW vw_ActiveCustomers AS
+SELECT Id, Name, Email
+FROM Customers
+WHERE IsActive = 1;
+
+SELECT * FROM vw_ActiveCustomers WHERE Email LIKE '%@gmail.com';
+
+<span class="com">-- indexed view (SQL Server) — physically stored, must be schema-bound</span>
+CREATE VIEW vw_OrderTotals
+WITH SCHEMABINDING AS
+SELECT CustomerId, SUM(Total) AS Total, COUNT_BIG(*) AS Cnt
+FROM dbo.Orders
+GROUP BY CustomerId;
+
+CREATE UNIQUE CLUSTERED INDEX IX_vw_OrderTotals ON vw_OrderTotals(CustomerId);</code></pre>
+    </section>
+
+    <section class="topic" id="indexes">
+      <div class="topic__check"><input type="checkbox" data-topic="10" /></div>
+      <h3><span class="num">11</span> Indexes — Clustered, Non-Clustered, Covering ⭐</h3>
+      <p class="concept">Indexes are the #1 performance lever. Every interview will ask "what's a clustered index?" — know this cold.</p>
+
+      <table>
+        <thead><tr><th>Type</th><th>Behavior</th><th>Per Table</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Clustered</strong></td><td>Defines physical row order; PK is clustered by default</td><td>Only ONE</td></tr>
+          <tr><td><strong>Non-Clustered</strong></td><td>Separate B-tree pointing to row; row data lives elsewhere</td><td>Many</td></tr>
+          <tr><td><strong>Unique</strong></td><td>Adds uniqueness constraint</td><td>Many</td></tr>
+          <tr><td><strong>Filtered</strong></td><td>Indexes only rows matching predicate (smaller, faster)</td><td>Many</td></tr>
+          <tr><td><strong>Composite</strong></td><td>Multiple columns; order matters</td><td>Many</td></tr>
+          <tr><td><strong>Covering</strong> (INCLUDE)</td><td>Includes extra cols so query needs only the index</td><td>Many</td></tr>
+        </tbody>
+      </table>
+
+      <pre><code>CREATE NONCLUSTERED INDEX IX_Orders_CustomerId
+ON Orders(CustomerId)
+INCLUDE (Total, Status);   <span class="com">-- covering index</span>
+
+<span class="com">-- filtered index — only active</span>
+CREATE INDEX IX_Users_ActiveEmail
+ON Users(Email) WHERE IsActive = 1;</code></pre>
+
+      <div class="interview">
+        <h4>🎯 Index Tradeoffs</h4>
+        <ul>
+          <li>Speed up SELECTs but slow down INSERT/UPDATE/DELETE (must update index too)</li>
+          <li>Take disk space</li>
+          <li>Index on columns used in WHERE, JOIN ON, ORDER BY</li>
+          <li>Don't index low-cardinality columns (e.g., gender) — full scan often faster</li>
+          <li>Composite index <code>(A, B)</code> helps queries filtering by A or A+B, NOT B alone</li>
+        </ul>
+      </div>
+
+      <div class="gotcha">⚠️ <strong>Gotcha:</strong> Functions on indexed columns (<code>WHERE YEAR(CreatedAt) = 2025</code>) defeat indexes. Rewrite as <code>WHERE CreatedAt &gt;= '2025-01-01' AND CreatedAt &lt; '2026-01-01'</code>.</div>
+    </section>
+
+    <section class="topic" id="tx">
+      <div class="topic__check"><input type="checkbox" data-topic="11" /></div>
+      <h3><span class="num">12</span> Transactions & ACID ⭐</h3>
+      <p class="concept">A transaction = unit of work: all-or-nothing. ACID guarantees (Atomicity, Consistency, Isolation, Durability) are the bedrock of relational databases.</p>
+
+      <table>
+        <thead><tr><th>Letter</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><strong>A</strong>tomicity</td><td>All operations succeed or none do (rollback)</td></tr>
+          <tr><td><strong>C</strong>onsistency</td><td>DB stays in valid state (constraints upheld)</td></tr>
+          <tr><td><strong>I</strong>solation</td><td>Concurrent tx don't interfere (controlled by isolation level)</td></tr>
+          <tr><td><strong>D</strong>urability</td><td>Committed data survives crashes (written to disk)</td></tr>
+        </tbody>
+      </table>
+
+      <h4>🎯 Isolation Levels (low → high)</h4>
+      <ul>
+        <li><strong>Read Uncommitted</strong> — sees uncommitted data (dirty reads)</li>
+        <li><strong>Read Committed</strong> — default; only sees committed (avoids dirty reads)</li>
+        <li><strong>Repeatable Read</strong> — same query returns same result within tx</li>
+        <li><strong>Serializable</strong> — fully isolated; slowest, most locking</li>
+        <li><strong>Snapshot</strong> — uses row versioning, no readers block writers</li>
+      </ul>
+
+      <pre><code>BEGIN TRANSACTION;
+BEGIN TRY
+  UPDATE Accounts SET Balance = Balance - 1000 WHERE Id = 1;
+  UPDATE Accounts SET Balance = Balance + 1000 WHERE Id = 2;
+  COMMIT;
+END TRY
+BEGIN CATCH
+  ROLLBACK;
+  THROW;
+END CATCH;</code></pre>
+
+      <div class="interview">
+        <h4>🎯 Common Anomalies</h4>
+        <ul>
+          <li><strong>Dirty Read</strong>: reading uncommitted change that gets rolled back</li>
+          <li><strong>Non-repeatable Read</strong>: same row read twice has different value</li>
+          <li><strong>Phantom Read</strong>: same query returns extra rows on re-execute</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="topic" id="window">
+      <div class="topic__check"><input type="checkbox" data-topic="12" /></div>
+      <h3><span class="num">13</span> Window Functions ⭐ (senior-level)</h3>
+      <p class="concept">Aggregate-like functions that DON'T collapse rows. Game-changer for ranking, running totals, and "top N per group" queries.</p>
+
+      <pre><code><span class="com">-- ROW_NUMBER, RANK, DENSE_RANK</span>
+SELECT
+  Name,
+  Department,
+  Salary,
+  ROW_NUMBER() OVER (PARTITION BY Department ORDER BY Salary DESC) AS RowNum,
+  RANK()       OVER (PARTITION BY Department ORDER BY Salary DESC) AS Rnk,
+  DENSE_RANK() OVER (PARTITION BY Department ORDER BY Salary DESC) AS DenseRnk
+FROM Employees;
+
+<span class="com">-- running total</span>
+SELECT
+  OrderDate,
+  Total,
+  SUM(Total) OVER (ORDER BY OrderDate) AS RunningTotal
+FROM Orders;
+
+<span class="com">-- "top 3 per category" — interview classic</span>
+WITH Ranked AS (
+  SELECT *, ROW_NUMBER() OVER (PARTITION BY Category ORDER BY Sales DESC) AS rn
+  FROM Products
+)
+SELECT * FROM Ranked WHERE rn &lt;= 3;
+
+<span class="com">-- LAG / LEAD — compare with previous/next row</span>
+SELECT
+  Month,
+  Revenue,
+  LAG(Revenue, 1) OVER (ORDER BY Month) AS PrevMonth,
+  Revenue - LAG(Revenue, 1) OVER (ORDER BY Month) AS Growth
+FROM MonthlyRevenue;</code></pre>
+
+      <div class="interview">
+        <h4>🎯 RANK vs DENSE_RANK vs ROW_NUMBER</h4>
+        <ul>
+          <li><strong>ROW_NUMBER</strong>: 1, 2, 3, 4 — always unique</li>
+          <li><strong>RANK</strong>: 1, 2, 2, 4 — ties get same rank, gap after</li>
+          <li><strong>DENSE_RANK</strong>: 1, 2, 2, 3 — ties get same rank, no gap</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="topic" id="perf">
+      <div class="topic__check"><input type="checkbox" data-topic="13" /></div>
+      <h3><span class="num">14</span> Query Optimization & Execution Plans</h3>
+      <p class="concept">When queries get slow, you read the execution plan, identify bottlenecks (table scans, key lookups, sorts) and fix with indexes or query rewrites.</p>
+
+      <h4>🎯 Diagnostic Tools</h4>
+      <ul>
+        <li>SSMS: Ctrl+M (Include Actual Execution Plan), Ctrl+L (Estimated)</li>
+        <li><code>SET STATISTICS IO ON;</code> shows reads/writes per operation</li>
+        <li><code>SET STATISTICS TIME ON;</code> shows CPU/elapsed time</li>
+        <li>SQL Server Profiler / Extended Events for live tracing</li>
+        <li>Azure Data Studio + Query Plan Viewer extension</li>
+      </ul>
+
+      <h4>🎯 Optimization Checklist</h4>
+      <ol>
+        <li>Add missing indexes (SSMS suggests them)</li>
+        <li>Avoid <code>SELECT *</code> — fetch only needed columns</li>
+        <li>Filter early, narrow before joining</li>
+        <li>Use <code>EXISTS</code> instead of <code>IN (subquery)</code> for large sets</li>
+        <li>Avoid functions on indexed columns in WHERE</li>
+        <li>Replace cursors with set-based operations</li>
+        <li>Use covering indexes (INCLUDE) for hot reads</li>
+        <li>Use <code>UNION ALL</code> instead of <code>UNION</code> if duplicates are fine</li>
+        <li>Watch for parameter sniffing issues — use <code>OPTION (RECOMPILE)</code> if needed</li>
+        <li>For pagination, use keyset (seek) pagination over OFFSET for large tables</li>
+      </ol>
+
+      <pre><code><span class="com">-- bad: function on column — index not used</span>
+SELECT * FROM Orders WHERE YEAR(CreatedAt) = 2025;
+
+<span class="com">-- good: range — index used</span>
+SELECT * FROM Orders
+WHERE CreatedAt &gt;= '2025-01-01' AND CreatedAt &lt; '2026-01-01';
+
+<span class="com">-- bad: SELECT * + no covering index → key lookups</span>
+SELECT * FROM Orders WHERE CustomerId = 123;
+
+<span class="com">-- good: project only what you need</span>
+SELECT Id, Total FROM Orders WHERE CustomerId = 123;</code></pre>
+
+      <div class="gotcha">⚠️ <strong>Gotcha:</strong> Don't optimize blindly. <em>Measure first</em> — execution plans are your truth, intuition lies.</div>
+    </section>
+
+    <section id="qa">
+      <h2 class="section-title">🎤 Interview Q&A — Phase 2</h2>
+      <div class="qa-block">
+        <details><summary>Q. What is difference between WHERE and HAVING?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>WHERE — filter rows BEFORE grouping</li>
+              <li>HAVING — filter groups AFTER grouping</li>
+            </ul>
+            <p><strong>Key Points:</strong></p>
+            <ul>
+              <li>WHERE cannot use aggregate functions (SUM, COUNT) — groups not exist yet</li>
+              <li>HAVING can use aggregate functions — work on groups</li>
+              <li>HAVING used with GROUP BY mostly</li>
+            </ul>
+            <p><strong>Example — Orders table:</strong></p>
+            <ul>
+              <li><code>WHERE Status = 'Paid'</code> — pick only paid rows first</li>
+              <li><code>GROUP BY CustomerId</code> — bucket them</li>
+              <li><code>HAVING SUM(Total) &gt; 10000</code> — keep only customers with spend over 10000</li>
+            </ul>
+            <p><strong>Note:</strong> WHERE for row, HAVING for group. Easy to remember.</p>
+          </div>
+        </details>
+        <details><summary>Q. Clustered vs Non-Clustered Index?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>Index = data structure to find rows fast (like book index)</li>
+              <li>Without index = scan whole table O(n)</li>
+              <li>With index = find in O(log n)</li>
+            </ul>
+            <p><strong>Clustered Index:</strong></p>
+            <ul>
+              <li>Define physical order of rows on disk</li>
+              <li>Only ONE per table</li>
+              <li>By default Primary Key become clustered index</li>
+              <li>Rows physically sorted by PK</li>
+            </ul>
+            <p><strong>Non-Clustered Index:</strong></p>
+            <ul>
+              <li>Separate structure (B-tree) stored apart from table</li>
+              <li>Contain indexed column + pointer to row</li>
+              <li>Many per table allowed</li>
+              <li>May need "key lookup" to fetch full row (slower)</li>
+            </ul>
+            <p><strong>Covering Index:</strong></p>
+            <ul>
+              <li>Add extra columns with <code>INCLUDE</code> keyword</li>
+              <li>Query get everything from index — no table touch</li>
+            </ul>
+            <p><strong>Cost:</strong></p>
+            <ul>
+              <li>Take disk space</li>
+              <li>Slow down INSERT/UPDATE/DELETE — index also need update</li>
+            </ul>
+            <p><strong>Rule:</strong> Index columns used in WHERE, JOIN ON, ORDER BY.</p>
+          </div>
+        </details>
+        <details><summary>Q. What is normalization? When to denormalize?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>Normalization = organize tables to remove duplicate data</li>
+              <li>Denormalization = duplicate data on purpose for read speed</li>
+            </ul>
+            <p><strong>Normal Forms:</strong></p>
+            <ul>
+              <li><strong>1NF</strong> — each column has atomic value (no comma list)</li>
+              <li><strong>2NF</strong> — every non-key column depend on WHOLE primary key</li>
+              <li><strong>3NF</strong> — no transitive dependency (non-key not depend on non-key)</li>
+            </ul>
+            <p><strong>3NF Example:</strong></p>
+            <ul>
+              <li>Don't store customer city in Orders table</li>
+              <li>Join to Customers table to get city</li>
+            </ul>
+            <p><strong>When to Denormalize:</strong></p>
+            <ul>
+              <li>Reporting / OLAP system where joins are slow</li>
+              <li>Hot read endpoint joining 6+ tables</li>
+              <li>Star schema in data warehouse</li>
+            </ul>
+            <p><strong>Note:</strong> OLTP — aim for 3NF. OLAP — denormalize for speed.</p>
+          </div>
+        </details>
+
+        <details><summary>Q. Explain ACID?</summary>
+          <div>
+            <p><strong>Definition:</strong> ACID = 4 guarantees databases give for transactions.</p>
+            <p><strong>A — Atomicity:</strong></p>
+            <ul>
+              <li>All-or-nothing</li>
+              <li>Money transfer: both updates happen or none</li>
+              <li>If fail — rollback</li>
+            </ul>
+            <p><strong>C — Consistency:</strong></p>
+            <ul>
+              <li>DB stay in valid state</li>
+              <li>All constraints (FK, unique, check) upheld</li>
+            </ul>
+            <p><strong>I — Isolation:</strong></p>
+            <ul>
+              <li>Concurrent transactions don't mess each other</li>
+              <li>Read Committed (default) — prevent dirty read</li>
+              <li>Serializable — strongest, slowest</li>
+            </ul>
+            <p><strong>D — Durability:</strong></p>
+            <ul>
+              <li>Once committed — data on disk</li>
+              <li>Survive power cut or crash</li>
+            </ul>
+            <p><strong>Note:</strong> NoSQL use BASE model — trade ACID for scale.</p>
+          </div>
+        </details>
+
+        <details><summary>Q. TRUNCATE vs DELETE?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>DELETE — DML, remove rows one by one</li>
+              <li>TRUNCATE — DDL, deallocate pages</li>
+            </ul>
+            <p><strong>Compare Table:</strong></p>
+            <table>
+              <thead><tr><th>Aspect</th><th>DELETE</th><th>TRUNCATE</th></tr></thead>
+              <tbody>
+                <tr><td>Type</td><td>DML</td><td>DDL</td></tr>
+                <tr><td>WHERE</td><td>Yes</td><td>No</td></tr>
+                <tr><td>Trigger</td><td>Yes</td><td>No</td></tr>
+                <tr><td>Logging</td><td>Full per row</td><td>Minimal</td></tr>
+                <tr><td>Speed</td><td>Slow</td><td>Fast</td></tr>
+                <tr><td>IDENTITY</td><td>Keep growing</td><td>Reset to seed</td></tr>
+              </tbody>
+            </table>
+            <p><strong>When to use:</strong></p>
+            <ul>
+              <li>DELETE — when filter needed or partial delete</li>
+              <li>TRUNCATE — wipe whole table fast (test data, reset)</li>
+            </ul>
+            <p><strong>Note:</strong> DROP is different — remove table itself.</p>
+          </div>
+        </details>
+
+        <details><summary>Q. What is CTE and when useful?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>CTE = Common Table Expression</li>
+              <li>Named temporary result set with <code>WITH</code> keyword</li>
+              <li>Like temporary view for next statement only</li>
+            </ul>
+            <p><strong>Why use CTE:</strong></p>
+            <ul>
+              <li><strong>Readability</strong> — complex query become like recipe</li>
+              <li>Chain multiple CTEs with comma</li>
+              <li><strong>Recursion</strong> — CTE can reference itself</li>
+              <li>Standard for org chart, category tree, folder hierarchy</li>
+            </ul>
+            <p><strong>vs Temporary Table:</strong></p>
+            <ul>
+              <li>CTE not write to disk</li>
+              <li>CTE auto cleaned — scope to one statement</li>
+              <li>No cleanup needed</li>
+            </ul>
+          </div>
+        </details>
+
+        <details><summary>Q. RANK vs DENSE_RANK vs ROW_NUMBER?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>All 3 are window functions in <code>OVER (ORDER BY ...)</code></li>
+              <li>Difference is how they handle ties</li>
+            </ul>
+            <p><strong>Output Compare (with ties at value 2):</strong></p>
+            <table>
+              <thead><tr><th>Function</th><th>Output</th><th>Behavior</th></tr></thead>
+              <tbody>
+                <tr><td>ROW_NUMBER</td><td>1, 2, 3, 4, 5</td><td>Always unique number</td></tr>
+                <tr><td>RANK</td><td>1, 2, 2, 4, 5</td><td>Same for ties, SKIP next</td></tr>
+                <tr><td>DENSE_RANK</td><td>1, 2, 2, 3, 4</td><td>Same for ties, NO skip</td></tr>
+              </tbody>
+            </table>
+            <p><strong>When to use:</strong></p>
+            <ul>
+              <li><strong>ROW_NUMBER</strong> — pagination, "first" record per group</li>
+              <li><strong>RANK</strong> — competition rank where ties skip</li>
+              <li><strong>DENSE_RANK</strong> — "top 3 salaries" — give all tied at top</li>
+            </ul>
+          </div>
+        </details>
+
+        <details><summary>Q. How to find second-highest salary?</summary>
+          <div>
+            <p><strong>Method 1 — Subquery:</strong></p>
+            <pre><code>SELECT MAX(Salary) FROM Employees
+WHERE Salary &lt; (SELECT MAX(Salary) FROM Employees);</code></pre>
+            <ul>
+              <li>Find max of salaries less than highest</li>
+              <li>Simple and works fine</li>
+            </ul>
+            <p><strong>Method 2 — Window Function (Modern):</strong></p>
+            <pre><code>SELECT Salary FROM (
+  SELECT Salary, DENSE_RANK() OVER (ORDER BY Salary DESC) AS rk
+  FROM Employees
+) t WHERE rk = 2;</code></pre>
+            <ul>
+              <li>DENSE_RANK assign rank 1 to highest, rank 2 to next distinct</li>
+              <li>Filter where rk = 2</li>
+              <li>Use DENSE_RANK so ties at top correctly handled</li>
+            </ul>
+            <p><strong>Wrong way — Don't use:</strong></p>
+            <ul>
+              <li><code>ORDER BY Salary DESC OFFSET 1 LIMIT 1</code></li>
+              <li>Give second ROW not second distinct salary</li>
+              <li>Wrong if multiple people share top salary</li>
+            </ul>
+          </div>
+        </details>
+
+        <details><summary>Q. What is deadlock in SQL Server?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>Two transactions each hold locks the other need</li>
+              <li>Neither can move forward</li>
+            </ul>
+            <p><strong>Example:</strong></p>
+            <ul>
+              <li>Transaction A — lock Orders, want Customers</li>
+              <li>Transaction B — lock Customers, want Orders</li>
+              <li>Both wait forever</li>
+            </ul>
+            <p><strong>How SQL Server handle:</strong></p>
+            <ul>
+              <li>Deadlock monitor run periodically</li>
+              <li>Pick cheaper transaction to kill (deadlock victim)</li>
+              <li>Rollback victim, let other proceed</li>
+              <li>App get error code 1205 — should retry</li>
+            </ul>
+            <p><strong>How to Prevent:</strong></p>
+            <ul>
+              <li>Always access tables in same order in all code</li>
+              <li>Keep transactions short — no user think time inside</li>
+              <li>Use Read Committed Snapshot Isolation</li>
+              <li>Add proper indexes — queries lock fewer rows</li>
+              <li>Add retry logic with exponential backoff</li>
+            </ul>
+            <p><strong>Java parallel:</strong></p>
+            <ul>
+              <li>Same as Java thread deadlock — same prevention rule</li>
+              <li>Take locks in same order everywhere</li>
+            </ul>
+          </div>
+        </details>
+
+        <details><summary>Q. How does indexing work and what is cost?</summary>
+          <div>
+            <p><strong>Definition:</strong> Index = separate B-tree to find rows fast.</p>
+            <p><strong>How it Help:</strong></p>
+            <ul>
+              <li>Without index — scan every row O(n)</li>
+              <li>With index — find in O(log n)</li>
+              <li>On 1 million rows: half second vs few microseconds</li>
+            </ul>
+            <p><strong>Cost 1 — Disk Space:</strong></p>
+            <ul>
+              <li>Each index is own structure on disk</li>
+              <li>Big tables can have indexes bigger than table itself</li>
+            </ul>
+            <p><strong>Cost 2 — Slower Writes:</strong></p>
+            <ul>
+              <li>Every INSERT/UPDATE/DELETE update table AND every index</li>
+              <li>5 indexes on write-heavy table = much slower inserts</li>
+            </ul>
+            <p><strong>Rules:</strong></p>
+            <ul>
+              <li>Index columns used in WHERE, JOIN ON, ORDER BY</li>
+              <li>Don't index columns that change a lot</li>
+              <li>Don't index low cardinality columns (Gender — only 2-3 values)</li>
+              <li>Check execution plan to see which indexes used</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <section id="mistakes" class="callout callout--warn">
+      <h3>⚠️ Common Mistakes in SQL</h3>
+      <ul>
+        <li>Using <code>= NULL</code> instead of <code>IS NULL</code></li>
+        <li><code>SELECT *</code> in production code (defeats covering indexes, fetches unused data)</li>
+        <li>Functions on indexed columns in WHERE clause</li>
+        <li>UNION when UNION ALL would do (slower needlessly)</li>
+        <li>Putting filter in WHERE instead of JOIN's ON for outer joins (changes semantics)</li>
+        <li>Cursors / loops where set-based operations work</li>
+        <li>Trusting "the ORM will handle it" — always inspect generated SQL</li>
+        <li>Missing transactions on multi-step operations (data corruption risk)</li>
+      </ul>
+    </section>
+
+    <nav class="phase-nav">
+      <a href="phase-1-csharp.html"><span class="label">← Prev</span><strong>Phase 1: C#</strong></a>
+      <a href="phase-3-aspnet-core.html" class="next"><span class="label">Next →</span><strong>Phase 3: ASP.NET Core Web API</strong></a>
+    </nav>
+  </main>
+</div>
+
+<footer class="footer">Phase 2 of 9 · SQL fluency unlocks every backend interview</footer>
+
+<script>
+  const phase = document.body.dataset.phase;
+  document.querySelectorAll('input[type="checkbox"][data-topic]').forEach(cb => {
+    const key = `phase-${phase}-topic-${cb.dataset.topic}`;
+    cb.checked = localStorage.getItem(key) === 'true';
+    cb.closest('.topic').classList.toggle('is-done', cb.checked);
+    cb.addEventListener('change', () => {
+      localStorage.setItem(key, cb.checked);
+      cb.closest('.topic').classList.toggle('is-done', cb.checked);
+    });
+  });
+  const links = document.querySelectorAll('.sidebar a[href^="#"]');
+  const sections = [...links].map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  window.addEventListener('scroll', () => {
+    let current = sections[0]?.id;
+    sections.forEach(s => { if (window.scrollY + 100 >= s.offsetTop) current = s.id; });
+    links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current));
+  });
+</script>
+</body>
+</html>

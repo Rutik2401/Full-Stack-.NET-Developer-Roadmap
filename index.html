@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Full Stack .NET Roadmap — 9 Months · 12-15 LPA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/global.css" />
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="topnav__inner">
+    <div class="brand">.NET<span class="dot">·</span>Roadmap</div>
+    <div class="topnav__links">
+      <a href="index.html" class="active">Home</a>
+      <a href="phases/phase-0-foundation.html">Phase 0</a>
+      <a href="phases/phase-1-csharp.html">C#</a>
+      <a href="phases/phase-2-sql.html">SQL</a>
+      <a href="phases/phase-3-aspnet-core.html">ASP.NET</a>
+      <a href="phases/phase-4-ef-core.html">EF Core</a>
+      <a href="phases/phase-5-angular-integration.html">Angular</a>
+      <a href="phases/phase-6-system-design.html">System Design</a>
+      <a href="phases/phase-7-devops-azure.html">Azure</a>
+      <a href="phases/phase-8-projects.html">Projects</a>
+      <a href="phases/phase-9-interview.html">Interview</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <h1>From Angular Dev → Full Stack .NET Engineer</h1>
+  <p>A 9-month, interview-grade roadmap to land a <strong>12-15 LPA</strong> Full Stack .NET role. Built for someone who already ships Angular daily.</p>
+  <div class="hero__stats">
+    <div class="stat"><div class="stat__num">10</div><div class="stat__label">Phases</div></div>
+    <div class="stat"><div class="stat__num">36</div><div class="stat__label">Weeks</div></div>
+    <div class="stat"><div class="stat__num">3</div><div class="stat__label">Real Projects</div></div>
+    <div class="stat"><div class="stat__num">15<span style="font-size:0.7em">LPA</span></div><div class="stat__label">Target</div></div>
+  </div>
+</header>
+
+<main class="container">
+
+  <section>
+    <h2 class="section-title">📚 The 10 Phases</h2>
+    <p class="muted">Each phase is a deep, point-wise study guide written in interview voice with Angular ↔ .NET analogies. Tick off topics as you finish — your progress is saved in this browser.</p>
+
+    <div class="phase-grid" id="phaseGrid">
+      <a class="phase-card" href="phases/phase-0-foundation.html" data-phase="0" data-topics="6">
+        <div class="phase-card__head"><span class="phase-card__no">PHASE 0</span><span class="phase-card__dur">1 Week</span></div>
+        <h3 class="phase-card__title">Foundation & TS → C# Bridge</h3>
+        <p class="phase-card__desc">Tools setup, .NET ecosystem, and a quick TypeScript-to-C# syntax bridge so you skip the basics.</p>
+        <div class="phase-card__progress"><span></span></div>
+        <div class="phase-card__pct">0%</div>
+      </a>
+
+      <a class="phase-card" href="phases/phase-1-csharp.html" data-phase="1" data-topics="22">
+        <div class="phase-card__head"><span class="phase-card__no">PHASE 1</span><span class="phase-card__dur">6 Weeks</span></div>
+        <h3 class="phase-card__title">C# from Basic → Advanced</h3>
+        <p class="phase-card__desc">OOP, collections, LINQ, delegates, async/await, memory, SOLID — every interview topic covered.</p>
+        <div class="phase-card__progress"><span></span></div>
+        <div class="phase-card__pct">0%</div>
+      </a>
+
+      <a class="phase-card" href="phases/phase-2-sql.html" data-phase="2" data-topics="14">
+        <div class="phase-card__head"><span class="phase-card__no">PHASE 2</span><span class="phase-card__dur">3 Weeks</span></div>
+        <h3 class="phase-card__title">SQL & Database Design</h3>
+        <p class="phase-card__desc">Joins, indexing, normalization, stored procs, CTEs, window functions, transactions — prerequisite for EF Core.</p>
+        <div class="phase-card__progress"><span></span></div>
+        <div class="phase-card__pct">0%</div>
+      </a>
+
+      <a class="phase-card" href="phases/phase-3-aspnet-core.html" data-phase="3" data-topics="18">
+        <div class="phase-card__head"><span class="phase-card__no">PHASE 3</span><span class="phase-card__dur">6 Weeks</span></div>
+        <h3 class="phase-card__title">ASP.NET Core Web API</h3>
+        <p class="phase-card__desc">Controllers, DI, middleware, JWT auth, filters, logging, versioning, real-world API patterns.</p>
+        <div class="phase-card__progress"><span></span></div>
+        <div class="phase-card__pct">0%</div>
+      </a>
+
+      <a class="phase-card" href="phases/phase-4-ef-core.html" data-phase="4" data-topics="14">
+        <div class="phase-card__head"><span class="phase-card__no">PHASE 4</span><span class="phase-card__dur">3 Weeks</span></div>
+        <h3 class="phase-card__title">Entity Framework Core</h3>
+        <p class="phase-card__desc">DbContext, migrations, relationships, tracking, N+1, performance, Repository pattern, Dapper alternative.</p>
+        <div class="phase-card__progress"><span></span></div>
+        <div class="phase-card__pct">0%</div>
+      </a>
+
+      <a class="phase-card" href="phases/phase-5-angular-integration.html" data-phase="5" data-topics="14">
+        <div class="phase-card__head"><span class="phase-card__no">PHASE 5</span><span class="phase-card__dur">3 Weeks</span></div>
+        <h3 class="phase-card__title">Angular Advanced + .NET Integration</h3>
+        <p class="phase-card__desc">Signals, OnPush, RxJS deep dive, JWT end-to-end, SignalR, NgRx, testing — fill the senior-level gaps.</p>
+        <div class="phase-card__progress"><span></span></div>
+        <div class="phase-card__pct">0%</div>
+      </a>
+
+      <a class="phase-card" href="phases/phase-6-system-design.html" data-phase="6" data-topics="14">
+        <div class="phase-card__head"><span class="phase-card__no">PHASE 6</span><span class="phase-card__dur">3 Weeks</span></div>
+        <h3 class="phase-card__title">System Design</h3>
+        <p class="phase-card__desc">Scalability, caching, load balancing, microservices, message queues, design patterns — high-impact for 15 LPA.</p>
+        <div class="phase-card__progress"><span></span></div>
+        <div class="phase-card__pct">0%</div>
+      </a>
+
+      <a class="phase-card" href="phases/phase-7-devops-azure.html" data-phase="7" data-topics="16">
+        <div class="phase-card__head"><span class="phase-card__no">PHASE 7</span><span class="phase-card__dur">4 Weeks</span></div>
+        <h3 class="phase-card__title">Docker, Azure & CI/CD</h3>
+        <p class="phase-card__desc">Containers, Compose, App Service, Azure SQL, Key Vault, GitHub Actions, Azure DevOps pipelines.</p>
+        <div class="phase-card__progress"><span></span></div>
+        <div class="phase-card__pct">0%</div>
+      </a>
+
+      <a class="phase-card" href="phases/phase-8-projects.html" data-phase="8" data-topics="3">
+        <div class="phase-card__head"><span class="phase-card__no">PHASE 8</span><span class="phase-card__dur">6 Weeks</span></div>
+        <h3 class="phase-card__title">Real Portfolio Projects</h3>
+        <p class="phase-card__desc">3 deployed projects: E-commerce, Microservices app, Real-time SignalR dashboard. The piece that lands offers.</p>
+        <div class="phase-card__progress"><span></span></div>
+        <div class="phase-card__pct">0%</div>
+      </a>
+
+      <a class="phase-card" href="phases/phase-9-interview.html" data-phase="9" data-topics="12">
+        <div class="phase-card__head"><span class="phase-card__no">PHASE 9</span><span class="phase-card__dur">3 Weeks</span></div>
+        <h3 class="phase-card__title">Interview Preparation</h3>
+        <p class="phase-card__desc">DSA essentials, .NET Q&A bank, system design rounds, behavioral STAR, resume polish, mock plan.</p>
+        <div class="phase-card__progress"><span></span></div>
+        <div class="phase-card__pct">0%</div>
+      </a>
+    </div>
+  </section>
+
+  <section class="callout callout--prereq">
+    <h3>💪 Your Existing Strength: Angular Developer</h3>
+    <p>You already know <strong>TypeScript</strong>, <strong>Dependency Injection</strong>, <strong>RxJS</strong>, <strong>Decorators</strong>, <strong>Routing</strong>, and you ship real code daily. That's a 30% head start over a fresher.</p>
+    <p>Throughout this roadmap, every new .NET concept is introduced via an <strong>Angular parallel</strong> — look for the blue 🔗 boxes on each topic.</p>
+  </section>
+
+  <section>
+    <h2 class="section-title">🧭 Quick Concept Map: Angular → .NET</h2>
+    <table>
+      <thead><tr><th>Angular (you know)</th><th>.NET equivalent</th><th>Note</th></tr></thead>
+      <tbody>
+        <tr><td>TypeScript</td><td>C#</td><td>Both strongly typed; C# is more powerful</td></tr>
+        <tr><td><code>@Injectable()</code></td><td>Service in DI container</td><td>Same constructor injection</td></tr>
+        <tr><td><code>providedIn:&nbsp;'root'</code></td><td>Singleton lifetime</td><td>Similar scope</td></tr>
+        <tr><td>HttpClient</td><td>HttpClient (.NET)</td><td>Same name, similar API</td></tr>
+        <tr><td>Interceptors</td><td>Middleware</td><td>Pipeline pattern</td></tr>
+        <tr><td>Guards (CanActivate)</td><td><code>[Authorize]</code> filter</td><td>Route protection</td></tr>
+        <tr><td>Decorators (<code>@Component</code>)</td><td>Attributes (<code>[ApiController]</code>)</td><td>Metadata</td></tr>
+        <tr><td>RxJS Observable</td><td><code>IObservable&lt;T&gt;</code> / async streams</td><td>Reactive patterns</td></tr>
+        <tr><td>Promise + async/await</td><td>Task + async/await</td><td>Almost identical syntax</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2 class="section-title">⏱️ Daily Plan</h2>
+    <table>
+      <thead><tr><th>Slot</th><th>Activity</th><th>Hours</th></tr></thead>
+      <tbody>
+        <tr><td>Morning</td><td>Theory / concept reading</td><td>1.5</td></tr>
+        <tr><td>Afternoon</td><td>Hands-on coding</td><td>2</td></tr>
+        <tr><td>Evening</td><td>Project work</td><td>1.5</td></tr>
+        <tr><td>Night</td><td>DSA / SQL / revision</td><td>1</td></tr>
+      </tbody>
+    </table>
+    <p class="muted">~6 hours/day. Consistency beats intensity. The compounding shows up in month 7.</p>
+  </section>
+
+</main>
+
+<footer class="footer">
+  Built for the journey from Angular Dev → Full Stack .NET Engineer · Discipline beats motivation.
+</footer>
+
+<script>
+  // ---- Progress: read localStorage and update each card ----
+  document.querySelectorAll('.phase-card').forEach(card => {
+    const phaseNum = card.dataset.phase;
+    const totalTopics = parseInt(card.dataset.topics || '0', 10);
+    if (!totalTopics) return;
+    let done = 0;
+    for (let i = 0; i < totalTopics; i++) {
+      if (localStorage.getItem(`phase-${phaseNum}-topic-${i}`) === 'true') done++;
+    }
+    const pct = Math.round((done / totalTopics) * 100);
+    card.querySelector('.phase-card__progress > span').style.width = pct + '%';
+    card.querySelector('.phase-card__pct').textContent = `${done} / ${totalTopics}  ·  ${pct}%`;
+  });
+</script>
+
+</body>
+</html>

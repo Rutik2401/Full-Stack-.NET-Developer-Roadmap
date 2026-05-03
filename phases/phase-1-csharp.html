@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Phase 1 — C# Basic → Advanced | .NET Roadmap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/global.css" />
+</head>
+<body data-phase="1">
+
+<nav class="topnav">
+  <div class="topnav__inner">
+    <div class="brand"><a href="../index.html" style="color:inherit">.NET<span class="dot">·</span>Roadmap</a></div>
+    <div class="topnav__links">
+      <a href="../index.html">Home</a>
+      <a href="phase-0-foundation.html">P0</a>
+      <a href="phase-1-csharp.html" class="active">P1</a>
+      <a href="phase-2-sql.html">P2</a>
+      <a href="phase-3-aspnet-core.html">P3</a>
+      <a href="phase-4-ef-core.html">P4</a>
+      <a href="phase-5-angular-integration.html">P5</a>
+      <a href="phase-6-system-design.html">P6</a>
+      <a href="phase-7-devops-azure.html">P7</a>
+      <a href="phase-8-projects.html">P8</a>
+      <a href="phase-9-interview.html">P9</a>
+    </div>
+  </div>
+</nav>
+
+<div class="phase-page">
+
+  <aside class="sidebar">
+    <h4>Week 1-2 · Basics</h4>
+    <ul>
+      <li><a href="#syntax">1. Program Structure</a></li>
+      <li><a href="#value-ref">2. Value vs Reference</a></li>
+      <li><a href="#nullable">3. Nullable Types</a></li>
+      <li><a href="#conversion">4. Type Conversion</a></li>
+      <li><a href="#strings">5. Strings & StringBuilder</a></li>
+    </ul>
+    <h4>Week 3 · OOP</h4>
+    <ul>
+      <li><a href="#classes">6. Classes & Constructors</a></li>
+      <li><a href="#encapsulation">7. Encapsulation</a></li>
+      <li><a href="#inheritance">8. Inheritance</a></li>
+      <li><a href="#polymorphism">9. Polymorphism</a></li>
+      <li><a href="#abstraction">10. Abstraction</a></li>
+      <li><a href="#properties">11. Properties</a></li>
+    </ul>
+    <h4>Week 4 · Intermediate</h4>
+    <ul>
+      <li><a href="#collections">12. Collections</a></li>
+      <li><a href="#generics">13. Generics</a></li>
+      <li><a href="#exceptions">14. Exception Handling</a></li>
+      <li><a href="#files">15. File Handling</a></li>
+      <li><a href="#linq">16. LINQ</a></li>
+    </ul>
+    <h4>Week 5 · Advanced</h4>
+    <ul>
+      <li><a href="#delegates">17. Delegates / Func / Action</a></li>
+      <li><a href="#events">18. Events</a></li>
+      <li><a href="#lambdas">19. Lambdas & Extension Methods</a></li>
+    </ul>
+    <h4>Week 6 · Async & Memory</h4>
+    <ul>
+      <li><a href="#async">20. Async / Await</a></li>
+      <li><a href="#threading">21. Multithreading</a></li>
+      <li><a href="#memory">22. Memory & GC + SOLID</a></li>
+    </ul>
+    <h4>Sections</h4>
+    <ul>
+      <li><a href="#qa">Interview Q&A</a></li>
+      <li><a href="#mistakes">Common Mistakes</a></li>
+    </ul>
+  </aside>
+
+  <main class="content">
+    <div class="breadcrumb"><a href="../index.html">Home</a> / Phase 1</div>
+
+    <header class="phase-header">
+      <h1>Phase 1 — C# from Basic → Advanced</h1>
+      <p class="lede">The single most important phase. Senior .NET roles assume rock-solid C# fluency: OOP design, LINQ, async/await, memory model, SOLID. Don't shortcut this.</p>
+      <div class="phase-meta">
+        <span class="pill">⏱ 6 Weeks</span>
+        <span class="pill">22 Topics</span>
+        <span class="pill">⭐ Highest impact phase</span>
+      </div>
+    </header>
+
+    <div class="callout callout--prereq">
+      <h3>📋 Prerequisites</h3>
+      <ul>
+        <li>Phase 0 complete (tools installed, TS→C# bridge in your head)</li>
+        <li>Existing OOP intuition from TypeScript classes</li>
+        <li>Async/await familiarity from JS Promises</li>
+      </ul>
+    </div>
+
+    <!-- ===== WEEK 1-2 ===== -->
+    <h2 class="section-title">📅 Week 1-2 — C# Basics</h2>
+
+    <section class="topic" id="syntax">
+      <div class="topic__check"><input type="checkbox" data-topic="0" /></div>
+      <h3><span class="num">1</span> Program Structure & Syntax</h3>
+      <p class="concept">Every C# program is organized into <strong>namespaces</strong> (file groups), <strong>classes</strong> (containers), and <strong>methods</strong> (functions). Execution starts at <code>Main</code> — or in modern C# 9+, at the top of <code>Program.cs</code> directly (top-level statements).</p>
+
+      <div class="interview">
+        <h4>🎯 Interview Points</h4>
+        <ul>
+          <li><strong>using</strong> imports namespaces (like TS <code>import</code>)</li>
+          <li><strong>namespace</strong> groups related types (like TS modules)</li>
+          <li><strong>Main</strong> is the entry point; signature is <code>static void Main(string[] args)</code></li>
+          <li><strong>Top-level statements</strong> (C# 9+) let you skip <code>Main</code> in <code>Program.cs</code></li>
+          <li><strong>Global usings</strong> (C# 10) let you import once for the whole project</li>
+        </ul>
+      </div>
+
+      <pre><code><span class="com">// classic</span>
+<span class="kw">using</span> System;
+
+<span class="kw">namespace</span> MyApp;
+
+<span class="kw">public class</span> Program {
+  <span class="kw">public static void</span> <span class="fn">Main</span>(<span class="kw">string</span>[] args) {
+    Console.WriteLine(<span class="str">"Hello"</span>);
+  }
+}
+
+<span class="com">// modern (C# 9+) — top-level statements</span>
+<span class="kw">using</span> System;
+Console.WriteLine(<span class="str">"Hello"</span>);</code></pre>
+
+      <div class="angular-bridge">🔗 <strong>Angular Parallel:</strong> namespace ≈ Angular module, using ≈ import statement. Top-level statements = like writing logic in <code>main.ts</code> directly.</div>
+    </section>
+
+    <section class="topic" id="value-ref">
+      <div class="topic__check"><input type="checkbox" data-topic="1" /></div>
+      <h3><span class="num">2</span> Value Types vs Reference Types</h3>
+      <p class="concept">The single most important concept in C# memory model. <strong>Value types</strong> hold the data directly (stack). <strong>Reference types</strong> hold a pointer to data on the heap. This affects copying, equality, and performance.</p>
+
+      <div class="interview">
+        <h4>🎯 Interview Points</h4>
+        <ul>
+          <li><strong>Value types</strong>: <code>int, double, bool, char, struct, enum, decimal, DateTime</code> — copied by value</li>
+          <li><strong>Reference types</strong>: <code>class, string, array, interface, delegate</code> — copied by reference</li>
+          <li>Passing a value type to a method copies it — caller's variable unchanged</li>
+          <li>Passing a reference type passes the reference — both names point to same object, mutations visible to all</li>
+          <li><strong>String</strong> is reference type but <em>immutable</em> — behaves like value for assignment</li>
+          <li><strong>Boxing</strong>: wrapping a value type in an object reference (heap allocation, slow). <strong>Unboxing</strong>: reverse.</li>
+        </ul>
+      </div>
+
+      <pre><code><span class="com">// Value type</span>
+<span class="kw">int</span> a = 5; <span class="kw">int</span> b = a; b = 10;
+<span class="com">// a is still 5 — copied by value</span>
+
+<span class="com">// Reference type</span>
+<span class="kw">var</span> list1 = <span class="kw">new</span> List&lt;<span class="kw">int</span>&gt; { 1, 2 };
+<span class="kw">var</span> list2 = list1; list2.Add(3);
+<span class="com">// list1 also has [1,2,3] — same object</span>
+
+<span class="com">// Boxing — avoid in hot paths</span>
+<span class="kw">int</span> n = 42;
+<span class="kw">object</span> boxed = n;        <span class="com">// allocates on heap</span>
+<span class="kw">int</span> unboxed = (<span class="kw">int</span>)boxed;</code></pre>
+
+      <div class="gotcha">⚠️ <strong>Gotcha:</strong> Boxing in tight loops kills performance. Use generics (<code>List&lt;int&gt;</code>) instead of <code>ArrayList</code> to avoid boxing.</div>
+      <div class="angular-bridge">🔗 <strong>Angular Parallel:</strong> Same as JS — primitives (number, boolean) are by-value, objects/arrays are by-reference. C# just makes the rule explicit and adds <code>struct</code> for custom value types.</div>
+    </section>
+
+    <section class="topic" id="nullable">
+      <div class="topic__check"><input type="checkbox" data-topic="2" /></div>
+      <h3><span class="num">3</span> Nullable Types & Null Operators</h3>
+      <p class="concept">C# 8+ added <strong>nullable reference types</strong> — like TS strict null checks. The compiler tracks nullability and warns on potential null dereferences.</p>
+
+      <div class="interview">
+        <h4>🎯 Interview Points</h4>
+        <ul>
+          <li><code>int?</code> = nullable value type (alias for <code>Nullable&lt;int&gt;</code>)</li>
+          <li><code>string?</code> = nullable reference type (post-C# 8 with <code>&lt;Nullable&gt;enable&lt;/Nullable&gt;</code>)</li>
+          <li><code>?.</code> — null-conditional access (same as TS optional chaining)</li>
+          <li><code>??</code> — null-coalescing (returns right if left is null)</li>
+          <li><code>??=</code> — assign only if null</li>
+          <li><code>!</code> — null-forgiving operator (tells compiler "trust me, not null")</li>
+          <li><code>.HasValue</code> / <code>.Value</code> — explicit access on nullable value types</li>
+        </ul>
+      </div>
+
+      <pre><code><span class="kw">int</span>? age = <span class="kw">null</span>;
+<span class="kw">if</span> (age.HasValue) Console.WriteLine(age.Value);
+
+<span class="kw">string</span>? name = GetName();
+<span class="kw">int</span> len = name?.Length ?? 0;          <span class="com">// safe access</span>
+
+<span class="kw">string</span> greeting = name ?? <span class="str">"Guest"</span>;    <span class="com">// fallback</span>
+config.Timeout ??= 30;                  <span class="com">// assign if null</span>
+
+<span class="com">// null-forgiving — use sparingly</span>
+<span class="kw">var</span> upper = name!.ToUpper();          <span class="com">// I promise it's not null</span></code></pre>
+
+      <div class="angular-bridge">🔗 <strong>Angular Parallel:</strong> Identical to TS strict mode — <code>?.</code> and <code>??</code> are the same. Enable <code>&lt;Nullable&gt;enable&lt;/Nullable&gt;</code> in .csproj just like <code>strict: true</code> in tsconfig.</div>
+    </section>
+
+    <section class="topic" id="conversion">
+      <div class="topic__check"><input type="checkbox" data-topic="3" /></div>
+      <h3><span class="num">4</span> Type Conversion</h3>
+      <p class="concept">C# is strict about type conversion. Implicit happens automatically when safe (no data loss). Explicit (cast) requires <code>(type)value</code>. Parsing strings has dedicated APIs.</p>
+
+      <div class="interview">
+        <h4>🎯 Conversion Methods</h4>
+        <ul>
+          <li><strong>Implicit</strong>: <code>int → long → double</code> (no loss)</li>
+          <li><strong>Explicit (cast)</strong>: <code>(int)3.14</code> = 3 (data loss → must be explicit)</li>
+          <li><strong>Convert.ToXxx</strong>: handles null safely, returns 0 for null</li>
+          <li><strong>Parse</strong>: throws <code>FormatException</code> if invalid</li>
+          <li><strong>TryParse</strong> ⭐: returns <code>bool</code>, never throws — preferred in production</li>
+          <li><strong>as</strong>: safe reference cast, returns null if fails</li>
+          <li><strong>is</strong>: type-check, returns bool (with optional pattern)</li>
+        </ul>
+      </div>
+
+      <pre><code><span class="com">// Always prefer TryParse for user input</span>
+<span class="kw">if</span> (<span class="kw">int</span>.TryParse(input, <span class="kw">out var</span> num))
+    Console.WriteLine(num);
+<span class="kw">else</span>
+    Console.WriteLine(<span class="str">"Invalid"</span>);
+
+<span class="com">// is + pattern (modern)</span>
+<span class="kw">if</span> (obj <span class="kw">is</span> User u) Console.WriteLine(u.Name);
+
+<span class="com">// as cast</span>
+<span class="kw">var</span> user = obj <span class="kw">as</span> User;     <span class="com">// null if not User</span></code></pre>
+
+      <div class="gotcha">⚠️ <strong>Gotcha:</strong> Using <code>Parse</code> on user input is a common bug source — always use <code>TryParse</code> in real apps.</div>
+    </section>
+
+    <section class="topic" id="strings">
+      <div class="topic__check"><input type="checkbox" data-topic="4" /></div>
+      <h3><span class="num">5</span> Strings & StringBuilder</h3>
+      <p class="concept">Strings in C# are <strong>immutable reference types</strong>. Every modification creates a new string. For heavy concatenation use <code>StringBuilder</code> (mutable, single allocation).</p>
+
+      <div class="interview">
+        <h4>🎯 Interview Points</h4>
+        <ul>
+          <li><strong>String pooling (interning)</strong>: identical literals share memory</li>
+          <li><strong>String interpolation</strong>: <code>$"Hello {name}"</code> — preferred over concat</li>
+          <li><strong>Verbatim strings</strong>: <code>@"C:\path\file"</code> — no escape processing</li>
+          <li><strong>Raw strings</strong> (C# 11): <code>"""multiline content"""</code></li>
+          <li><strong>String.Equals</strong> with <code>StringComparison.OrdinalIgnoreCase</code> for case-insensitive</li>
+          <li><strong>StringBuilder</strong> in loops with 4+ appends, otherwise <code>+</code> is fine</li>
+          <li>Common methods: <code>Split, Join, Trim, Replace, Substring, Contains, IndexOf, ToUpper, ToLower</code></li>
+        </ul>
+      </div>
+
+      <pre><code><span class="com">// Interpolation + format</span>
+<span class="kw">var</span> price = 99.5; <span class="kw">var</span> name = <span class="str">"Pro"</span>;
+Console.WriteLine($<span class="str">"{name}: ₹{price:F2}"</span>);     <span class="com">// Pro: ₹99.50</span>
+
+<span class="com">// StringBuilder for heavy concat</span>
+<span class="kw">var</span> sb = <span class="kw">new</span> StringBuilder();
+<span class="kw">for</span> (<span class="kw">int</span> i = 0; i &lt; 1000; i++) sb.Append(i).Append(<span class="str">", "</span>);
+<span class="kw">var</span> result = sb.ToString();
+
+<span class="com">// Case-insensitive compare (correct way)</span>
+<span class="kw">if</span> (str.Equals(<span class="str">"Admin"</span>, StringComparison.OrdinalIgnoreCase)) ...</code></pre>
+
+      <div class="gotcha">⚠️ <strong>Gotcha:</strong> <code>str1 == str2</code> compares <em>values</em> in C# (operator overload), unlike Java where it compares references. So you usually don't need <code>.Equals()</code> for value comparison — but DO use it with <code>StringComparison</code> for case rules.</div>
+    </section>
+
+    <!-- ===== WEEK 3 OOP ===== -->
+    <h2 class="section-title">📅 Week 3 — OOP Deep Dive</h2>
+
+    <section class="topic" id="classes">
+      <div class="topic__check"><input type="checkbox" data-topic="5" /></div>
+      <h3><span class="num">6</span> Classes, Objects, Constructors</h3>
+      <p class="concept">A class is a blueprint; an object is an instance. Constructors initialize state. C# supports default, parameterized, static, and copy constructors plus the modern <strong>primary constructor</strong> (C# 12).</p>
+
+      <div class="interview">
+        <h4>🎯 Constructor Types</h4>
+        <ul>
+          <li><strong>Default (parameterless)</strong> — auto-generated if no constructor defined</li>
+          <li><strong>Parameterized</strong> — typical use case</li>
+          <li><strong>Static</strong> — runs ONCE before any access; no params, no access modifier</li>
+          <li><strong>Copy constructor</strong> — manual: takes same-type object, clones state</li>
+          <li><strong>Primary constructor</strong> (C# 12) — declare params on the class itself</li>
+          <li><strong>Constructor chaining</strong>: <code>: this(...)</code> calls another ctor; <code>: base(...)</code> calls parent's</li>
+        </ul>
+      </div>
+
+      <pre><code><span class="kw">public class</span> Order {
+    <span class="kw">public int</span> Id { <span class="kw">get</span>; }
+    <span class="kw">public</span> DateTime CreatedAt { <span class="kw">get</span>; }
+    <span class="kw">public static int</span> TotalCreated;
+
+    <span class="com">// static ctor — runs once before any Order is created</span>
+    <span class="kw">static</span> Order() { TotalCreated = 0; }
+
+    <span class="com">// parameterized</span>
+    <span class="kw">public</span> Order(<span class="kw">int</span> id) {
+        Id = id;
+        CreatedAt = DateTime.UtcNow;
+        TotalCreated++;
+    }
+
+    <span class="com">// chaining</span>
+    <span class="kw">public</span> Order() : <span class="kw">this</span>(0) { }
+}
+
+<span class="com">// Primary constructor (C# 12)</span>
+<span class="kw">public class</span> Money(<span class="kw">decimal</span> amount, <span class="kw">string</span> currency) {
+    <span class="kw">public</span> <span class="kw">decimal</span> Amount =&gt; amount;
+    <span class="kw">public</span> <span class="kw">string</span> Currency =&gt; currency;
+}</code></pre>
+
+      <div class="angular-bridge">🔗 <strong>Angular Parallel:</strong> Constructors work the same way as in TypeScript classes. C# 12's primary constructor is similar to TS shorthand <code>constructor(public name: string) {}</code>.</div>
+    </section>
+
+    <section class="topic" id="encapsulation">
+      <div class="topic__check"><input type="checkbox" data-topic="6" /></div>
+      <h3><span class="num">7</span> Encapsulation & Access Modifiers</h3>
+      <p class="concept">Hide implementation details behind a public interface. C# offers fine-grained visibility control with 6 access modifiers.</p>
+
+      <table>
+        <thead><tr><th>Modifier</th><th>Visible from</th></tr></thead>
+        <tbody>
+          <tr><td><code>public</code></td><td>Anywhere</td></tr>
+          <tr><td><code>private</code></td><td>Same class only (default for class members)</td></tr>
+          <tr><td><code>protected</code></td><td>Same class + derived classes</td></tr>
+          <tr><td><code>internal</code></td><td>Same assembly (project) — default for top-level types</td></tr>
+          <tr><td><code>protected internal</code></td><td>Same assembly OR derived class</td></tr>
+          <tr><td><code>private protected</code></td><td>Derived class within same assembly</td></tr>
+          <tr><td><code>file</code> (C# 11)</td><td>Same source file only</td></tr>
+        </tbody>
+      </table>
+
+      <div class="interview">
+        <h4>🎯 Best Practices</h4>
+        <ul>
+          <li>Default to <code>private</code> for fields, expose via properties</li>
+          <li>Use <code>internal</code> for library implementation details — invisible to consumers</li>
+          <li><code>protected</code> for extensibility points designed for inheritance</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="topic" id="inheritance">
+      <div class="topic__check"><input type="checkbox" data-topic="7" /></div>
+      <h3><span class="num">8</span> Inheritance</h3>
+      <p class="concept">A class can extend one base class with <code>:</code> syntax. C# supports single inheritance for classes, multiple for interfaces.</p>
+
+      <div class="interview">
+        <h4>🎯 Interview Points</h4>
+        <ul>
+          <li><strong>Single inheritance only</strong> for classes; <strong>multiple</strong> for interfaces</li>
+          <li><code>base</code> keyword accesses parent members; <code>: base(...)</code> calls parent constructor</li>
+          <li><code>sealed</code> class cannot be inherited (perf optimization, finality)</li>
+          <li><code>sealed override</code> on a method prevents further override</li>
+          <li>All classes implicitly inherit from <code>System.Object</code></li>
+        </ul>
+      </div>
+
+      <pre><code><span class="kw">public class</span> Animal {
+    <span class="kw">protected string</span> Name;
+    <span class="kw">public</span> Animal(<span class="kw">string</span> name) { Name = name; }
+    <span class="kw">public virtual void</span> Speak() =&gt; Console.WriteLine(<span class="str">"..."</span>);
+}
+
+<span class="kw">public class</span> Dog : Animal {
+    <span class="kw">public</span> Dog(<span class="kw">string</span> name) : <span class="kw">base</span>(name) { }
+    <span class="kw">public override void</span> Speak() {
+        <span class="kw">base</span>.Speak();
+        Console.WriteLine($<span class="str">"{Name}: Woof!"</span>);
+    }
+}
+
+<span class="kw">public sealed class</span> Puppy : Dog { ... }   <span class="com">// can't inherit further</span></code></pre>
+    </section>
+
+    <section class="topic" id="polymorphism">
+      <div class="topic__check"><input type="checkbox" data-topic="8" /></div>
+      <h3><span class="num">9</span> Polymorphism (Overloading + Overriding)</h3>
+      <p class="concept">Two flavors. <strong>Compile-time (overloading)</strong>: same method name, different signatures. <strong>Runtime (overriding)</strong>: derived class replaces base class behavior using <code>virtual</code> + <code>override</code>.</p>
+
+      <div class="interview">
+        <h4>🎯 virtual / override / new</h4>
+        <ul>
+          <li><strong>virtual</strong> on base method allows override</li>
+          <li><strong>override</strong> in derived class replaces virtual implementation (runtime dispatch)</li>
+          <li><strong>new</strong> hides base method (compile-time, dispatch depends on declared type — usually a code smell)</li>
+          <li><strong>abstract</strong> method has no body and MUST be overridden</li>
+          <li>Method overloading: same name, different parameter types/count (compile-time)</li>
+        </ul>
+      </div>
+
+      <pre><code><span class="kw">class</span> Shape {
+    <span class="kw">public virtual double</span> Area() =&gt; 0;
+}
+<span class="kw">class</span> Circle : Shape {
+    <span class="kw">public double</span> Radius { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public override double</span> Area() =&gt; Math.PI * Radius * Radius;
+}
+
+<span class="com">// runtime polymorphism</span>
+Shape s = <span class="kw">new</span> Circle { Radius = 5 };
+Console.WriteLine(s.Area());   <span class="com">// 78.5 — Circle's version called</span>
+
+<span class="com">// overloading</span>
+<span class="kw">class</span> Calculator {
+    <span class="kw">public int</span> Add(<span class="kw">int</span> a, <span class="kw">int</span> b) =&gt; a + b;
+    <span class="kw">public double</span> Add(<span class="kw">double</span> a, <span class="kw">double</span> b) =&gt; a + b;
+}</code></pre>
+
+      <div class="gotcha">⚠️ <strong>Gotcha:</strong> If you forget <code>virtual</code> on the base, the derived <code>override</code> won't compile. Use <code>new</code> only if you mean to <em>shadow</em>, not override.</div>
+    </section>
+
+    <section class="topic" id="abstraction">
+      <div class="topic__check"><input type="checkbox" data-topic="9" /></div>
+      <h3><span class="num">10</span> Abstraction — Abstract Class vs Interface</h3>
+      <p class="concept">Both define contracts; pick based on intent. Use <strong>interface</strong> for capability ("can do X"). Use <strong>abstract class</strong> when you have shared partial implementation + state.</p>
+
+      <table>
+        <thead><tr><th>Aspect</th><th>Abstract Class</th><th>Interface</th></tr></thead>
+        <tbody>
+          <tr><td>Multiple inheritance</td><td>No (single)</td><td>Yes (many)</td></tr>
+          <tr><td>State (fields)</td><td>Yes</td><td>No (until C# 8 default impls)</td></tr>
+          <tr><td>Constructor</td><td>Yes</td><td>No</td></tr>
+          <tr><td>Access modifiers</td><td>Any</td><td>public (default)</td></tr>
+          <tr><td>Default method body</td><td>Yes</td><td>Yes (C# 8+)</td></tr>
+          <tr><td>Use when</td><td>Shared code + "is-a"</td><td>Capability + "can-do"</td></tr>
+        </tbody>
+      </table>
+
+      <pre><code><span class="kw">public interface</span> IRepository&lt;T&gt; {
+    Task&lt;T?&gt; GetById(<span class="kw">int</span> id);
+    Task Add(T entity);
+}
+
+<span class="kw">public abstract class</span> RepositoryBase&lt;T&gt; : IRepository&lt;T&gt; {
+    <span class="kw">protected readonly</span> DbContext _ctx;
+    <span class="kw">protected</span> RepositoryBase(DbContext ctx) =&gt; _ctx = ctx;
+
+    <span class="kw">public abstract</span> Task&lt;T?&gt; GetById(<span class="kw">int</span> id);     <span class="com">// must override</span>
+    <span class="kw">public virtual</span> Task Add(T e) { _ctx.Add(e); <span class="kw">return</span> _ctx.SaveChangesAsync(); }
+}</code></pre>
+
+      <div class="angular-bridge">🔗 <strong>Angular Parallel:</strong> Same as TS interfaces vs abstract classes. The <em>"interface for capability, abstract for shared code"</em> rule applies identically.</div>
+    </section>
+
+    <section class="topic" id="properties">
+      <div class="topic__check"><input type="checkbox" data-topic="10" /></div>
+      <h3><span class="num">11</span> Properties (the C# way of fields)</h3>
+      <p class="concept">Properties expose data with optional logic — they're methods masquerading as fields. <strong>Always use properties, never public fields</strong>, even for simple cases.</p>
+
+      <div class="interview">
+        <h4>🎯 Property Variants</h4>
+        <ul>
+          <li><strong>Auto-property</strong>: <code>public string Name { get; set; }</code></li>
+          <li><strong>Read-only auto</strong>: <code>public int Id { get; }</code> (set in constructor)</li>
+          <li><strong>Init-only</strong> (C# 9): <code>public string Email { get; init; }</code> (immutable after construction)</li>
+          <li><strong>Full property</strong> with backing field for logic</li>
+          <li><strong>Computed (expression-bodied)</strong>: <code>public int Sum =&gt; A + B;</code></li>
+          <li><strong>Required</strong> (C# 11): <code>public required string Name { get; set; }</code></li>
+        </ul>
+      </div>
+
+      <pre><code><span class="kw">public class</span> User {
+    <span class="kw">public required string</span> Name { <span class="kw">get</span>; <span class="kw">init</span>; }
+    <span class="kw">public</span> DateTime BirthDate { <span class="kw">get</span>; <span class="kw">init</span>; }
+
+    <span class="com">// computed</span>
+    <span class="kw">public int</span> Age =&gt; DateTime.Today.Year - BirthDate.Year;
+
+    <span class="com">// full property with validation</span>
+    <span class="kw">private string</span> _email = <span class="str">""</span>;
+    <span class="kw">public string</span> Email {
+        <span class="kw">get</span> =&gt; _email;
+        <span class="kw">set</span> {
+            <span class="kw">if</span> (!value.Contains(<span class="str">"@"</span>)) <span class="kw">throw new</span> ArgumentException();
+            _email = value;
+        }
+    }
+}
+
+<span class="kw">var</span> u = <span class="kw">new</span> User { Name = <span class="str">"Rutik"</span>, BirthDate = <span class="kw">new</span>(1998, 1, 1) };</code></pre>
+
+      <div class="gotcha">⚠️ <strong>Gotcha:</strong> Public fields in C# break encapsulation AND ABI compatibility (changing a field to a property is a binary-breaking change). Always start with properties.</div>
+    </section>
+
+    <!-- ===== WEEK 4 INTERMEDIATE ===== -->
+    <h2 class="section-title">📅 Week 4 — Intermediate</h2>
+
+    <section class="topic" id="collections">
+      <div class="topic__check"><input type="checkbox" data-topic="11" /></div>
+      <h3><span class="num">12</span> Collections — List, Dictionary, HashSet, Queue, Stack</h3>
+      <p class="concept">All in <code>System.Collections.Generic</code>. Pick based on access pattern: ordered indexed (<strong>List</strong>), key→value (<strong>Dictionary</strong>), unique items (<strong>HashSet</strong>), FIFO (<strong>Queue</strong>), LIFO (<strong>Stack</strong>).</p>
+
+      <table>
+        <thead><tr><th>Collection</th><th>Order</th><th>Lookup</th><th>Use</th></tr></thead>
+        <tbody>
+          <tr><td>List&lt;T&gt;</td><td>Insertion</td><td>O(n)</td><td>Default ordered list</td></tr>
+          <tr><td>Dictionary&lt;K,V&gt;</td><td>None</td><td>O(1)</td><td>Key → value map</td></tr>
+          <tr><td>HashSet&lt;T&gt;</td><td>None</td><td>O(1)</td><td>Unique values, set ops</td></tr>
+          <tr><td>SortedDictionary&lt;K,V&gt;</td><td>By key</td><td>O(log n)</td><td>Keys sorted automatically</td></tr>
+          <tr><td>Queue&lt;T&gt;</td><td>FIFO</td><td>—</td><td>Job queue, BFS</td></tr>
+          <tr><td>Stack&lt;T&gt;</td><td>LIFO</td><td>—</td><td>Undo, DFS</td></tr>
+          <tr><td>LinkedList&lt;T&gt;</td><td>Insertion</td><td>O(n)</td><td>Frequent middle insertions</td></tr>
+          <tr><td>ConcurrentDictionary</td><td>None</td><td>O(1)</td><td>Thread-safe</td></tr>
+          <tr><td>ImmutableList&lt;T&gt;</td><td>Insertion</td><td>O(log n)</td><td>Functional / immutable code</td></tr>
+        </tbody>
+      </table>
+
+      <pre><code><span class="kw">var</span> users = <span class="kw">new</span> List&lt;User&gt;();
+users.Add(u); users.RemoveAt(0); users.Sort();
+
+<span class="kw">var</span> ages = <span class="kw">new</span> Dictionary&lt;<span class="kw">string</span>, <span class="kw">int</span>&gt; { [<span class="str">"Rutik"</span>] = 27 };
+<span class="kw">if</span> (ages.TryGetValue(<span class="str">"Rutik"</span>, <span class="kw">out var</span> age)) ...
+
+<span class="kw">var</span> tags = <span class="kw">new</span> HashSet&lt;<span class="kw">string</span>&gt; { <span class="str">"net"</span>, <span class="str">"angular"</span> };
+tags.Add(<span class="str">"net"</span>);   <span class="com">// no-op, already exists</span></code></pre>
+
+      <div class="angular-bridge">🔗 <strong>Angular Parallel:</strong> List ≈ TS Array, Dictionary ≈ TS Map, HashSet ≈ TS Set. Big difference: C# generics enforce types at runtime too.</div>
+    </section>
+
+    <section class="topic" id="generics">
+      <div class="topic__check"><input type="checkbox" data-topic="12" /></div>
+      <h3><span class="num">13</span> Generics & Constraints</h3>
+      <p class="concept">Write code that works for any type while keeping compile-time type safety. Constraints (<code>where</code>) restrict T to types matching certain criteria.</p>
+
+      <div class="interview">
+        <h4>🎯 Constraints</h4>
+        <ul>
+          <li><code>where T : class</code> — reference type</li>
+          <li><code>where T : struct</code> — value type</li>
+          <li><code>where T : new()</code> — has parameterless constructor</li>
+          <li><code>where T : IComparable</code> — implements interface</li>
+          <li><code>where T : BaseClass</code> — inherits from class</li>
+          <li><code>where T : notnull</code> — non-nullable</li>
+        </ul>
+      </div>
+
+      <pre><code><span class="kw">public class</span> Repository&lt;T&gt; <span class="kw">where</span> T : <span class="kw">class</span>, IEntity, <span class="kw">new</span>() {
+    <span class="kw">private</span> List&lt;T&gt; _items = <span class="kw">new</span>();
+    <span class="kw">public</span> T Create() =&gt; <span class="kw">new</span> T();
+    <span class="kw">public</span> T? Find(<span class="kw">int</span> id) =&gt; _items.FirstOrDefault(x =&gt; x.Id == id);
+}
+
+<span class="com">// generic method</span>
+T Max&lt;T&gt;(T a, T b) <span class="kw">where</span> T : IComparable&lt;T&gt; =&gt;
+    a.CompareTo(b) &gt; 0 ? a : b;</code></pre>
+    </section>
+
+    <section class="topic" id="exceptions">
+      <div class="topic__check"><input type="checkbox" data-topic="13" /></div>
+      <h3><span class="num">14</span> Exception Handling</h3>
+      <p class="concept">Use <code>try/catch/finally</code>. Throw <code>Exception</code> subclasses to signal errors. Don't use exceptions for control flow.</p>
+
+      <div class="interview">
+        <h4>🎯 Best Practices</h4>
+        <ul>
+          <li>Catch <strong>specific</strong> exceptions first, generic <code>Exception</code> last</li>
+          <li><code>finally</code> always runs (even on return) — for cleanup</li>
+          <li>Use <code>using</code> statement for <code>IDisposable</code> auto-cleanup (preferred over try/finally)</li>
+          <li><strong>Custom exceptions</strong>: inherit from <code>Exception</code>, end name with "Exception"</li>
+          <li><strong>throw vs throw ex</strong>: <code>throw;</code> preserves stack trace, <code>throw ex;</code> resets it (almost always wrong)</li>
+          <li>In Web API, use <strong>global exception middleware</strong> instead of try/catch in every controller</li>
+          <li>Log exceptions with stack trace using <code>ILogger</code>, never swallow silently</li>
+        </ul>
+      </div>
+
+      <pre><code><span class="kw">try</span> {
+    <span class="kw">var</span> data = File.ReadAllText(path);
+} <span class="kw">catch</span> (FileNotFoundException ex) {
+    _logger.LogWarning(<span class="str">"Missing file: {Path}"</span>, path);
+    <span class="kw">throw new</span> ConfigMissingException(<span class="str">"Config not found"</span>, ex);
+} <span class="kw">catch</span> (Exception ex) <span class="kw">when</span> (ex.Message.Contains(<span class="str">"timeout"</span>)) {
+    <span class="com">// exception filter — newer feature</span>
+    _logger.LogError(ex, <span class="str">"Timeout"</span>);
+    <span class="kw">throw</span>;     <span class="com">// preserves stack trace</span>
+} <span class="kw">finally</span> {
+    cleanup();
+}
+
+<span class="com">// using = automatic Dispose, no try/finally needed</span>
+<span class="kw">using var</span> stream = File.OpenRead(path);</code></pre>
+
+      <div class="gotcha">⚠️ <strong>Gotcha:</strong> <code>throw ex;</code> resets the stack trace and hides the original error location. Always use bare <code>throw;</code>.</div>
+    </section>
+
+    <section class="topic" id="files">
+      <div class="topic__check"><input type="checkbox" data-topic="14" /></div>
+      <h3><span class="num">15</span> File Handling</h3>
+      <p class="concept">The <code>System.IO</code> namespace has APIs for files, directories, and streams. <code>File.ReadAllText</code> for small files, streams for large.</p>
+
+      <pre><code><span class="com">// quick file ops</span>
+<span class="kw">string</span> text = File.ReadAllText(<span class="str">"data.txt"</span>);
+File.WriteAllText(<span class="str">"out.txt"</span>, text);
+<span class="kw">var</span> lines = File.ReadAllLines(<span class="str">"log.txt"</span>);
+
+<span class="com">// async (preferred for large files / web)</span>
+<span class="kw">var</span> json = <span class="kw">await</span> File.ReadAllTextAsync(<span class="str">"data.json"</span>);
+<span class="kw">await</span> File.WriteAllTextAsync(<span class="str">"out.json"</span>, json);
+
+<span class="com">// stream-based for big files (don't load all into memory)</span>
+<span class="kw">using var</span> sr = <span class="kw">new</span> StreamReader(<span class="str">"big.csv"</span>);
+<span class="kw">string</span>? line;
+<span class="kw">while</span> ((line = <span class="kw">await</span> sr.ReadLineAsync()) != <span class="kw">null</span>) {
+    Process(line);
+}
+
+<span class="com">// directories</span>
+Directory.CreateDirectory(<span class="str">"logs"</span>);
+<span class="kw">var</span> files = Directory.EnumerateFiles(<span class="str">"."</span>, <span class="str">"*.cs"</span>, SearchOption.AllDirectories);
+
+<span class="com">// safe path construction</span>
+<span class="kw">var</span> path = Path.Combine(<span class="str">"data"</span>, <span class="str">"users.json"</span>);</code></pre>
+
+      <div class="gotcha">⚠️ <strong>Gotcha:</strong> Always use <code>Path.Combine</code> instead of string concat with slashes — it handles platform separators (Windows <code>\</code> vs Unix <code>/</code>) correctly.</div>
+    </section>
+
+    <section class="topic" id="linq">
+      <div class="topic__check"><input type="checkbox" data-topic="15" /></div>
+      <h3><span class="num">16</span> LINQ — Language Integrated Query ⭐</h3>
+      <p class="concept">LINQ unifies querying over collections, databases, XML — same syntax everywhere. Two flavors: <strong>method syntax</strong> (chained methods) and <strong>query syntax</strong> (SQL-like). Both compile to identical IL.</p>
+
+      <div class="interview">
+        <h4>🎯 Most-Used Operators</h4>
+        <ul>
+          <li><strong>Filter</strong>: <code>Where</code></li>
+          <li><strong>Project</strong>: <code>Select, SelectMany</code></li>
+          <li><strong>Order</strong>: <code>OrderBy, OrderByDescending, ThenBy</code></li>
+          <li><strong>Group</strong>: <code>GroupBy</code></li>
+          <li><strong>Join</strong>: <code>Join, GroupJoin</code></li>
+          <li><strong>Aggregate</strong>: <code>Count, Sum, Min, Max, Average, Aggregate</code></li>
+          <li><strong>Single element</strong>: <code>First, FirstOrDefault, Single, SingleOrDefault, Last</code></li>
+          <li><strong>Any element</strong>: <code>Any, All, Contains</code></li>
+          <li><strong>Set ops</strong>: <code>Distinct, Union, Intersect, Except</code></li>
+          <li><strong>Materialize</strong>: <code>ToList, ToArray, ToDictionary</code></li>
+        </ul>
+      </div>
+
+      <pre><code><span class="com">// method syntax (preferred)</span>
+<span class="kw">var</span> top5 = orders
+    .Where(o =&gt; o.Total &gt; 100)
+    .OrderByDescending(o =&gt; o.Total)
+    .Select(o =&gt; <span class="kw">new</span> { o.Id, o.Total })
+    .Take(5)
+    .ToList();
+
+<span class="com">// query syntax</span>
+<span class="kw">var</span> q = <span class="kw">from</span> o <span class="kw">in</span> orders
+        <span class="kw">where</span> o.Total &gt; 100
+        <span class="kw">orderby</span> o.Total <span class="kw">descending</span>
+        <span class="kw">select new</span> { o.Id, o.Total };
+
+<span class="com">// group + aggregate</span>
+<span class="kw">var</span> byUser = orders
+    .GroupBy(o =&gt; o.UserId)
+    .Select(g =&gt; <span class="kw">new</span> { UserId = g.Key, Total = g.Sum(o =&gt; o.Total) });</code></pre>
+
+      <h4>🎯 IEnumerable vs IQueryable (interview favorite)</h4>
+      <ul>
+        <li><strong>IEnumerable&lt;T&gt;</strong> — in-memory, executes locally (LINQ to Objects). Filter happens after fetch.</li>
+        <li><strong>IQueryable&lt;T&gt;</strong> — translates expression tree to backend (SQL via EF). Filter happens at DB.</li>
+        <li>Calling <code>.AsEnumerable()</code> too early fetches everything then filters in memory — performance trap.</li>
+      </ul>
+
+      <h4>🎯 Deferred vs Immediate Execution</h4>
+      <ul>
+        <li><strong>Deferred</strong>: <code>Where, Select, OrderBy</code> — query runs on enumeration (foreach, ToList)</li>
+        <li><strong>Immediate</strong>: <code>ToList, ToArray, Count, First, Sum</code> — query runs immediately</li>
+      </ul>
+
+      <div class="gotcha">⚠️ <strong>Gotcha:</strong> Re-enumerating a deferred query re-runs it. If you'll iterate twice, call <code>.ToList()</code> first.</div>
+      <div class="angular-bridge">🔗 <strong>Angular Parallel:</strong> RxJS operators map perfectly: <code>filter ≈ Where</code>, <code>map ≈ Select</code>, <code>reduce ≈ Aggregate</code>. The functional pipeline is identical.</div>
+    </section>
+
+    <!-- ===== WEEK 5 ADVANCED ===== -->
+    <h2 class="section-title">📅 Week 5 — Advanced</h2>
+
+    <section class="topic" id="delegates">
+      <div class="topic__check"><input type="checkbox" data-topic="16" /></div>
+      <h3><span class="num">17</span> Delegates, Func, Action, Predicate</h3>
+      <p class="concept">A <strong>delegate</strong> is a type-safe function pointer. <code>Func</code>, <code>Action</code>, <code>Predicate</code> are built-in generic delegates that cover 99% of use cases.</p>
+
+      <div class="interview">
+        <h4>🎯 The Trio</h4>
+        <ul>
+          <li><strong>Action</strong> — returns void: <code>Action&lt;int, string&gt;</code></li>
+          <li><strong>Func</strong> — last type param is return: <code>Func&lt;int, int, bool&gt;</code> (two ints → bool)</li>
+          <li><strong>Predicate&lt;T&gt;</strong> — shortcut for <code>Func&lt;T, bool&gt;</code></li>
+          <li>Multicast delegates can chain multiple methods (<code>+=</code>, <code>-=</code>)</li>
+          <li>Delegates are the basis of events, LINQ, and async callbacks</li>
+        </ul>
+      </div>
+
+      <pre><code>Action&lt;<span class="kw">string</span>&gt; log = msg =&gt; Console.WriteLine(msg);
+Func&lt;<span class="kw">int</span>, <span class="kw">int</span>, <span class="kw">int</span>&gt; add = (a, b) =&gt; a + b;
+Predicate&lt;<span class="kw">int</span>&gt; isEven = n =&gt; n % 2 == 0;
+
+log(<span class="str">"hello"</span>);
+Console.WriteLine(add(2, 3));
+Console.WriteLine(isEven(4));
+
+<span class="com">// passing delegates as params (LINQ does this internally)</span>
+List&lt;<span class="kw">int</span>&gt; nums = [1, 2, 3, 4, 5];
+<span class="kw">var</span> evens = nums.FindAll(isEven);</code></pre>
+
+      <div class="angular-bridge">🔗 <strong>Angular Parallel:</strong> Like callback functions in TS. <code>Func&lt;X, Y&gt;</code> ≈ <code>(x: X) =&gt; Y</code>. C# just gives the function-type a name.</div>
+    </section>
+
+    <section class="topic" id="events">
+      <div class="topic__check"><input type="checkbox" data-topic="17" /></div>
+      <h3><span class="num">18</span> Events</h3>
+      <p class="concept">An <strong>event</strong> is a delegate wrapped with safety — only the declaring class can <em>raise</em> it; outside code can only <em>subscribe/unsubscribe</em>. The publisher-subscriber (observer) pattern made first-class.</p>
+
+      <pre><code><span class="kw">public class</span> OrderService {
+    <span class="kw">public event</span> EventHandler&lt;Order&gt;? OrderPlaced;
+
+    <span class="kw">public void</span> Place(Order o) {
+        Save(o);
+        OrderPlaced?.Invoke(<span class="kw">this</span>, o);    <span class="com">// raise</span>
+    }
+}
+
+<span class="com">// subscribe</span>
+<span class="kw">var</span> svc = <span class="kw">new</span> OrderService();
+svc.OrderPlaced += (sender, order) =&gt; Console.WriteLine($<span class="str">"New: {order.Id}"</span>);
+svc.OrderPlaced += SendEmailHandler;
+
+<span class="com">// unsubscribe — important to prevent memory leaks!</span>
+svc.OrderPlaced -= SendEmailHandler;</code></pre>
+
+      <div class="gotcha">⚠️ <strong>Gotcha:</strong> Forgetting to unsubscribe creates memory leaks — the event holds a reference to the handler's owner.</div>
+      <div class="angular-bridge">🔗 <strong>Angular Parallel:</strong> Same as RxJS Subjects — emit/subscribe/unsubscribe. Or like Angular's <code>@Output() EventEmitter</code>.</div>
+    </section>
+
+    <section class="topic" id="lambdas">
+      <div class="topic__check"><input type="checkbox" data-topic="18" /></div>
+      <h3><span class="num">19</span> Lambdas, Anonymous Methods, Extension Methods</h3>
+      <p class="concept"><strong>Lambdas</strong> are inline functions: <code>(x) =&gt; x * 2</code>. <strong>Extension methods</strong> let you add methods to existing types without inheriting — the magic behind LINQ.</p>
+
+      <pre><code><span class="com">// lambda variants</span>
+Func&lt;<span class="kw">int</span>, <span class="kw">int</span>&gt; sq = x =&gt; x * x;
+Func&lt;<span class="kw">int</span>, <span class="kw">int</span>, <span class="kw">int</span>&gt; add = (a, b) =&gt; a + b;
+Action greet = () =&gt; Console.WriteLine(<span class="str">"hi"</span>);
+
+<span class="com">// multi-statement lambda</span>
+Func&lt;<span class="kw">int</span>, <span class="kw">int</span>&gt; complex = x =&gt; {
+    <span class="kw">var</span> y = x * 2;
+    <span class="kw">return</span> y + 1;
+};
+
+<span class="com">// closure — captures outer variable</span>
+<span class="kw">int</span> counter = 0;
+Action inc = () =&gt; counter++;
+
+<span class="com">// EXTENSION METHOD — must be in static class, first param has 'this'</span>
+<span class="kw">public static class</span> StringExtensions {
+    <span class="kw">public static bool</span> IsValidEmail(<span class="kw">this string</span> s) =&gt; s.Contains(<span class="str">"@"</span>);
+}
+
+<span class="com">// usage:</span>
+<span class="kw">if</span> (<span class="str">"x@y.com"</span>.IsValidEmail()) ...    <span class="com">// looks like instance method!</span></code></pre>
+
+      <div class="interview">
+        <h4>🎯 Closure Gotcha (interview classic)</h4>
+        <ul>
+          <li>Lambda captures variable by <em>reference</em>, not value</li>
+          <li>In a loop, all lambdas may capture the same variable — use a local copy</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== WEEK 6 ASYNC + MEMORY ===== -->
+    <h2 class="section-title">📅 Week 6 — Async, Threading, Memory + SOLID</h2>
+
+    <section class="topic" id="async">
+      <div class="topic__check"><input type="checkbox" data-topic="19" /></div>
+      <h3><span class="num">20</span> Async / Await ⭐</h3>
+      <p class="concept">Asynchronous code without callback hell. <code>async</code> marks a method as awaitable; <code>await</code> pauses until the <code>Task</code> completes — without blocking the calling thread.</p>
+
+      <div class="interview">
+        <h4>🎯 Interview-Critical Points</h4>
+        <ul>
+          <li><strong>Task</strong> = a future result (like Promise). <strong>Task&lt;T&gt;</strong> = future of T.</li>
+          <li><strong>async void</strong> only for event handlers — never for normal methods (exceptions get swallowed)</li>
+          <li><strong>Naming convention</strong>: async methods end with <code>Async</code> (e.g. <code>GetUserAsync</code>)</li>
+          <li><strong>ConfigureAwait(false)</strong> — in libraries, avoid capturing sync context (perf, deadlock prevention)</li>
+          <li><strong>Don't .Result or .Wait()</strong> on a Task — causes deadlocks. Always async all the way.</li>
+          <li><strong>CancellationToken</strong> — propagate to enable cooperative cancellation</li>
+          <li><strong>Task.WhenAll</strong> — run multiple tasks in parallel; <strong>WhenAny</strong> — first to finish</li>
+          <li><strong>ValueTask</strong> — perf optimization for hot paths returning sync result often</li>
+        </ul>
+      </div>
+
+      <pre><code><span class="kw">public async</span> Task&lt;User&gt; GetUserAsync(<span class="kw">int</span> id, CancellationToken ct = <span class="kw">default</span>) {
+    <span class="kw">var</span> response = <span class="kw">await</span> _http.GetAsync($<span class="str">"/users/{id}"</span>, ct);
+    response.EnsureSuccessStatusCode();
+    <span class="kw">return await</span> response.Content.ReadFromJsonAsync&lt;User&gt;(ct);
+}
+
+<span class="com">// parallel calls</span>
+<span class="kw">var</span> [user, orders, profile] = <span class="kw">await</span> Task.WhenAll(
+    GetUserAsync(1),
+    GetOrdersAsync(1),
+    GetProfileAsync(1)
+);</code></pre>
+
+      <div class="gotcha">⚠️ <strong>Gotcha:</strong> <code>var x = SomeAsync().Result;</code> in ASP.NET Web API → deadlock. Always <code>await</code> from top to bottom.</div>
+      <div class="angular-bridge">🔗 <strong>Angular Parallel:</strong> Same as TS async/await + Promise. <code>Task</code> ≈ <code>Promise</code>, <code>Task.WhenAll</code> ≈ <code>Promise.all</code>.</div>
+    </section>
+
+    <section class="topic" id="threading">
+      <div class="topic__check"><input type="checkbox" data-topic="20" /></div>
+      <h3><span class="num">21</span> Multithreading & Parallel Programming</h3>
+      <p class="concept">Modern .NET prefers <code>Task</code>-based async over manual <code>Thread</code> management. But you must understand thread safety, locking, and the parallel APIs for CPU-bound work.</p>
+
+      <div class="interview">
+        <h4>🎯 Concepts</h4>
+        <ul>
+          <li><strong>Thread</strong> — OS-level unit of execution (heavyweight)</li>
+          <li><strong>ThreadPool</strong> — managed pool, .NET reuses threads (lightweight)</li>
+          <li><strong>Task</strong> — abstraction over ThreadPool for async work (preferred)</li>
+          <li><strong>Parallel.For / ForEach</strong> — for CPU-bound loops over data</li>
+          <li><strong>PLINQ</strong> — <code>.AsParallel()</code> on LINQ for data parallelism</li>
+          <li><strong>lock</strong> — mutual exclusion: <code>lock(_obj) { ... }</code></li>
+          <li><strong>Monitor.Enter/Exit</strong> — what <code>lock</code> compiles to</li>
+          <li><strong>Interlocked.Increment</strong> — atomic operations</li>
+          <li><strong>SemaphoreSlim</strong> — async-friendly semaphore</li>
+          <li><strong>Race condition</strong>, <strong>deadlock</strong>, <strong>livelock</strong> — be ready to define</li>
+          <li><strong>Concurrent collections</strong>: <code>ConcurrentDictionary</code>, <code>ConcurrentQueue</code>, <code>ConcurrentBag</code></li>
+        </ul>
+      </div>
+
+      <pre><code><span class="com">// Parallel CPU-bound work</span>
+Parallel.ForEach(images, img =&gt; ResizeImage(img));
+
+<span class="com">// PLINQ</span>
+<span class="kw">var</span> primes = numbers.AsParallel().Where(IsPrime).ToList();
+
+<span class="com">// thread-safe counter</span>
+<span class="kw">private static int</span> _count = 0;
+<span class="kw">private static readonly object</span> _lock = <span class="kw">new</span>();
+
+<span class="kw">void</span> Inc() {
+    <span class="kw">lock</span> (_lock) { _count++; }      <span class="com">// classic</span>
+    Interlocked.Increment(<span class="kw">ref</span> _count);  <span class="com">// faster (atomic)</span>
+}</code></pre>
+
+      <div class="gotcha">⚠️ <strong>Gotcha:</strong> Don't use <code>lock</code> in async methods (can't <code>await</code> inside). Use <code>SemaphoreSlim.WaitAsync()</code>.</div>
+    </section>
+
+    <section class="topic" id="memory">
+      <div class="topic__check"><input type="checkbox" data-topic="21" /></div>
+      <h3><span class="num">22</span> Memory Management, Garbage Collection & SOLID</h3>
+      <p class="concept">.NET has automatic garbage collection but you should understand stack vs heap, generations, and the <code>IDisposable</code> pattern. SOLID principles guide all your class designs.</p>
+
+      <h4>🎯 Memory Model</h4>
+      <ul>
+        <li><strong>Stack</strong>: value types, method frames, fast, automatic cleanup</li>
+        <li><strong>Heap</strong>: reference types, GC managed</li>
+        <li><strong>GC Generations</strong>: Gen 0 (new), Gen 1 (survived 1 GC), Gen 2 (long-lived). Higher gens collected less often.</li>
+        <li><strong>Large Object Heap (LOH)</strong>: objects ≥ 85KB live here, not compacted by default → fragmentation risk</li>
+        <li><strong>Finalizer</strong> (~destructor) — runs before GC, slow, avoid unless wrapping unmanaged resources</li>
+        <li><strong>IDisposable</strong> — release resources deterministically with <code>using</code></li>
+      </ul>
+
+      <pre><code><span class="kw">public class</span> FileLogger : IDisposable {
+    <span class="kw">private</span> StreamWriter _writer;
+    <span class="kw">public</span> FileLogger(<span class="kw">string</span> path) =&gt; _writer = <span class="kw">new</span> StreamWriter(path);
+    <span class="kw">public void</span> Log(<span class="kw">string</span> msg) =&gt; _writer.WriteLine(msg);
+    <span class="kw">public void</span> Dispose() =&gt; _writer?.Dispose();
+}
+
+<span class="kw">using</span> (<span class="kw">var</span> log = <span class="kw">new</span> FileLogger(<span class="str">"app.log"</span>)) {
+    log.Log(<span class="str">"hi"</span>);
+}   <span class="com">// Dispose called automatically</span></code></pre>
+
+      <h4>🎯 SOLID Principles ⭐ (memorize one-line definitions)</h4>
+      <table>
+        <thead><tr><th>Letter</th><th>Principle</th><th>One-liner</th></tr></thead>
+        <tbody>
+          <tr><td><strong>S</strong></td><td>Single Responsibility</td><td>One class, one reason to change.</td></tr>
+          <tr><td><strong>O</strong></td><td>Open/Closed</td><td>Open for extension, closed for modification.</td></tr>
+          <tr><td><strong>L</strong></td><td>Liskov Substitution</td><td>Subtypes must be substitutable for their base type.</td></tr>
+          <tr><td><strong>I</strong></td><td>Interface Segregation</td><td>Many small interfaces > one fat interface.</td></tr>
+          <tr><td><strong>D</strong></td><td>Dependency Inversion</td><td>Depend on abstractions, not concretions.</td></tr>
+        </tbody>
+      </table>
+
+      <div class="gotcha">⚠️ <strong>Gotcha:</strong> Calling <code>GC.Collect()</code> manually is almost always wrong — interferes with the GC's optimization. Trust the GC.</div>
+    </section>
+
+    <!-- INTERVIEW Q&A -->
+    <section id="qa">
+      <h2 class="section-title">🎤 Interview Q&A — Phase 1</h2>
+      <div class="qa-block">
+        <details><summary>Q. What is difference between Value Type and Reference Type?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>Value type — hold actual data inside variable</li>
+              <li>Reference type — hold pointer that point to data on heap</li>
+            </ul>
+            <p><strong>Value Type Examples:</strong></p>
+            <ul>
+              <li><code>int, double, bool, char, struct, enum, DateTime</code></li>
+              <li>Stored on stack (fast, auto cleanup)</li>
+              <li>Copied by value — changes in one not affect other</li>
+            </ul>
+            <p><strong>Reference Type Examples:</strong></p>
+            <ul>
+              <li><code>class, string, array, interface, delegate</code></li>
+              <li>Stored on heap (managed by GC)</li>
+              <li>Copied by reference — both names point to same object</li>
+              <li>Change visible to all references</li>
+            </ul>
+            <p><strong>Java parallel:</strong></p>
+            <ul>
+              <li>Same like Java — primitive (int, boolean) vs Object (class)</li>
+              <li>C# add <code>struct</code> for custom value type — Java has no struct</li>
+            </ul>
+            <p><strong>Note:</strong> <code>string</code> is reference type but it is immutable — behave like value type.</p>
+            <p><strong>Special case — Boxing:</strong></p>
+            <ul>
+              <li>When value type stored in <code>object</code> variable — wrapped on heap (slow)</li>
+              <li>Always use generics like <code>List&lt;int&gt;</code> not <code>ArrayList</code> to avoid boxing</li>
+            </ul>
+          </div>
+        </details>
+
+        <details><summary>Q. Abstract class vs Interface — when to use which?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>Interface — only contract (capability)</li>
+              <li>Abstract class — partial built parent class with shared code + state</li>
+            </ul>
+            <p><strong>Interface — Use when:</strong></p>
+            <ul>
+              <li>Define capability ("can do X")</li>
+              <li>Need multiple inheritance — class can implement many interfaces</li>
+              <li>No shared state needed</li>
+              <li>Examples: <code>IDisposable, IEnumerable, IComparable</code></li>
+            </ul>
+            <p><strong>Abstract class — Use when:</strong></p>
+            <ul>
+              <li>Need shared code + shared state for child classes</li>
+              <li>Need constructor</li>
+              <li>Need fields (state)</li>
+              <li>Want "is-a" relationship — single inheritance only</li>
+            </ul>
+            <p><strong>Compare Table:</strong></p>
+            <table>
+              <thead><tr><th>Aspect</th><th>Abstract Class</th><th>Interface</th></tr></thead>
+              <tbody>
+                <tr><td>Multiple inherit</td><td>No (single)</td><td>Yes (many)</td></tr>
+                <tr><td>State (fields)</td><td>Yes</td><td>No</td></tr>
+                <tr><td>Constructor</td><td>Yes</td><td>No</td></tr>
+                <tr><td>Default method body</td><td>Yes</td><td>Yes (C# 8+)</td></tr>
+                <tr><td>Use when</td><td>Shared code</td><td>Capability</td></tr>
+              </tbody>
+            </table>
+            <p><strong>Java parallel:</strong></p>
+            <ul>
+              <li>Same like Java abstract class vs interface</li>
+              <li>Same rules apply — class can implement many interfaces, only one abstract class</li>
+            </ul>
+          </div>
+        </details>
+
+        <details><summary>Q. What is difference between IEnumerable and IQueryable?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>IEnumerable — sequence in memory (LINQ to Objects)</li>
+              <li>IQueryable — build expression tree, run at data source (database)</li>
+            </ul>
+            <p><strong>Key Points:</strong></p>
+            <ul>
+              <li>IEnumerable — operations run in your app memory</li>
+              <li>IQueryable — operations translated to SQL by EF Core</li>
+              <li>IQueryable filter happen AT database (only matching rows come back)</li>
+              <li>IEnumerable filter happen IN memory (all data first loaded)</li>
+            </ul>
+            <p><strong>Performance Example:</strong></p>
+            <ul>
+              <li><code>db.Products.Where(p =&gt; p.Price &gt; 100).ToList()</code> — fast (SQL WHERE)</li>
+              <li><code>db.Products.ToList().Where(p =&gt; p.Price &gt; 100)</code> — slow (load all rows first)</li>
+            </ul>
+            <p><strong>Java parallel:</strong></p>
+            <ul>
+              <li>IEnumerable = Java Stream API (in-memory)</li>
+              <li>IQueryable = something like JPA Criteria API (translated to SQL)</li>
+            </ul>
+            <p><strong>Rule:</strong></p>
+            <ul>
+              <li>Stay on IQueryable as long as possible</li>
+              <li>Call <code>.ToList()</code> at very end</li>
+              <li>Never call <code>.AsEnumerable()</code> too early</li>
+            </ul>
+          </div>
+        </details>
+
+        <details><summary>Q. What does async/await do under the hood?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>async/await = way to write async code in simple way</li>
+              <li><code>async</code> keyword mark method as async</li>
+              <li><code>await</code> keyword pause method till Task complete</li>
+            </ul>
+            <p><strong>How it works:</strong></p>
+            <ul>
+              <li>Compiler convert async method into hidden state machine</li>
+              <li>Each <code>await</code> become a checkpoint</li>
+              <li>At await, method pause and thread released back to thread pool</li>
+              <li>Thread can serve other requests</li>
+              <li>When Task complete, method resume from where it paused</li>
+            </ul>
+            <p><strong>Why important:</strong></p>
+            <ul>
+              <li>Web app can handle thousands of users with few threads</li>
+              <li>No thread sit blocked waiting for database</li>
+              <li>Better performance and scalability</li>
+            </ul>
+            <p><strong>Java parallel:</strong></p>
+            <ul>
+              <li>Task = Java's <code>Future</code> or <code>CompletableFuture</code></li>
+              <li>Java need ExecutorService + Runnable — C# is simpler</li>
+              <li>Same idea as Java's CompletableFuture but cleaner syntax</li>
+            </ul>
+            <p><strong>Note:</strong></p>
+            <ul>
+              <li>Rule = "async all the way" — caller must also be async</li>
+              <li>Never call <code>.Result</code> or <code>.Wait()</code> on Task in web — cause deadlock</li>
+            </ul>
+          </div>
+        </details>
+
+        <details><summary>Q. What is deadlock and how to prevent?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>Deadlock = two threads wait for each other forever</li>
+              <li>Nothing moves, app freeze</li>
+            </ul>
+            <p><strong>Classic Example:</strong></p>
+            <ul>
+              <li>Thread A hold lock X, want lock Y</li>
+              <li>Thread B hold lock Y, want lock X</li>
+              <li>Both wait forever</li>
+            </ul>
+            <p><strong>How to prevent:</strong></p>
+            <ul>
+              <li>Always take locks in same order in whole code</li>
+              <li>Use timeout with <code>Monitor.TryEnter</code> — give up after few seconds</li>
+              <li>Use lock-free types like <code>Interlocked.Increment</code> for counters</li>
+              <li>Use <code>ConcurrentDictionary</code> instead of lock + Dictionary</li>
+              <li>Never call <code>.Result</code> on Task in async code</li>
+            </ul>
+            <p><strong>Java parallel:</strong></p>
+            <ul>
+              <li>Same like Java deadlock — you already know from Java MultiThreading</li>
+              <li>C# <code>lock(obj){}</code> = Java <code>synchronized(obj){}</code></li>
+              <li>C# <code>Interlocked.Increment</code> = Java <code>AtomicInteger.incrementAndGet()</code></li>
+            </ul>
+          </div>
+        </details>
+
+        <details><summary>Q. Explain SOLID principles?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>SOLID = 5 design rules to make code easy to maintain and test</li>
+            </ul>
+            <p><strong>S — Single Responsibility:</strong></p>
+            <ul>
+              <li>One class should do one thing only</li>
+              <li>If <code>UserService</code> handle user + email + log — split it</li>
+            </ul>
+            <p><strong>O — Open/Closed:</strong></p>
+            <ul>
+              <li>Open for extension, closed for modification</li>
+              <li>Add new feature by inheritance — not by editing working code</li>
+            </ul>
+            <p><strong>L — Liskov Substitution:</strong></p>
+            <ul>
+              <li>Child class must work where parent expected</li>
+              <li>Don't make Penguin (child of Bird) crash when you call <code>Fly()</code></li>
+            </ul>
+            <p><strong>I — Interface Segregation:</strong></p>
+            <ul>
+              <li>Many small interfaces better than one big interface</li>
+              <li>Class should not implement methods it not need</li>
+            </ul>
+            <p><strong>D — Dependency Inversion:</strong></p>
+            <ul>
+              <li>Depend on abstraction (interface), not on concrete class</li>
+              <li>This is why .NET DI exist — service depend on <code>IRepository</code> not <code>SqlRepository</code></li>
+            </ul>
+            <p><strong>Java parallel:</strong></p>
+            <ul>
+              <li>Same SOLID principles apply in Java also — same rules</li>
+            </ul>
+          </div>
+        </details>
+
+        <details><summary>Q. What is boxing and why it is slow?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>Boxing = put value type (like int) in object reference</li>
+              <li>Unboxing = take value out of object back</li>
+            </ul>
+            <p><strong>Why it slow:</strong></p>
+            <ul>
+              <li>Box allocate new object on heap</li>
+              <li>Heap allocation cost CPU and memory</li>
+              <li>GC has to clean up the box later</li>
+              <li>In tight loop with millions calls — performance disaster</li>
+            </ul>
+            <p><strong>Classic Trap:</strong></p>
+            <ul>
+              <li>Old <code>ArrayList</code> store everything as <code>object</code></li>
+              <li>Every <code>int</code> added — get boxed</li>
+            </ul>
+            <p><strong>Fix:</strong></p>
+            <ul>
+              <li>Use generic collections — <code>List&lt;int&gt;</code>, <code>Dictionary&lt;K,V&gt;</code>, <code>HashSet&lt;T&gt;</code></li>
+              <li>Generics avoid boxing — store ints directly</li>
+            </ul>
+            <p><strong>Java parallel:</strong></p>
+            <ul>
+              <li>Same as Java auto-boxing — int → Integer</li>
+              <li>Java <code>List&lt;Integer&gt;</code> also auto-box</li>
+              <li>C# generics avoid boxing — Java generics use erasure (always box)</li>
+            </ul>
+          </div>
+        </details>
+
+        <details><summary>Q. What is difference between throw and throw ex?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li><code>throw;</code> — re-throw current exception (keep original stack trace)</li>
+              <li><code>throw ex;</code> — re-throw but RESET stack trace (lose original error location)</li>
+            </ul>
+            <p><strong>Key Points:</strong></p>
+            <ul>
+              <li>Use <code>throw;</code> always — keep stack trace</li>
+              <li><code>throw ex;</code> hide real source of bug</li>
+              <li><code>throw ex;</code> make debugging painful</li>
+              <li><code>throw new MyException("msg", ex)</code> — wrap with inner exception (OK)</li>
+            </ul>
+            <p><strong>Java parallel:</strong></p>
+            <ul>
+              <li>Java does not have this problem — Java <code>throw e;</code> always keep stack</li>
+              <li>This is C# specific gotcha</li>
+            </ul>
+            <p><strong>Quick interview answer:</strong></p>
+            <ul>
+              <li>"Always use <code>throw;</code> alone"</li>
+              <li>"<code>throw ex;</code> destroy stack trace — almost always bug"</li>
+            </ul>
+          </div>
+        </details>
+
+        <details><summary>Q. Explain GC generations?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>GC = Garbage Collector — clean unused memory automatically</li>
+              <li>GC group objects by age into 3 generations for efficiency</li>
+            </ul>
+            <p><strong>Generations:</strong></p>
+            <ul>
+              <li><strong>Gen 0</strong> — new objects just created (small, scanned often, fast)</li>
+              <li><strong>Gen 1</strong> — survived one GC (medium frequency)</li>
+              <li><strong>Gen 2</strong> — long-lived objects (static cache, singleton) — scanned rarely (expensive)</li>
+            </ul>
+            <p><strong>Why this design:</strong></p>
+            <ul>
+              <li>Most objects die young — used briefly, become garbage</li>
+              <li>Gen 0 small and quick to clean</li>
+              <li>Gen 2 large and slow — clean rarely</li>
+            </ul>
+            <p><strong>Special area — LOH (Large Object Heap):</strong></p>
+            <ul>
+              <li>Objects ≥ 85KB stored here</li>
+              <li>Treated like Gen 2</li>
+              <li>Not compacted by default — can fragment</li>
+            </ul>
+            <p><strong>Java parallel:</strong></p>
+            <ul>
+              <li>Same like Java GC — Young Generation, Old Generation</li>
+              <li>Gen 0/1 = Young Gen (Eden + Survivor)</li>
+              <li>Gen 2 = Old Gen (Tenured)</li>
+            </ul>
+            <p><strong>Note:</strong> Never call <code>GC.Collect()</code> in production — interfere with GC tuning.</p>
+          </div>
+        </details>
+
+        <details><summary>Q. What is purpose of IDisposable?</summary>
+          <div>
+            <p><strong>Definition:</strong></p>
+            <ul>
+              <li>IDisposable = interface with one method <code>Dispose()</code></li>
+              <li>Used to clean up resources at right time (not wait for GC)</li>
+            </ul>
+            <p><strong>Why need it:</strong></p>
+            <ul>
+              <li>For resources GC don't manage well — file handle, DB connection, socket, lock</li>
+              <li>If not released quick — can hit limit (DB connection pool full)</li>
+              <li>App stop working when limits reached</li>
+            </ul>
+            <p><strong>How to use:</strong></p>
+            <ul>
+              <li><code>using</code> statement — auto call Dispose at end of scope</li>
+              <li>Example: <code>using var stream = File.OpenRead(path);</code></li>
+              <li>Dispose called even if exception thrown</li>
+              <li>Cleaner than try/finally</li>
+            </ul>
+            <p><strong>When to implement:</strong></p>
+            <ul>
+              <li>When your class wrap unmanaged resource</li>
+              <li>When your class hold another IDisposable as field</li>
+            </ul>
+            <p><strong>Java parallel:</strong></p>
+            <ul>
+              <li>IDisposable = Java <code>AutoCloseable</code> interface</li>
+              <li><code>using</code> statement = Java <code>try-with-resources</code></li>
+              <li><code>Dispose()</code> = Java <code>close()</code></li>
+            </ul>
+            <p><strong>Modern:</strong> <code>IAsyncDisposable</code> with <code>DisposeAsync()</code> — used with <code>await using</code>.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <section id="mistakes" class="callout callout--warn">
+      <h3>⚠️ Common Mistakes in Phase 1</h3>
+      <ul>
+        <li>Calling <code>.Result</code> or <code>.Wait()</code> on async tasks → deadlock in web code.</li>
+        <li>Using <code>throw ex;</code> instead of <code>throw;</code> → loses stack trace.</li>
+        <li>Using public fields instead of properties → breaks encapsulation and binary compatibility.</li>
+        <li>Forgetting to dispose <code>IDisposable</code> resources → file/socket leaks.</li>
+        <li>Catching <code>Exception</code> generically and swallowing it.</li>
+        <li>Mutating a List while iterating it (<code>InvalidOperationException</code>).</li>
+        <li>Not understanding closure capture in loops (capturing loop variable instead of value).</li>
+        <li>Boxing in hot loops (using <code>object</code> or non-generic collections).</li>
+      </ul>
+    </section>
+
+    <nav class="phase-nav">
+      <a href="phase-0-foundation.html"><span class="label">← Prev</span><strong>Phase 0: Foundation</strong></a>
+      <a href="phase-2-sql.html" class="next"><span class="label">Next →</span><strong>Phase 2: SQL & Database Design</strong></a>
+    </nav>
+
+  </main>
+</div>
+
+<footer class="footer">Phase 1 of 9 · Master C# and the rest becomes much easier</footer>
+
+<script>
+  const phase = document.body.dataset.phase;
+  document.querySelectorAll('input[type="checkbox"][data-topic]').forEach(cb => {
+    const key = `phase-${phase}-topic-${cb.dataset.topic}`;
+    cb.checked = localStorage.getItem(key) === 'true';
+    cb.closest('.topic').classList.toggle('is-done', cb.checked);
+    cb.addEventListener('change', () => {
+      localStorage.setItem(key, cb.checked);
+      cb.closest('.topic').classList.toggle('is-done', cb.checked);
+    });
+  });
+  const links = document.querySelectorAll('.sidebar a[href^="#"]');
+  const sections = [...links].map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  window.addEventListener('scroll', () => {
+    let current = sections[0]?.id;
+    sections.forEach(s => { if (window.scrollY + 100 >= s.offsetTop) current = s.id; });
+    links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current));
+  });
+</script>
+</body>
+</html>
