@@ -195,26 +195,390 @@
       <h3><span class="num">7</span> C# / OOP Q&A (memorize these answers)</h3>
 
       <div class="qa-block">
-        <details><summary>Value vs Reference Type</summary><p>Value types like <code>int</code>, <code>double</code>, <code>bool</code>, <code>struct</code>, and <code>DateTime</code> hold the actual data inside the variable, usually on the stack. When you assign or pass them, you get a copy — changes in one place don't affect the other. Reference types like <code>class</code>, <code>string</code>, and arrays hold a pointer to data on the managed heap. When you assign or pass them, both names point to the same object — a change is visible everywhere. The interesting twist is that <code>string</code> is a reference type but it behaves like a value because strings are immutable. The interview bonus point is <strong>boxing</strong>: when a value type gets stored in an <code>object</code> variable, the runtime wraps it on the heap, which is slow. So always use generic collections like <code>List&lt;int&gt;</code> instead of non-generic <code>ArrayList</code> to avoid boxing in hot paths.</p></details>
-        <details><summary>Boxing / Unboxing</summary><p>Boxing happens when you take a value type (like an <code>int</code>) and store it in a reference type variable like <code>object</code>. The runtime allocates a new object on the heap and copies the int into it — slow because of the heap allocation and the work it creates for the garbage collector. Unboxing is the reverse — extracting the value back out, which involves a type check and another copy. The most common place this used to happen was old non-generic collections like <code>ArrayList</code> that store everything as <code>object</code> — every primitive added gets boxed. The fix is generics: <code>List&lt;int&gt;</code> stores ints natively with zero boxing. In a normal piece of code you won't notice the cost, but in tight loops running millions of iterations, boxing kills performance and triggers extra GC pressure. Modern .NET code rarely sees boxing thanks to generics, but it's a popular interview question.</p></details>
-        <details><summary>What is the CLR?</summary><p>The CLR (Common Language Runtime) is the engine that actually runs .NET code. Your C# code first compiles to IL — Intermediate Language — not directly to machine code. At runtime, the CLR's JIT (Just-In-Time) compiler translates IL into native machine code just before each method runs. The CLR also takes care of three important things you don't have to manage: garbage collection (it cleans up unused memory automatically), exception handling (it manages the throw/catch flow), and security (it enforces what code is allowed to do). Because the CLR handles all this, C# developers focus on business logic instead of memory management. Other languages like F# and VB.NET also compile to IL and run on the same CLR — that's how they all interoperate. The bonus point: the CLR enables features like reflection, generics, async/await, and modern garbage collection.</p></details>
-        <details><summary>Stack vs Heap?</summary><p>The stack and heap are two different memory areas your .NET app uses. The <strong>stack</strong> is per-thread, fast, and managed automatically. It holds value types (when they're local variables), method call frames (parameters, return addresses), and reference variables themselves (the pointer, not the data they point to). When a method returns, its stack frame is wiped instantly. The <strong>heap</strong> is shared across threads and managed by the garbage collector. It holds reference types — every <code>new ClassName()</code> allocates here. Heap allocation is slower than stack because it involves finding free space and bookkeeping. The GC periodically scans for objects with no references and reclaims that memory. As a developer you don't manually manage either, but understanding this helps you reason about performance — for example, why creating millions of small classes pressures the GC, while structs (value types) avoid heap allocation entirely.</p></details>
-        <details><summary>What's a struct vs a class?</summary><p>Both are user-defined types that hold data and methods, but they have very different behavior. A <strong>class</strong> is a reference type — it lives on the heap, supports inheritance, can be null, and is copied by reference (both names point to the same object). A <strong>struct</strong> is a value type — it lives on the stack (when local) or inline inside its containing object, does NOT support inheritance (it's implicitly sealed), can implement interfaces, and is copied by value. Use a struct only for small, immutable, value-like data — examples are <code>Point(x, y)</code>, <code>Money(amount, currency)</code>, or coordinates. The .NET BCL uses structs for things like <code>int</code>, <code>DateTime</code>, <code>TimeSpan</code>, <code>Guid</code>. The rules of thumb: keep struct size under 16 bytes, prefer immutability (use <code>readonly struct</code>), and don't use them for anything with reference semantics. C# 10 added the ability for structs to have parameterless constructors. For 99% of business code, you should use class.</p></details>
-        <details><summary>Abstract class vs Interface</summary><p>Both are ways to define a contract that other classes must follow, but they have different roles. An <strong>interface</strong> is pure capability — it says "this type can do X". It contains method/property signatures with no implementation (since C# 8, it can have default implementations though). A class can implement many interfaces. Examples: <code>IDisposable</code> for things that can be disposed, <code>IEnumerable</code> for things you can loop over. An <strong>abstract class</strong> is a partly-built parent class — it can have fields, properties, real constructors, and some method implementations, but it forces children to fill in the abstract members. A class can only inherit from one abstract class. The simple rule: use an interface when you only need a contract; use an abstract class when you also need shared state or shared code that all children inherit. Modern .NET tends to prefer interfaces with default implementations because they're more flexible and align with the Dependency Inversion principle.</p></details>
-        <details><summary>SOLID</summary><p>SOLID is five design rules that make code easier to maintain and test. <strong>S — Single Responsibility:</strong> a class should have one reason to change. If a class handles user storage AND email sending AND logging, split it into three. <strong>O — Open/Closed:</strong> code should be open for extension but closed for modification. Add new behavior through inheritance or composition rather than editing existing working code. <strong>L — Liskov Substitution:</strong> subclasses must work everywhere their parent type is used without breaking expectations. Don't make a Penguin that crashes when you call Fly() — that violates the contract. <strong>I — Interface Segregation:</strong> many small focused interfaces beat one giant interface. A class should not be forced to implement methods it doesn't need. <strong>D — Dependency Inversion:</strong> depend on abstractions (interfaces), not concrete classes. This is exactly why .NET dependency injection exists — controllers depend on <code>IUserService</code>, not on <code>UserService</code> directly, so you can swap implementations and unit-test with mocks.</p></details>
-        <details><summary>Delegate vs Event</summary><p>A <strong>delegate</strong> is a type-safe function pointer in C#. You define a delegate type that says "any method matching this signature", then create a variable that holds a method reference and invoke it like a function. Delegates are the basis for callbacks, LINQ, and async patterns. The built-in delegates <code>Action</code>, <code>Func</code>, and <code>Predicate</code> cover most cases. An <strong>event</strong> is a delegate wrapped with extra safety — only the declaring class can <em>invoke</em> the event, while outside code can only <em>subscribe</em> with <code>+=</code> or <em>unsubscribe</em> with <code>-=</code>. This enforces the publisher-subscriber (observer) pattern at the language level. So if class A exposes an OnOrderPlaced event, only A can fire it; other classes can listen but cannot accidentally trigger it. The classic bug with events is forgetting to unsubscribe, which keeps the subscriber alive in memory — a memory leak.</p></details>
-        <details><summary>Func vs Action vs Predicate</summary><p>These are the three built-in generic delegate types you'll see everywhere in .NET — they cover almost every callback need. <strong>Action</strong> is for methods that return void: <code>Action</code> takes no arguments, <code>Action&lt;int&gt;</code> takes one int, up to 16 type parameters. <strong>Func</strong> is for methods that return a value — the LAST type parameter is always the return type: <code>Func&lt;int&gt;</code> returns an int with no args, <code>Func&lt;int, int, bool&gt;</code> takes two ints and returns a bool. <strong>Predicate&lt;T&gt;</strong> is a shortcut for <code>Func&lt;T, bool&gt;</code> — used in methods like <code>List&lt;T&gt;.Find</code> and <code>List&lt;T&gt;.RemoveAll</code>. Knowing these saves you from defining custom delegate types most of the time. Example: <code>list.Where(x =&gt; x &gt; 5)</code> — that lambda is implicitly a <code>Func&lt;int, bool&gt;</code>.</p></details>
-        <details><summary>What's a closure?</summary><p>A closure happens when a lambda or anonymous method captures a variable from the surrounding scope. The lambda then "carries" access to that variable even after the original method has returned. Captures are by REFERENCE, not by value — the lambda sees the current value of the variable, not the value at capture time. The classic bug is in loops: <code>for (int i = 0; i &lt; 5; i++) actions.Add(() =&gt; Console.WriteLine(i));</code> — every lambda captures the SAME <code>i</code>, so when you invoke them all, they all print 5 (the value when the loop ended). The fix is to copy the loop variable into a local: <code>var local = i;</code> inside the loop, then capture <code>local</code>. Modern <code>foreach</code> in C# 5+ has its own scoped variable per iteration, so this trap mostly happens with <code>for</code>. Closures are powerful for callbacks and LINQ but be aware they keep referenced objects alive longer than expected.</p></details>
-        <details><summary>async/await internals</summary><p>Async/await is C#'s way to write asynchronous code that reads like synchronous code. You mark a method <code>async</code> and put <code>await</code> in front of any operation returning a <code>Task</code>. A Task represents work that will finish later. Under the hood, the compiler rewrites your async method into a hidden <strong>state machine</strong> class. Each <code>await</code> becomes a checkpoint — the method pauses, captures its local state, and returns. The thread is released back to the thread pool. When the awaited Task completes, a continuation runs that restores state and resumes from the next line. This is why async scales so well — ASP.NET Core can serve thousands of concurrent users with very few threads, because no thread sits blocked waiting for I/O. The most important rule is "async all the way" — once a method is async, every caller above should also be async and await it. Calling <code>.Result</code> blocks the thread and can deadlock.</p></details>
-        <details><summary>Why never .Result on a Task in web?</summary><p>Calling <code>.Result</code> or <code>.Wait()</code> on a Task in web code can cause a deadlock — and even when it doesn't deadlock, it kills your scalability by blocking a thread. Here's why deadlock happens: in classic ASP.NET, every request runs in a synchronization context that allows only one thread at a time. When you call <code>.Result</code>, the thread blocks waiting for the Task to complete. Inside the Task, the awaited continuation needs to come back to that same context to finish — but you've blocked the only available thread, so the continuation can never run. Both wait forever. Even in ASP.NET Core where the sync context issue is less severe, blocking on <code>.Result</code> wastes a thread that could serve another request — under load, your thread pool runs out and everything slows down. The fix is "async all the way" — make the calling method async too and use <code>await</code> instead. The pattern only takes one async method to ripple all the way up.</p></details>
-        <details><summary>IEnumerable vs IQueryable</summary><p>This is one of the most asked LINQ interview questions. <code>IEnumerable&lt;T&gt;</code> represents a sequence that lives in memory — operations on it run inside your application's process using LINQ to Objects. <code>IQueryable&lt;T&gt;</code> represents a query that builds an expression tree, which a provider (like Entity Framework) translates into the target language, usually SQL. The huge practical difference is where filtering happens. <code>db.Products.Where(p =&gt; p.Price &gt; 100).ToList()</code> with EF translates to a SQL WHERE clause and only matching rows return — fast. But <code>db.Products.ToList().Where(p =&gt; p.Price &gt; 100)</code> pulls EVERY product into memory then filters in C# — slow on big tables. The rule: stay on IQueryable as long as possible (Where, Select, OrderBy, Take, Skip), then call <code>.ToList()</code> at the very end. Calling <code>.AsEnumerable()</code> too early has the same trap.</p></details>
-        <details><summary>Deferred vs Immediate execution</summary><p>LINQ operators come in two flavors. <strong>Deferred</strong> operators like <code>Where</code>, <code>Select</code>, <code>OrderBy</code>, and <code>Take</code> don't actually run when you call them — they just build up the query. The query executes only when you start enumerating it, like in a <code>foreach</code> loop or by calling a terminal operator. <strong>Immediate</strong> operators force the query to run right away and return a concrete result. Examples: <code>ToList</code>, <code>ToArray</code>, <code>ToDictionary</code>, <code>Count</code>, <code>Sum</code>, <code>First</code>, <code>Single</code>, <code>Any</code>. The big trap with deferred execution: if you re-enumerate the same query, it runs again — calling the database again, fetching all data again. If you'll iterate twice, materialize first with <code>.ToList()</code> to cache the results. Also be careful about closures inside deferred queries — they capture variables by reference, so changing the variable later changes the query result.</p></details>
-        <details><summary>throw vs throw ex</summary><p>This looks tiny but is a popular interview trick question. <code>throw;</code> with no name re-throws the current exception while keeping the original stack trace intact — your logs still show where the error really happened. <code>throw ex;</code> re-throws but RESETS the stack trace, making it look like the error started at the line where you wrote <code>throw ex;</code>. This hides the real source of the bug and makes debugging painful. So in 99% of cases, when you catch an exception and want to bubble it up, write a bare <code>throw;</code>. The only legitimate case for <code>throw ex;</code> is when you intentionally want to discard context, which is almost never. If you want to wrap the exception in a new one, use <code>throw new MyException("message", ex);</code> — passing the original as inner exception preserves the chain. Quick interview answer: "Always use <code>throw;</code> alone. <code>throw ex;</code> destroys the stack trace and is almost always a bug."</p></details>
-        <details><summary>What is IDisposable?</summary><p><code>IDisposable</code> is an interface with one method, <code>Dispose()</code>, that lets your class clean up resources deterministically — right when you're done with it, not whenever the garbage collector feels like running. This matters for resources the GC doesn't manage well: file handles, database connections, network sockets, lock handles. If you don't release them quickly, you can hit limits like the database connection pool maximum and your app stops working. The easiest way to use IDisposable correctly is the <code>using</code> statement: <code>using var stream = File.OpenRead(path);</code>. The compiler generates code that calls <code>Dispose()</code> automatically when the variable goes out of scope, even if an exception is thrown — much cleaner than try/finally. You should implement IDisposable yourself whenever your class wraps an unmanaged resource or holds another IDisposable. Modern .NET also has <code>IAsyncDisposable</code> with <code>DisposeAsync()</code> for async cleanup, used with <code>await using</code>.</p></details>
-        <details><summary>GC generations?</summary><p>The .NET garbage collector groups heap objects by age into three generations to make cleanup efficient. <strong>Gen 0</strong> holds new objects you just created. <strong>Gen 1</strong> holds objects that survived one GC cleanup. <strong>Gen 2</strong> holds long-lived objects like static caches or singletons that survived many cleanups. The reason for this design is that most objects die young — they get created, used briefly, and become garbage quickly. So the GC scans Gen 0 very often, but Gen 0 is small so it's quick. Gen 1 is scanned less often, and Gen 2 is scanned rarely because it's the largest set and most expensive to clean. There's also a special area called the <strong>Large Object Heap (LOH)</strong> for objects 85KB or bigger. LOH is treated like Gen 2 and is not compacted by default, so it can fragment over time. As a developer you don't manage this — you just trust the GC. The interview bonus point: never call <code>GC.Collect()</code> manually in production, it interferes with the GC's tuning.</p></details>
-        <details><summary>readonly vs const</summary><p>Both create values that cannot be changed, but they work differently. <code>const</code> is a compile-time constant — its value must be known at compile time, can only be a primitive type or string, and gets baked directly into every assembly that references it. The catch: if you change a <code>const</code> in a library and don't recompile the apps that use it, they keep the old value. <code>readonly</code> is a runtime constant — its value can be set in the field declaration OR in the constructor (so it can be different per instance), and it can be any type including reference types. Once set, the field reference cannot be reassigned. Note that <code>readonly</code> doesn't make the OBJECT immutable — for a List, you still can't reassign the field, but you can still <code>list.Add(x)</code>. Prefer <code>readonly</code> for most cases — safer for library evolution and supports any type. There's also <code>static readonly</code> for class-level constants of complex types. C# 10 added <code>const</code> for interpolated strings.</p></details>
-        <details><summary>What's a record?</summary><p>A <code>record</code> (added in C# 9) is a special kind of class designed for immutable data, with several conveniences built in. The biggest difference from a normal class is <strong>value-based equality</strong> — two records are equal if all their properties are equal, not just if they're the same instance. Other built-in goodies: a <code>ToString()</code> that prints all properties, a deconstructor (so you can do <code>var (id, name) = user;</code>), and a <code>with</code> expression that creates a copy with some properties changed (<code>var modified = user with { Name = "New" }</code>). The syntax is concise — <code>public record User(int Id, string Name);</code> declares a record with two properties in one line. Records default to immutable (init-only properties). They're perfect for DTOs, value objects, and any data-transfer scenarios. There are also <code>record struct</code> (C# 10) for value-type records when you want stack allocation.</p></details>
-        <details><summary>Generics with constraints</summary><p>Generics let you write code that works with any type while keeping compile-time type safety — like <code>List&lt;T&gt;</code> works for List of int, List of string, etc. Sometimes you need to restrict T to types that meet certain rules. That's what <strong>constraints</strong> do, declared with the <code>where</code> keyword. Common constraints: <code>where T : class</code> (must be a reference type), <code>where T : struct</code> (must be a value type), <code>where T : new()</code> (must have a parameterless constructor so you can do <code>new T()</code>), <code>where T : IComparable&lt;T&gt;</code> (must implement that interface), <code>where T : SomeBaseClass</code> (must inherit from that class), and <code>where T : notnull</code>. You can combine multiple: <code>where T : class, IEntity, new()</code>. Constraints unlock methods specific to that type — for example with the IComparable constraint, you can call <code>a.CompareTo(b)</code> inside the generic method. Generics + constraints are the foundation for type-safe libraries like LINQ, EF Core, and the entire collections framework.</p></details>
+        <details><summary>Q. Value vs Reference Type?</summary><div>
+          <p><strong>Value Type:</strong></p>
+          <ul>
+            <li>Hold actual data inside variable</li>
+            <li>Examples: <code>int, double, bool, struct, DateTime</code></li>
+            <li>Stored on stack</li>
+            <li>Copied by value — change in one not affect other</li>
+          </ul>
+          <p><strong>Reference Type:</strong></p>
+          <ul>
+            <li>Hold pointer to data on heap</li>
+            <li>Examples: <code>class, string, array</code></li>
+            <li>Both names point to same object</li>
+            <li>Change visible to all references</li>
+          </ul>
+          <p><strong>Note:</strong> <code>string</code> is reference type but immutable — behave like value.</p>
+          <p><strong>Java parallel:</strong> Same like primitive (int) vs Object — but C# has <code>struct</code>.</p>
+        </div></details>
+
+        <details><summary>Q. Boxing / Unboxing?</summary><div>
+          <p><strong>Boxing:</strong> Put value type (int) in object reference — wrap on heap.</p>
+          <p><strong>Unboxing:</strong> Take value out of object back.</p>
+          <p><strong>Why slow:</strong></p>
+          <ul>
+            <li>Heap allocation cost CPU and memory</li>
+            <li>GC has to clean later</li>
+            <li>Disaster in tight loops with millions iterations</li>
+          </ul>
+          <p><strong>Common Trap:</strong> Old <code>ArrayList</code> store everything as object — every int boxed.</p>
+          <p><strong>Fix:</strong> Use generics — <code>List&lt;int&gt;</code> store ints natively, no boxing.</p>
+          <p><strong>Java parallel:</strong> Same as Java auto-boxing (int → Integer).</p>
+        </div></details>
+
+        <details><summary>Q. What is the CLR?</summary><div>
+          <p><strong>Definition:</strong> CLR = Common Language Runtime. Engine that run .NET code.</p>
+          <p><strong>How it works:</strong></p>
+          <ul>
+            <li>C# compile to IL (Intermediate Language) — not machine code</li>
+            <li>JIT (Just-In-Time) compiler translate IL to machine code at run time</li>
+          </ul>
+          <p><strong>CLR handles:</strong></p>
+          <ul>
+            <li>Garbage Collection (auto clean memory)</li>
+            <li>Exception Handling (throw/catch flow)</li>
+            <li>Security (what code can do)</li>
+          </ul>
+          <p><strong>Other languages:</strong> F#, VB.NET also compile to IL — run on same CLR.</p>
+          <p><strong>Java parallel:</strong> CLR = JVM. IL = Bytecode. Same idea.</p>
+        </div></details>
+
+        <details><summary>Q. Stack vs Heap?</summary><div>
+          <p><strong>Stack:</strong></p>
+          <ul>
+            <li>Per-thread, fast, auto managed</li>
+            <li>Hold value types (local variables)</li>
+            <li>Hold method call frames (parameters, return address)</li>
+            <li>Hold reference variables themselves (pointer, not data)</li>
+            <li>Method return = stack frame wiped instantly</li>
+          </ul>
+          <p><strong>Heap:</strong></p>
+          <ul>
+            <li>Shared across threads, managed by GC</li>
+            <li>Hold reference types — every <code>new</code> allocate here</li>
+            <li>Slower than stack — find free space, bookkeeping</li>
+            <li>GC scan and reclaim memory periodically</li>
+          </ul>
+          <p><strong>Java parallel:</strong> Same Stack vs Heap concept as Java.</p>
+        </div></details>
+
+        <details><summary>Q. Struct vs Class?</summary><div>
+          <p><strong>Class:</strong></p>
+          <ul>
+            <li>Reference type, live on heap</li>
+            <li>Support inheritance</li>
+            <li>Can be null</li>
+            <li>Copy by reference</li>
+          </ul>
+          <p><strong>Struct:</strong></p>
+          <ul>
+            <li>Value type, live on stack</li>
+            <li>NO inheritance (implicitly sealed)</li>
+            <li>Can implement interfaces</li>
+            <li>Copy by value</li>
+          </ul>
+          <p><strong>Use struct for:</strong></p>
+          <ul>
+            <li>Small immutable value-like data: Point(x,y), Money</li>
+            <li>Examples in BCL: int, DateTime, TimeSpan, Guid</li>
+            <li>Keep size under 16 bytes</li>
+          </ul>
+          <p><strong>Java parallel:</strong> Java has no struct. All custom types are class.</p>
+          <p><strong>Note:</strong> For 99% of business code, use class.</p>
+        </div></details>
+
+        <details><summary>Q. Abstract class vs Interface?</summary><div>
+          <p><strong>Interface:</strong></p>
+          <ul>
+            <li>Pure capability — "this type can do X"</li>
+            <li>Method/property signatures, no implementation (mostly)</li>
+            <li>Class can implement MANY interfaces</li>
+            <li>Examples: <code>IDisposable, IEnumerable</code></li>
+          </ul>
+          <p><strong>Abstract Class:</strong></p>
+          <ul>
+            <li>Partly-built parent class</li>
+            <li>Can have fields, properties, constructors, real methods</li>
+            <li>Force children to fill abstract members</li>
+            <li>Class can inherit only ONE</li>
+          </ul>
+          <p><strong>Rule:</strong> Interface for contract. Abstract class for shared code/state.</p>
+          <p><strong>Java parallel:</strong> Same exactly as Java abstract class vs interface.</p>
+        </div></details>
+
+        <details><summary>Q. Explain SOLID?</summary><div>
+          <p><strong>S — Single Responsibility:</strong> One class, one reason to change. Don't combine user storage + email + log.</p>
+          <p><strong>O — Open/Closed:</strong> Open for extension, closed for modification. Add behavior via inheritance, not editing.</p>
+          <p><strong>L — Liskov Substitution:</strong> Child class work where parent expected. Don't make Penguin crash on Fly().</p>
+          <p><strong>I — Interface Segregation:</strong> Many small interfaces beat one big. Don't force class to implement methods it not need.</p>
+          <p><strong>D — Dependency Inversion:</strong> Depend on abstraction (interface), not concrete class. Why .NET DI exists.</p>
+          <p><strong>Java parallel:</strong> Same SOLID rules apply in Java also.</p>
+        </div></details>
+
+        <details><summary>Q. Delegate vs Event?</summary><div>
+          <p><strong>Delegate:</strong></p>
+          <ul>
+            <li>Type-safe function pointer</li>
+            <li>Hold method reference</li>
+            <li>Invoke like function</li>
+            <li>Built-in: <code>Action, Func, Predicate</code></li>
+          </ul>
+          <p><strong>Event:</strong></p>
+          <ul>
+            <li>Delegate with extra safety</li>
+            <li>Only declaring class can INVOKE</li>
+            <li>Outside code can only SUBSCRIBE (<code>+=</code>) or UNSUBSCRIBE (<code>-=</code>)</li>
+            <li>Enforce publisher-subscriber pattern</li>
+          </ul>
+          <p><strong>Common Bug:</strong> Forget to unsubscribe — subscriber stay in memory (leak).</p>
+          <p><strong>Java parallel:</strong> Like Observer pattern interface (PropertyChangeListener).</p>
+        </div></details>
+
+        <details><summary>Q. Func vs Action vs Predicate?</summary><div>
+          <p><strong>Action:</strong></p>
+          <ul>
+            <li>Method that return void</li>
+            <li><code>Action</code> = no args</li>
+            <li><code>Action&lt;int&gt;</code> = one int</li>
+            <li>Up to 16 type params</li>
+          </ul>
+          <p><strong>Func:</strong></p>
+          <ul>
+            <li>Method that return value</li>
+            <li>LAST type param = return type</li>
+            <li><code>Func&lt;int&gt;</code> = no args, return int</li>
+            <li><code>Func&lt;int, int, bool&gt;</code> = 2 ints, return bool</li>
+          </ul>
+          <p><strong>Predicate&lt;T&gt;:</strong></p>
+          <ul>
+            <li>Shortcut for <code>Func&lt;T, bool&gt;</code></li>
+            <li>Used in <code>List&lt;T&gt;.Find</code>, <code>List&lt;T&gt;.RemoveAll</code></li>
+          </ul>
+          <p><strong>Example:</strong> <code>list.Where(x =&gt; x &gt; 5)</code> — lambda is <code>Func&lt;int, bool&gt;</code>.</p>
+        </div></details>
+
+        <details><summary>Q. What is a closure?</summary><div>
+          <p><strong>Definition:</strong></p>
+          <ul>
+            <li>Lambda capture variable from outer scope</li>
+            <li>Lambda carry access even after method return</li>
+          </ul>
+          <p><strong>Important:</strong> Captures by REFERENCE, not by value.</p>
+          <p><strong>Classic Bug in for loop:</strong></p>
+          <pre><code>for (int i = 0; i &lt; 5; i++)
+    actions.Add(() =&gt; Console.WriteLine(i));
+// All print 5 (final value of i)</code></pre>
+          <p><strong>Fix:</strong> Copy loop variable to local:</p>
+          <pre><code>for (int i = 0; i &lt; 5; i++) {
+    var local = i;
+    actions.Add(() =&gt; Console.WriteLine(local));
+}</code></pre>
+          <p><strong>Java parallel:</strong> Same lambda capture issue in Java (variable must be effectively final).</p>
+        </div></details>
+
+        <details><summary>Q. async/await internals?</summary><div>
+          <p><strong>Definition:</strong> Way to write async code that look sync.</p>
+          <p><strong>Keywords:</strong></p>
+          <ul>
+            <li><code>async</code> mark method as async</li>
+            <li><code>await</code> pause until Task complete</li>
+          </ul>
+          <p><strong>Under the Hood:</strong></p>
+          <ul>
+            <li>Compiler rewrite method as state machine class</li>
+            <li>Each <code>await</code> = checkpoint</li>
+            <li>Method pause, capture local state, return</li>
+            <li>Thread released back to thread pool</li>
+            <li>When Task complete — continuation restore state and resume</li>
+          </ul>
+          <p><strong>Why Important:</strong></p>
+          <ul>
+            <li>ASP.NET Core serve thousands users with few threads</li>
+            <li>No thread blocked waiting for I/O</li>
+          </ul>
+          <p><strong>Rule:</strong> "async all the way" — caller must also be async.</p>
+          <p><strong>Java parallel:</strong> Like CompletableFuture but cleaner syntax.</p>
+        </div></details>
+
+        <details><summary>Q. Why never .Result on a Task in web?</summary><div>
+          <p><strong>Problem:</strong> Cause deadlock OR kill scalability.</p>
+          <p><strong>Why Deadlock:</strong></p>
+          <ul>
+            <li>In classic ASP.NET, request run in sync context (one thread at time)</li>
+            <li><code>.Result</code> block thread waiting for Task</li>
+            <li>Task continuation need same context to finish</li>
+            <li>You blocked the only thread — both wait forever</li>
+          </ul>
+          <p><strong>Even in ASP.NET Core:</strong></p>
+          <ul>
+            <li>Block thread that could serve another request</li>
+            <li>Under load — thread pool run out</li>
+            <li>Everything slow down</li>
+          </ul>
+          <p><strong>Fix:</strong> "async all the way" — make caller async, use <code>await</code>.</p>
+        </div></details>
+
+        <details><summary>Q. IEnumerable vs IQueryable?</summary><div>
+          <p><strong>IEnumerable&lt;T&gt;:</strong></p>
+          <ul>
+            <li>In-memory sequence</li>
+            <li>Operations run in app process (LINQ to Objects)</li>
+          </ul>
+          <p><strong>IQueryable&lt;T&gt;:</strong></p>
+          <ul>
+            <li>Build expression tree</li>
+            <li>Provider (EF) translate to SQL</li>
+            <li>Filter happen at database</li>
+          </ul>
+          <p><strong>Performance Example:</strong></p>
+          <ul>
+            <li>Good: <code>db.Products.Where(...).ToList()</code> — SQL WHERE</li>
+            <li>Bad: <code>db.Products.ToList().Where(...)</code> — load all rows first</li>
+          </ul>
+          <p><strong>Rule:</strong> Stay on IQueryable as long as possible. Call <code>.ToList()</code> at very end.</p>
+        </div></details>
+
+        <details><summary>Q. Deferred vs Immediate execution?</summary><div>
+          <p><strong>Deferred (build query, not run):</strong></p>
+          <ul>
+            <li>Where, Select, OrderBy, Take</li>
+            <li>Run only on enumeration (foreach, terminal operator)</li>
+          </ul>
+          <p><strong>Immediate (run now):</strong></p>
+          <ul>
+            <li>ToList, ToArray, ToDictionary</li>
+            <li>Count, Sum, First, Single, Any</li>
+          </ul>
+          <p><strong>Big Trap:</strong></p>
+          <ul>
+            <li>Re-enumerate same query = run again (DB hit again)</li>
+            <li>If iterate twice — call <code>.ToList()</code> first to cache</li>
+          </ul>
+          <p><strong>Note:</strong> Closures inside deferred queries capture by reference.</p>
+        </div></details>
+
+        <details><summary>Q. throw vs throw ex?</summary><div>
+          <p><strong>throw;</strong> — re-throw current exception, KEEP original stack trace.</p>
+          <p><strong>throw ex;</strong> — re-throw, RESET stack trace (lose original location).</p>
+          <p><strong>Rule:</strong> Always use bare <code>throw;</code> alone.</p>
+          <p><strong>To Wrap Exception:</strong></p>
+          <pre><code>throw new MyException("message", ex);</code></pre>
+          <ul>
+            <li>Original passed as inner exception — preserve chain</li>
+          </ul>
+          <p><strong>Quick Answer:</strong> "<code>throw ex;</code> destroy stack trace — almost always bug."</p>
+          <p><strong>Java parallel:</strong> Java <code>throw e;</code> always keep stack — no this problem.</p>
+        </div></details>
+
+        <details><summary>Q. What is IDisposable?</summary><div>
+          <p><strong>Definition:</strong></p>
+          <ul>
+            <li>Interface with one method <code>Dispose()</code></li>
+            <li>Clean resources at right time (not wait for GC)</li>
+          </ul>
+          <p><strong>Why need:</strong></p>
+          <ul>
+            <li>For resources GC don't manage well — file handle, DB connection, socket, lock</li>
+            <li>Hit limits (connection pool full) — app stop working</li>
+          </ul>
+          <p><strong>How to Use — using statement:</strong></p>
+          <pre><code>using var stream = File.OpenRead(path);</code></pre>
+          <ul>
+            <li>Auto call Dispose at end of scope</li>
+            <li>Even if exception thrown</li>
+            <li>Cleaner than try/finally</li>
+          </ul>
+          <p><strong>Java parallel:</strong> IDisposable = AutoCloseable. <code>using</code> = try-with-resources.</p>
+          <p><strong>Modern:</strong> <code>IAsyncDisposable</code> with <code>await using</code>.</p>
+        </div></details>
+
+        <details><summary>Q. GC generations?</summary><div>
+          <p><strong>3 Generations:</strong></p>
+          <ul>
+            <li><strong>Gen 0</strong> — new objects (small, scanned often, fast)</li>
+            <li><strong>Gen 1</strong> — survived one GC (medium frequency)</li>
+            <li><strong>Gen 2</strong> — long-lived (static cache, singleton) — scanned rarely (expensive)</li>
+          </ul>
+          <p><strong>Why this design:</strong></p>
+          <ul>
+            <li>Most objects die young</li>
+            <li>Gen 0 small and quick to clean</li>
+            <li>Gen 2 large and slow — clean rarely</li>
+          </ul>
+          <p><strong>LOH (Large Object Heap):</strong></p>
+          <ul>
+            <li>Objects ≥ 85KB</li>
+            <li>Treated like Gen 2</li>
+            <li>Not compacted by default — can fragment</li>
+          </ul>
+          <p><strong>Java parallel:</strong> Gen 0/1 = Young Gen (Eden + Survivor). Gen 2 = Old Gen (Tenured).</p>
+          <p><strong>Note:</strong> Never call <code>GC.Collect()</code> in production.</p>
+        </div></details>
+
+        <details><summary>Q. readonly vs const?</summary><div>
+          <p><strong>const:</strong></p>
+          <ul>
+            <li>Compile-time constant</li>
+            <li>Value must be known at compile time</li>
+            <li>Only primitive type or string</li>
+            <li>Baked into every assembly that reference it</li>
+            <li>Catch: change in library = need recompile users</li>
+          </ul>
+          <p><strong>readonly:</strong></p>
+          <ul>
+            <li>Run-time constant</li>
+            <li>Set in field declaration OR constructor</li>
+            <li>Any type (including reference type)</li>
+            <li>Field reference cannot be reassigned</li>
+          </ul>
+          <p><strong>Note:</strong> <code>readonly</code> not make OBJECT immutable. <code>readonly List</code> — can still <code>list.Add(x)</code>.</p>
+          <p><strong>Java parallel:</strong> <code>const</code> = Java <code>final</code> primitive. <code>readonly</code> = Java <code>final</code> object reference.</p>
+        </div></details>
+
+        <details><summary>Q. What is a record?</summary><div>
+          <p><strong>Definition:</strong></p>
+          <ul>
+            <li>Special class for immutable data (C# 9+)</li>
+            <li>Concise syntax: <code>public record User(int Id, string Name);</code></li>
+          </ul>
+          <p><strong>Built-in features:</strong></p>
+          <ul>
+            <li><strong>Value-based equality</strong> — equal if all properties equal</li>
+            <li>Auto <code>ToString()</code> print all properties</li>
+            <li>Deconstructor: <code>var (id, name) = user;</code></li>
+            <li><code>with</code> expression: <code>var modified = user with { Name = "New" }</code></li>
+            <li>Default immutable (init-only properties)</li>
+          </ul>
+          <p><strong>Use for:</strong></p>
+          <ul>
+            <li>DTOs, value objects, data-transfer scenarios</li>
+          </ul>
+          <p><strong>Note:</strong> <code>record struct</code> (C# 10) for value-type records.</p>
+          <p><strong>Java parallel:</strong> Java 14+ also has <code>record</code> with same idea.</p>
+        </div></details>
+
+        <details><summary>Q. Generics with constraints?</summary><div>
+          <p><strong>Definition:</strong></p>
+          <ul>
+            <li>Generics let code work with any type</li>
+            <li>Constraints restrict T to types that meet rules</li>
+            <li>Use <code>where</code> keyword</li>
+          </ul>
+          <p><strong>Common Constraints:</strong></p>
+          <ul>
+            <li><code>where T : class</code> — must be reference type</li>
+            <li><code>where T : struct</code> — must be value type</li>
+            <li><code>where T : new()</code> — must have parameterless constructor</li>
+            <li><code>where T : IComparable&lt;T&gt;</code> — must implement interface</li>
+            <li><code>where T : SomeBaseClass</code> — must inherit from class</li>
+            <li><code>where T : notnull</code> — non-nullable</li>
+          </ul>
+          <p><strong>Combine multiple:</strong></p>
+          <pre><code>where T : class, IEntity, new()</code></pre>
+          <p><strong>Java parallel:</strong> Java <code>&lt;T extends Comparable&gt;</code> — same idea, different syntax.</p>
+        </div></details>
       </div>
     </section>
 
@@ -223,26 +587,398 @@
       <h3><span class="num">8</span> ASP.NET / EF Core Q&A</h3>
 
       <div class="qa-block">
-        <details><summary>Middleware order matters — example?</summary><p>The middleware pipeline runs in the exact order you call <code>app.UseXxx()</code> in <code>Program.cs</code>, and order is critical because each middleware depends on what previous ones did. The standard correct order is <strong>UseRouting → UseCors → UseAuthentication → UseAuthorization → MapControllers</strong>. <code>UseRouting</code> must come first so that endpoint matching happens — middleware after it knows which endpoint is targeted. <code>UseAuthentication</code> MUST come before <code>UseAuthorization</code> because you need to know WHO the user is (authentication) before you can check WHAT they're allowed to do (authorization). If you flip them, authorization sees no user and rejects everything. Custom middleware like exception handling typically goes near the start (so it catches errors from everything below), while logging can go anywhere. Forgetting <code>UseStaticFiles</code> means your wwwroot files don't serve. Rule: when something doesn't work, check the middleware order first.</p></details>
-        <details><summary>Singleton, Scoped, Transient — when?</summary><p>These are the three service lifetimes in .NET dependency injection. <strong>Singleton</strong> — one instance for the entire app lifetime. Use for stateless services like configuration, in-memory cache, loggers, HttpClient factory. <strong>Scoped</strong> — one instance per HTTP request, reused within that request, then disposed. Use for DbContext (so all parts of one request share the same context and transaction) and request-bound services. <strong>Transient</strong> — a new instance every single time the service is injected, even within the same request. Use for lightweight stateless helpers. The classic interview trap is the <strong>captive dependency bug</strong>: never inject a Scoped service like DbContext into a Singleton, because the Scoped service gets "captured" forever, lives as long as the Singleton, breaks request isolation, and is not thread-safe. .NET has <code>ValidateScopes</code> in development mode to catch this.</p></details>
-        <details><summary>What does [ApiController] do?</summary><p><code>[ApiController]</code> is an attribute on a controller class that turns on several modern Web API conventions automatically. First, <strong>automatic model validation</strong> — if the incoming JSON fails any <code>[Required]</code> or <code>[EmailAddress]</code> check, the framework returns a 400 Bad Request with a clean ProblemDetails JSON before your action even runs. Second, <strong>binding source inference</strong> — for complex types it assumes <code>[FromBody]</code>, for simple types it assumes <code>[FromRoute]</code> or <code>[FromQuery]</code>, so you don't have to write attributes everywhere. Third, errors come back as standard <strong>RFC 7807 ProblemDetails</strong> JSON, the modern industry standard. Fourth, it requires <strong>attribute routing</strong> instead of conventional routing. Together these make controllers cleaner and consistent. Almost every new ASP.NET Core API controller should have <code>[ApiController]</code>.</p></details>
-        <details><summary>How do you do JWT auth in ASP.NET?</summary><p>Setup happens in three steps. First, in <code>Program.cs</code>, register JWT services: <code>builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opts =&gt; { opts.TokenValidationParameters = new() { ValidateIssuer = true, ValidateAudience = true, ValidateLifetime = true, ValidateIssuerSigningKey = true, ValidIssuer = ..., ValidAudience = ..., IssuerSigningKey = new SymmetricSecurityKey(...) }; });</code> and <code>builder.Services.AddAuthorization();</code>. Second, add to the pipeline: <code>app.UseAuthentication(); app.UseAuthorization();</code> in that order, before MapControllers. Third, write a token generation method that creates Claims (sub, email, role), instantiates a <code>JwtSecurityToken</code> with issuer/audience/expiry/signing credentials, and uses <code>JwtSecurityTokenHandler.WriteToken()</code> to produce the string. The login endpoint validates credentials against the DB and returns this token. The client sends it in <code>Authorization: Bearer ...</code> on every request, the middleware validates the signature and populates <code>HttpContext.User</code>. For production, add refresh tokens stored in the DB so you can revoke.</p></details>
-        <details><summary>Difference between Authentication and Authorization?</summary><p>People often confuse these two but they answer different questions. <strong>Authentication</strong> answers "Who are you?" — verifying user identity through credentials, JWT validation, or another mechanism. After authentication, the server knows who the user is and what claims they carry. Failure returns HTTP <strong>401 Unauthorized</strong> (which actually means "not authenticated"). <strong>Authorization</strong> answers "What are you allowed to do?" — checking whether the authenticated user has permission for the requested resource based on roles, policies, or claims. Failure returns HTTP <strong>403 Forbidden</strong>, meaning "we know who you are, but you can't do this". A simple analogy: showing your ID at the office gate is authentication; the system checking whether your ID grants access to the 5th floor is authorization. In .NET, <code>UseAuthentication()</code> middleware handles the first, <code>UseAuthorization()</code> handles the second, and they MUST be called in that order.</p></details>
-        <details><summary>How to handle exceptions globally?</summary><p>The wrong way is to wrap every controller action in try/catch — repetitive and easy to miss. The right way is centralized via middleware. Write a custom <strong>ExceptionHandlingMiddleware</strong> that wraps the call to <code>next()</code> in a try/catch. When any unhandled exception bubbles up, it catches it, logs with full context (request path, user, correlation ID), maps the exception type to an HTTP status code (NotFoundException → 404, ValidationException → 400, anything else → 500), and writes a standardized <strong>ProblemDetails</strong> JSON response (RFC 7807). This gives clients consistent error shapes with title, status, detail. In .NET 8 there's an even cleaner built-in approach: implement <code>IExceptionHandler</code>, register it with <code>AddExceptionHandler&lt;T&gt;()</code>, add <code>app.UseExceptionHandler()</code>, and call <code>builder.Services.AddProblemDetails()</code>. Either way, you get one place to handle errors, consistent responses, and clean controllers.</p></details>
-        <details><summary>What is CORS?</summary><p>CORS stands for Cross-Origin Resource Sharing. It's a browser security mechanism that blocks JavaScript from one origin (domain + port + protocol) from calling APIs on a different origin by default. This protects users from malicious sites making calls to their banking app while they're logged in. You need CORS configuration whenever frontend and backend are on different origins — most commonly Angular at <code>http://localhost:4200</code> calling .NET at <code>http://localhost:5000</code>. To allow this, configure CORS on the SERVER side (because the server is the one trusting the origin). In .NET: <code>AddCors</code> in services with a policy specifying <code>WithOrigins</code>, <code>AllowAnyHeader</code>, <code>AllowAnyMethod</code>, and optionally <code>AllowCredentials</code>; then <code>app.UseCors("PolicyName")</code> in the pipeline before <code>UseAuthentication</code>. Be careful: combining <code>AllowAnyOrigin()</code> with <code>AllowCredentials()</code> is forbidden by the spec — list specific origins when sending cookies or auth.</p></details>
-        <details><summary>Difference between IActionResult and ActionResult&lt;T&gt;?</summary><p>Both are return types for controller actions but serve slightly different needs. <strong><code>IActionResult</code></strong> is the base interface that any action result implements — Ok(), NotFound(), BadRequest(), CreatedAtAction(), etc. It's flexible: you can return any of these. The downside is the return type doesn't tell anyone (Swagger, callers, IDE) what data shape comes back on success. <strong><code>ActionResult&lt;T&gt;</code></strong> is the generic version added in newer .NET. It lets you return either a status code result like <code>NotFound()</code> OR a typed value of T directly with <code>return user;</code>. The advantage is much better Swagger documentation (Swagger sees that on success the response is a User object) and stronger typing for callers. Modern best practice: use <code>ActionResult&lt;T&gt;</code> for actions returning data on success, plain <code>IActionResult</code> for actions returning only status codes (like 204 NoContent on delete). Either way, the Ok/NotFound/etc helpers still work the same.</p></details>
-        <details><summary>What's a filter? Types?</summary><p>Filters are cross-cutting code that runs INSIDE the MVC pipeline, after routing has identified which action to call but around the action execution itself. Different from middleware (which runs in the broader HTTP pipeline). There are five filter types in execution order. <strong>Authorization filters</strong> run first to allow or deny access. <strong>Resource filters</strong> wrap everything else — used for caching or short-circuiting. <strong>Action filters</strong> run before and after the action method. <strong>Exception filters</strong> catch exceptions thrown by actions or other filters. <strong>Result filters</strong> wrap the result execution. Use filters when you need behavior that's specific to controllers (like <code>[ServiceFilter]</code> to log every action call). Use middleware when behavior should apply to all requests including static files. Filters are MVC-aware so they have access to the controller and action context, while middleware just sees raw HttpContext.</p></details>
-        <details><summary>Explain N+1 in EF</summary><p>N+1 is the most common EF performance bug and a guaranteed interview question. It happens when you fetch a list of parent rows with one query, then loop through them accessing a navigation property — which triggers one extra query per parent. So loading 100 orders and accessing <code>order.Customer.Name</code> in a loop runs 1 + 100 = 101 queries. With 50 such requests per second, you slam the DB with 5050 queries. Fix it two ways. First, <strong>eager loading</strong> with <code>.Include()</code>: <code>db.Orders.Include(o =&gt; o.Customer).ToListAsync()</code> generates a JOIN. Second and often best, <strong>projection</strong>: shape your query into a DTO with <code>.Select(o =&gt; new { o.Id, CustomerName = o.Customer.Name })</code> — fetches only the columns you need. Always check generated SQL with <code>.ToQueryString()</code> during development to catch N+1 before it hits production.</p></details>
-        <details><summary>Tracking vs NoTracking</summary><p>EF Core tracks every entity it returns from a query by default, so it can detect changes you make and translate them to UPDATE statements when you call <code>SaveChanges</code>. Change-tracking has costs — extra memory (EF stores a snapshot of every entity) and extra CPU (it compares snapshots to detect changes). For UPDATE scenarios this cost is worth it. But for read-only queries — like a GET endpoint just returning data — tracking is wasted work. The fix is <code>.AsNoTracking()</code>: <code>var products = await db.Products.AsNoTracking().ToListAsync();</code>. This skips the change tracker entirely. Result is typically 20-50% faster and noticeably less memory, especially on large result sets. Rule of thumb: AsNoTracking on every GET / list endpoint, normal tracking when you'll modify and save. You can also set the default globally with <code>UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)</code> for read-heavy apps.</p></details>
-        <details><summary>EF Core vs Dapper</summary><p>Both let you talk to a SQL database from .NET, but they sit at different points on the productivity vs raw-speed spectrum. <strong>EF Core</strong> is a full ORM — write LINQ, EF generates SQL, manages change tracking, supports migrations, handles relationships, integrates with the rest of .NET (DI, async). The cost is an abstraction layer that's slightly slower than hand-written SQL. <strong>Dapper</strong> is a "micro-ORM" — a thin layer over ADO.NET that maps SQL results to C# objects. You write SQL yourself: <code>conn.QueryAsync&lt;Product&gt;("SELECT * FROM Products WHERE CategoryId = @cat", new { cat = 5 })</code>. Performance is essentially the same as raw ADO.NET. The decision: EF Core for 80% of CRUD work because productivity matters more than 5% of perf. Dapper for hot read paths (heavy reporting queries, read-mostly endpoints with millions of hits) where every millisecond counts, or for complex SQL that LINQ can't express well. Many serious .NET projects use BOTH — EF for writes and standard CRUD, Dapper for read-optimized queries.</p></details>
-        <details><summary>Eager vs Lazy vs Explicit loading</summary><p>Three EF strategies to fetch related data. <strong>Eager loading</strong> uses <code>.Include()</code> to fetch related data in the same query as the parent — EF generates a JOIN. <code>db.Orders.Include(o =&gt; o.Customer)</code>. This is the default and best choice for most cases — you control exactly what loads. <strong>Lazy loading</strong> loads related data on first access — read <code>order.Customer</code> and EF transparently fires a query at that moment. Requires the <code>Microsoft.EntityFrameworkCore.Proxies</code> package and <code>virtual</code> on navigation properties. The big problem is N+1 — accessing the navigation in a loop triggers one query per iteration. Lazy also breaks JSON serialization (infinite recursion). <strong>Avoid lazy loading in web apps.</strong> <strong>Explicit loading</strong> means manually calling <code>db.Entry(order).Reference(o =&gt; o.Customer).LoadAsync()</code> after the main query. Useful when you sometimes need related data and sometimes don't, but you control the timing. Modern best practice: eager loading with <code>.Include()</code> for full entities, or even better, <code>.Select()</code> projection into DTOs.</p></details>
-        <details><summary>How does EF Concurrency work?</summary><p>EF supports <strong>optimistic concurrency</strong>, which assumes conflicts are rare and detects them at save time instead of locking rows pessimistically. The standard pattern in SQL Server: add a <code>RowVersion</code> column (a byte array marked with <code>[Timestamp]</code>) to your entity. SQL Server auto-increments this column on every UPDATE. When EF generates an UPDATE statement, it includes <code>WHERE Id = @id AND RowVersion = @originalRowVersion</code>. If another user updated the row between your fetch and your save, the rowversion changed, the UPDATE affects 0 rows, and EF throws <code>DbUpdateConcurrencyException</code>. You catch this and decide how to handle: retry the operation, merge the conflict by re-fetching and re-applying, show the user a "this was modified by someone else" message, or pick a winner (last-write-wins). This is much more scalable than pessimistic locking because no DB locks are held while users think. For pessimistic scenarios you'd use raw SQL with <code>SELECT ... FOR UPDATE</code>, but in real .NET apps optimistic is what you want 95% of the time.</p></details>
-        <details><summary>What's CQRS?</summary><p>CQRS stands for Command Query Responsibility Segregation. The core idea is to separate the code (and often the data model) for writes from the code for reads. <strong>Commands</strong> are write operations — CreateOrder, UpdateProduct, DeleteUser. They go through dedicated handler classes containing validation, business rules, calls to repositories. They typically don't return data, just success/failure. <strong>Queries</strong> are read operations — GetOrder, ListProducts. They go through their own handlers reading from optimized projections, often denormalized or pulled from cache. Benefits: reads and writes scale independently and have different complexity profiles. Reads can be denormalized for speed; writes can be richly modeled with full business rules. In .NET, CQRS is usually implemented with the <strong>MediatR</strong> library — your controllers just call <code>mediator.Send(command)</code> and the right handler runs. CQRS doesn't always mean separate databases — it can be just a code pattern. When paired with Event Sourcing, you get truly separate read/write storage.</p></details>
-        <details><summary>Why use DTOs?</summary><p>DTO stands for Data Transfer Object — a separate class representing the shape of data sent over the wire, separate from your DB entity. There are several strong reasons to use them. First, <strong>security</strong> — your User entity might have a PasswordHash field; if you return it directly, that hash leaks. With a DTO you only include safe fields. Second, <strong>over-posting protection</strong> — if your API accepts the User entity directly, a malicious client could send <code>{ "isAdmin": true }</code> and EF would set that property when binding. With a CreateUserDto that only has Email and Password, IsAdmin is invisible. Third, <strong>decoupling</strong> — DB schema can change without breaking API consumers. Fourth, <strong>payload size</strong> — only include fields the client needs, keeping responses small. Use a tool like AutoMapper to map between Entity and DTO without writing tedious property-by-property code. This is one of the easiest "senior-level" practices to adopt and interviewers always notice it.</p></details>
-        <details><summary>How to make API stateless?</summary><p>A stateless API doesn't store any per-user data in its own memory between requests. Every request carries everything needed to process it. The huge benefit: ANY server instance can handle ANY request — they're interchangeable, so horizontal scaling is trivial. To achieve statelessness: use <strong>JWT for authentication</strong> instead of server-side sessions — the token contains user identity and claims. For shared state across requests (like a shopping cart for a logged-in user), use <strong>Redis</strong> or another distributed store, never in-memory dictionaries. Don't store anything in static fields you'd need across requests. Build idempotent operations so they can be safely retried. The result: you can spin up 10 more instances behind a load balancer with zero code changes. If a server crashes, no user state is lost. This is the foundation for cloud-native scaling on Azure App Service, Kubernetes, anywhere.</p></details>
-        <details><summary>What is gRPC and when to use it?</summary><p>gRPC is a high-performance Remote Procedure Call framework built by Google, using HTTP/2 for transport and Protobuf (Protocol Buffers) for serialization instead of JSON. It's strongly-typed end-to-end via .proto schema files that generate matching client and server code. The advantages over REST: significantly faster (binary format, smaller payloads), strongly typed contracts (no JSON guesswork), and built-in support for streaming (server-streaming, client-streaming, bidirectional). The trade-offs: not browser-friendly without a proxy (browsers can't speak HTTP/2 with custom framing easily), harder to debug than JSON over HTTP, requires the .proto file to be shared between client and server. The right use case is <strong>internal microservice-to-microservice communication</strong> within your infrastructure — fast, type-safe, efficient. For public APIs facing browsers and third parties, stick with REST or GraphQL. .NET has excellent gRPC support — <code>Microsoft.AspNetCore.Grpc</code> packages — and many companies use it for backend service meshes.</p></details>
-        <details><summary>SignalR — what is it?</summary><p>SignalR is .NET's real-time communication framework. It abstracts away the transport so your code just calls "broadcast a message to all clients" or "send to a specific user", and SignalR picks the best transport: WebSockets (preferred), Server-Sent Events, or long polling as fallback. Use cases: chat applications, live notifications, real-time dashboards (e.g., live order tracking), collaborative editing, multiplayer games, live sports/stock tickers. On the server, you create a Hub class with methods that clients can invoke and that can call back to clients. On the Angular side, install <code>@microsoft/signalr</code> and create a HubConnection. Authentication integrates with JWT — pass the token via <code>accessTokenFactory</code>. For scaling across multiple servers, use the <strong>Redis backplane</strong> so that a message published from one server reaches clients connected to other servers. SignalR is one of the easiest "wow factor" features to add to a portfolio project for interviews.</p></details>
-        <details><summary>Health checks — why and how?</summary><p>A health check endpoint is a URL like <code>/healthz</code> that reports whether your app is alive and its dependencies are working. The reason: load balancers and orchestrators (like Azure App Service or Kubernetes) periodically ping this endpoint. If it returns failure, they stop routing traffic to that instance, preventing users from hitting a dead server. In .NET, the setup is one line: <code>app.MapHealthChecks("/healthz")</code>. To check more than just "the app is responding", chain in dependency checks: <code>builder.Services.AddHealthChecks().AddDbContextCheck&lt;AppDbContext&gt;().AddRedis(...).AddUrlGroup(new Uri("https://api.payment.com/status"))</code>. This way the endpoint reports unhealthy if DB, Redis, or downstream APIs are down. Best practice: have TWO endpoints — <code>/healthz/live</code> for liveness (is the process alive?) and <code>/healthz/ready</code> for readiness (are dependencies ready to serve traffic?). Liveness failure means restart the pod; readiness failure means stop sending traffic but don't restart.</p></details>
+        <details><summary>Q. Middleware order matters — example?</summary><div>
+          <p><strong>Definition:</strong> Pipeline run in exact order of <code>app.UseXxx()</code> calls.</p>
+          <p><strong>Standard Correct Order:</strong></p>
+          <ol>
+            <li><code>UseRouting</code> — endpoint matching first</li>
+            <li><code>UseCors</code> — CORS check</li>
+            <li><code>UseAuthentication</code> — WHO is user?</li>
+            <li><code>UseAuthorization</code> — WHAT they can do?</li>
+            <li><code>MapControllers</code> — call controller</li>
+          </ol>
+          <p><strong>Critical Rule:</strong></p>
+          <ul>
+            <li><code>UseAuthentication</code> MUST come before <code>UseAuthorization</code></li>
+            <li>Need to know WHO before checking WHAT</li>
+            <li>Flip them = authorization see no user, reject everything</li>
+          </ul>
+          <p><strong>Note:</strong> Custom exception middleware near start. Forget <code>UseStaticFiles</code> = wwwroot files don't serve.</p>
+        </div></details>
+
+        <details><summary>Q. Singleton, Scoped, Transient — when?</summary><div>
+          <p><strong>Compare Table:</strong></p>
+          <table>
+            <thead><tr><th>Lifetime</th><th>Created</th><th>Use For</th></tr></thead>
+            <tbody>
+              <tr><td>Singleton</td><td>Once for app</td><td>Config, cache, logger, HttpClient</td></tr>
+              <tr><td>Scoped</td><td>Once per request</td><td>DbContext, request-bound services</td></tr>
+              <tr><td>Transient</td><td>Every injection</td><td>Lightweight stateless helpers</td></tr>
+            </tbody>
+          </table>
+          <p><strong>Captive Dependency Bug (interview trap):</strong></p>
+          <ul>
+            <li>Don't inject Scoped (DbContext) into Singleton</li>
+            <li>Scoped get captured forever</li>
+            <li>Break request isolation, not thread-safe</li>
+            <li>Use <code>ValidateScopes</code> in dev to catch</li>
+          </ul>
+        </div></details>
+
+        <details><summary>Q. What does [ApiController] do?</summary><div>
+          <p><strong>Definition:</strong> Attribute on controller class — enable modern Web API conventions automatically.</p>
+          <p><strong>Features:</strong></p>
+          <ul>
+            <li><strong>Auto model validation</strong> — invalid JSON return 400 before action run</li>
+            <li><strong>Binding source inference</strong> — complex type = <code>[FromBody]</code>, simple = <code>[FromRoute]</code>/<code>[FromQuery]</code></li>
+            <li><strong>ProblemDetails errors</strong> — RFC 7807 standard JSON</li>
+            <li><strong>Force attribute routing</strong> — no conventional routing</li>
+          </ul>
+          <p><strong>Note:</strong> Almost every new ASP.NET Core API controller should have it.</p>
+        </div></details>
+
+        <details><summary>Q. How to do JWT auth in ASP.NET?</summary><div>
+          <p><strong>3 Steps:</strong></p>
+          <p><strong>Step 1 — Register in Program.cs:</strong></p>
+          <ul>
+            <li><code>builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)</code></li>
+            <li><code>.AddJwtBearer(opts =&gt; { opts.TokenValidationParameters = ... })</code></li>
+            <li>Set: ValidateIssuer, ValidateAudience, ValidateLifetime, IssuerSigningKey</li>
+            <li><code>builder.Services.AddAuthorization()</code></li>
+          </ul>
+          <p><strong>Step 2 — Add to Pipeline:</strong></p>
+          <ul>
+            <li><code>app.UseAuthentication();</code></li>
+            <li><code>app.UseAuthorization();</code></li>
+            <li>In that order, before MapControllers</li>
+          </ul>
+          <p><strong>Step 3 — Token Generation:</strong></p>
+          <ul>
+            <li>Create Claims (sub, email, role)</li>
+            <li>Make <code>JwtSecurityToken</code> with issuer/audience/expiry/signing</li>
+            <li>Use <code>JwtSecurityTokenHandler.WriteToken()</code></li>
+          </ul>
+          <p><strong>Note:</strong> Add refresh token in DB for revocation.</p>
+        </div></details>
+
+        <details><summary>Q. Authentication vs Authorization?</summary><div>
+          <p><strong>Authentication:</strong> WHO are you? (verify identity).</p>
+          <p><strong>Authorization:</strong> WHAT can you do? (check permission).</p>
+          <table>
+            <thead><tr><th>Aspect</th><th>Authentication</th><th>Authorization</th></tr></thead>
+            <tbody>
+              <tr><td>Question</td><td>Who are you?</td><td>What can you do?</td></tr>
+              <tr><td>Method</td><td>Username/password, JWT</td><td>Roles, policies, claims</td></tr>
+              <tr><td>Fail status</td><td>401 Unauthorized</td><td>403 Forbidden</td></tr>
+              <tr><td>Middleware</td><td>UseAuthentication()</td><td>UseAuthorization()</td></tr>
+            </tbody>
+          </table>
+          <p><strong>Real Example:</strong> Show ID at gate = auth. Gate check 5th floor access = authz.</p>
+          <p><strong>Note:</strong> UseAuthentication MUST come before UseAuthorization.</p>
+        </div></details>
+
+        <details><summary>Q. How to handle exceptions globally?</summary><div>
+          <p><strong>Wrong Way:</strong> try/catch in every controller — repetitive, easy miss.</p>
+          <p><strong>Right Way — Custom Middleware:</strong></p>
+          <ul>
+            <li>Write <code>ExceptionHandlingMiddleware</code></li>
+            <li>Wrap call to <code>next()</code> in try/catch</li>
+            <li>Catch unhandled exceptions</li>
+            <li>Log with full context (path, user, correlation ID)</li>
+            <li>Map exception to HTTP status (NotFoundException → 404, ValidationException → 400, else → 500)</li>
+            <li>Return ProblemDetails JSON (RFC 7807)</li>
+          </ul>
+          <p><strong>.NET 8 Cleaner Way:</strong></p>
+          <ul>
+            <li>Implement <code>IExceptionHandler</code></li>
+            <li><code>AddExceptionHandler&lt;T&gt;()</code></li>
+            <li><code>app.UseExceptionHandler()</code></li>
+            <li><code>builder.Services.AddProblemDetails()</code></li>
+          </ul>
+        </div></details>
+
+        <details><summary>Q. What is CORS?</summary><div>
+          <p><strong>Definition:</strong> CORS = Cross-Origin Resource Sharing. Browser security blocking JS calling API on different origin.</p>
+          <p><strong>When needed:</strong></p>
+          <ul>
+            <li>Frontend on different origin than backend</li>
+            <li>Common: Angular on <code>localhost:4200</code> calling .NET on <code>localhost:5000</code></li>
+          </ul>
+          <p><strong>Configure (.NET):</strong></p>
+          <ul>
+            <li>In services: <code>AddCors</code> with policy</li>
+            <li>Specify <code>WithOrigins, AllowAnyHeader, AllowAnyMethod</code></li>
+            <li>Optional: <code>AllowCredentials</code> for cookies</li>
+            <li>In pipeline: <code>app.UseCors("PolicyName")</code></li>
+          </ul>
+          <p><strong>Note:</strong> Cannot combine <code>AllowAnyOrigin()</code> + <code>AllowCredentials()</code> — forbidden by spec.</p>
+        </div></details>
+
+        <details><summary>Q. IActionResult vs ActionResult&lt;T&gt;?</summary><div>
+          <p><strong>IActionResult:</strong></p>
+          <ul>
+            <li>Base interface — Ok(), NotFound(), BadRequest()</li>
+            <li>Flexible</li>
+            <li>Swagger don't know data shape</li>
+          </ul>
+          <p><strong>ActionResult&lt;T&gt;:</strong></p>
+          <ul>
+            <li>Generic version (newer .NET)</li>
+            <li>Return either status code OR typed data</li>
+            <li>Better Swagger documentation</li>
+            <li>Stronger typing</li>
+          </ul>
+          <p><strong>Best Practice:</strong></p>
+          <ul>
+            <li>Use <code>ActionResult&lt;T&gt;</code> when action return data</li>
+            <li>Use <code>IActionResult</code> when only status (204 NoContent on delete)</li>
+          </ul>
+        </div></details>
+
+        <details><summary>Q. What is filter and types?</summary><div>
+          <p><strong>Definition:</strong> Cross-cutting code inside MVC pipeline. Run AFTER routing identify action, AROUND action execution.</p>
+          <p><strong>Different from Middleware:</strong> Middleware run in broader HTTP pipeline.</p>
+          <p><strong>5 Filter Types (execution order):</strong></p>
+          <ol>
+            <li><strong>Authorization</strong> — first, allow or deny</li>
+            <li><strong>Resource</strong> — wrap everything else, used for caching</li>
+            <li><strong>Action</strong> — before and after action method</li>
+            <li><strong>Exception</strong> — catch exceptions from actions or filters</li>
+            <li><strong>Result</strong> — wrap result execution</li>
+          </ol>
+          <p><strong>When to use:</strong></p>
+          <ul>
+            <li>Filter — controller-specific behavior (<code>[ServiceFilter]</code> for action logging)</li>
+            <li>Middleware — apply to all requests including static files</li>
+          </ul>
+          <p><strong>Note:</strong> Filter MVC-aware (access controller context). Middleware see only HttpContext.</p>
+        </div></details>
+
+        <details><summary>Q. Explain N+1 in EF?</summary><div>
+          <p><strong>Definition:</strong> 1 query for parent + N queries for navigation = 1+N queries.</p>
+          <p><strong>Example:</strong></p>
+          <ul>
+            <li>Load 100 orders = 1 query</li>
+            <li>Loop and access <code>order.Customer.Name</code> = 100 queries</li>
+            <li>Total = 101 queries</li>
+            <li>50 requests/sec = 5050 queries — DB fall over</li>
+          </ul>
+          <p><strong>Fix 1 — Eager Loading:</strong></p>
+          <pre><code>db.Orders.Include(o =&gt; o.Customer).ToListAsync()</code></pre>
+          <p><strong>Fix 2 — Projection (BEST):</strong></p>
+          <pre><code>.Select(o =&gt; new { o.Id, CustomerName = o.Customer.Name })</code></pre>
+          <p><strong>Note:</strong> Always check generated SQL with <code>.ToQueryString()</code>.</p>
+        </div></details>
+
+        <details><summary>Q. Tracking vs NoTracking?</summary><div>
+          <p><strong>Tracking (default):</strong></p>
+          <ul>
+            <li>EF track every entity for change detection</li>
+            <li>Cost: extra memory + CPU</li>
+            <li>Worth for UPDATE scenarios</li>
+          </ul>
+          <p><strong>NoTracking:</strong></p>
+          <ul>
+            <li><code>db.Products.AsNoTracking().ToListAsync()</code></li>
+            <li>Skip change tracker</li>
+            <li>20-50% faster, less memory</li>
+            <li>For read-only / GET endpoints</li>
+          </ul>
+          <p><strong>Rule:</strong> AsNoTracking on every GET. Tracking when modify and save.</p>
+          <p><strong>Global default:</strong> <code>UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)</code></p>
+        </div></details>
+
+        <details><summary>Q. EF Core vs Dapper?</summary><div>
+          <table>
+            <thead><tr><th>Aspect</th><th>EF Core</th><th>Dapper</th></tr></thead>
+            <tbody>
+              <tr><td>Type</td><td>Full ORM</td><td>Micro-ORM</td></tr>
+              <tr><td>Query syntax</td><td>LINQ</td><td>Raw SQL</td></tr>
+              <tr><td>Change tracking</td><td>Yes</td><td>No</td></tr>
+              <tr><td>Migrations</td><td>Yes</td><td>No</td></tr>
+              <tr><td>Speed</td><td>Slightly slower</td><td>= ADO.NET</td></tr>
+            </tbody>
+          </table>
+          <p><strong>EF Core for:</strong> 80% of CRUD work, productivity matter more than 5% perf.</p>
+          <p><strong>Dapper for:</strong> Hot read paths, heavy reporting queries, complex SQL LINQ can't express.</p>
+          <p><strong>Note:</strong> Many real projects use BOTH — EF for writes, Dapper for read-optimized.</p>
+          <p><strong>Java parallel:</strong> EF Core = Hibernate. Dapper = JDBC with light wrapper.</p>
+        </div></details>
+
+        <details><summary>Q. Eager vs Lazy vs Explicit loading?</summary><div>
+          <p><strong>Eager (BEST):</strong></p>
+          <ul>
+            <li>Use <code>.Include()</code> — fetch related data in same query (JOIN)</li>
+            <li>You control what loads</li>
+          </ul>
+          <p><strong>Lazy (AVOID in web):</strong></p>
+          <ul>
+            <li>Load on first access</li>
+            <li>Need <code>Microsoft.EntityFrameworkCore.Proxies</code> + <code>virtual</code> nav properties</li>
+            <li>Cause N+1 in loops</li>
+            <li>Break JSON serialization (infinite recursion)</li>
+          </ul>
+          <p><strong>Explicit:</strong></p>
+          <ul>
+            <li>Manual: <code>db.Entry(order).Reference(o =&gt; o.Customer).LoadAsync()</code></li>
+            <li>You control timing</li>
+          </ul>
+          <p><strong>Best Practice:</strong> Eager with <code>.Include()</code> OR <code>.Select()</code> projection into DTOs.</p>
+        </div></details>
+
+        <details><summary>Q. How does EF Concurrency work?</summary><div>
+          <p><strong>Approach:</strong> Optimistic Concurrency (assume conflicts rare).</p>
+          <p><strong>Setup:</strong></p>
+          <ul>
+            <li>Add <code>RowVersion</code> column with <code>[Timestamp]</code></li>
+            <li>SQL Server auto-increment on every UPDATE</li>
+            <li>EF include in WHERE: <code>WHERE Id = @id AND RowVersion = @original</code></li>
+          </ul>
+          <p><strong>If row changed in between:</strong></p>
+          <ul>
+            <li>UPDATE affect 0 rows</li>
+            <li>EF throw <code>DbUpdateConcurrencyException</code></li>
+          </ul>
+          <p><strong>How to Handle:</strong></p>
+          <ul>
+            <li>Retry operation</li>
+            <li>Merge conflict by re-fetching</li>
+            <li>Show user "modified by someone else"</li>
+            <li>Pick winner (last-write-wins)</li>
+          </ul>
+          <p><strong>Note:</strong> Optimistic > pessimistic for scale (no DB locks).</p>
+        </div></details>
+
+        <details><summary>Q. What is CQRS?</summary><div>
+          <p><strong>Definition:</strong> CQRS = Command Query Responsibility Segregation.</p>
+          <ul>
+            <li>Separate code for writes (commands) from code for reads (queries)</li>
+          </ul>
+          <p><strong>Commands (Write):</strong></p>
+          <ul>
+            <li>CreateOrder, UpdateProduct, DeleteUser</li>
+            <li>Dedicated handler classes</li>
+            <li>Validation + business rules</li>
+            <li>Don't return data, just success/failure</li>
+          </ul>
+          <p><strong>Queries (Read):</strong></p>
+          <ul>
+            <li>GetOrder, ListProducts</li>
+            <li>Own handlers</li>
+            <li>Read from optimized projections (denormalized or cached)</li>
+          </ul>
+          <p><strong>Benefits:</strong></p>
+          <ul>
+            <li>Reads and writes scale independently</li>
+            <li>Different complexity profiles</li>
+          </ul>
+          <p><strong>.NET Tool:</strong> MediatR library — <code>mediator.Send(command)</code></p>
+          <p><strong>Note:</strong> CQRS not always separate DBs — can be just code pattern.</p>
+        </div></details>
+
+        <details><summary>Q. Why use DTOs?</summary><div>
+          <p><strong>Definition:</strong> DTO = Data Transfer Object. Separate class for data sent over wire.</p>
+          <p><strong>4 Big Reasons:</strong></p>
+          <ul>
+            <li><strong>Security</strong> — User entity has PasswordHash, don't leak it</li>
+            <li><strong>Over-posting protection</strong> — client cannot send <code>{"isAdmin": true}</code> sneakily</li>
+            <li><strong>Decoupling</strong> — DB schema change without breaking API</li>
+            <li><strong>Payload size</strong> — include only needed fields</li>
+          </ul>
+          <p><strong>Tools:</strong> AutoMapper — map Entity to DTO automatically.</p>
+          <p><strong>Java parallel:</strong> Same DTO pattern. Java POJO = .NET POCO.</p>
+        </div></details>
+
+        <details><summary>Q. How to make API stateless?</summary><div>
+          <p><strong>Definition:</strong> Stateless = no per-user data in memory between requests.</p>
+          <p><strong>Benefits:</strong></p>
+          <ul>
+            <li>ANY server can handle ANY request</li>
+            <li>Trivial horizontal scaling</li>
+            <li>Server crash = no user state lost</li>
+          </ul>
+          <p><strong>How to achieve:</strong></p>
+          <ul>
+            <li>JWT for auth (no server sessions)</li>
+            <li>Token contain user identity + claims</li>
+            <li>Shared state in Redis or DB (not in-memory)</li>
+            <li>Don't store in static fields</li>
+            <li>Build idempotent operations (safe to retry)</li>
+          </ul>
+          <p><strong>Result:</strong> Spin up 10 more instances behind load balancer with zero code change.</p>
+        </div></details>
+
+        <details><summary>Q. What is gRPC and when to use?</summary><div>
+          <p><strong>Definition:</strong></p>
+          <ul>
+            <li>High-performance RPC framework by Google</li>
+            <li>HTTP/2 transport</li>
+            <li>Protobuf binary serialization (not JSON)</li>
+          </ul>
+          <p><strong>Advantages over REST:</strong></p>
+          <ul>
+            <li>Faster (binary, smaller payloads)</li>
+            <li>Strongly typed (no JSON guessing)</li>
+            <li>Streaming support (server, client, bidirectional)</li>
+          </ul>
+          <p><strong>Trade-offs:</strong></p>
+          <ul>
+            <li>Not browser-friendly (need proxy)</li>
+            <li>Harder to debug than JSON</li>
+            <li>Need .proto file shared client/server</li>
+          </ul>
+          <p><strong>Use for:</strong> Internal microservice-to-microservice communication.</p>
+          <p><strong>NOT for:</strong> Public APIs facing browsers — stick with REST or GraphQL.</p>
+        </div></details>
+
+        <details><summary>Q. What is SignalR?</summary><div>
+          <p><strong>Definition:</strong> .NET's real-time communication framework.</p>
+          <p><strong>Transport (auto pick best):</strong></p>
+          <ul>
+            <li>WebSockets (preferred)</li>
+            <li>Server-Sent Events</li>
+            <li>Long polling (fallback)</li>
+          </ul>
+          <p><strong>Use Cases:</strong></p>
+          <ul>
+            <li>Chat applications</li>
+            <li>Live notifications</li>
+            <li>Real-time dashboards (live order tracking)</li>
+            <li>Collaborative editing</li>
+            <li>Multiplayer games</li>
+            <li>Sports/stock tickers</li>
+          </ul>
+          <p><strong>Setup:</strong></p>
+          <ul>
+            <li>Server: create Hub class</li>
+            <li>Angular: <code>@microsoft/signalr</code> + HubConnection</li>
+            <li>Auth: JWT via <code>accessTokenFactory</code></li>
+          </ul>
+          <p><strong>Scale:</strong> Use Redis backplane — message from one server reach clients on other servers.</p>
+          <p><strong>Note:</strong> Easy "wow factor" feature for portfolio projects.</p>
+        </div></details>
+
+        <details><summary>Q. Health checks — why and how?</summary><div>
+          <p><strong>Definition:</strong> Endpoint like <code>/healthz</code> that report if app + dependencies are working.</p>
+          <p><strong>Why needed:</strong></p>
+          <ul>
+            <li>Load balancers / orchestrators ping endpoint</li>
+            <li>If fail — stop routing traffic to that instance</li>
+            <li>Prevent users hitting dead server</li>
+          </ul>
+          <p><strong>Setup (one line):</strong></p>
+          <pre><code>app.MapHealthChecks("/healthz")</code></pre>
+          <p><strong>Add Dependency Checks:</strong></p>
+          <pre><code>builder.Services.AddHealthChecks()
+    .AddDbContextCheck&lt;AppDbContext&gt;()
+    .AddRedis(...)
+    .AddUrlGroup(new Uri("https://api.payment.com/status"))</code></pre>
+          <p><strong>Best Practice — TWO Endpoints:</strong></p>
+          <ul>
+            <li><code>/healthz/live</code> — liveness (is process alive?). Failure = restart pod</li>
+            <li><code>/healthz/ready</code> — readiness (dependencies ready?). Failure = stop traffic, no restart</li>
+          </ul>
+        </div></details>
       </div>
     </section>
 
